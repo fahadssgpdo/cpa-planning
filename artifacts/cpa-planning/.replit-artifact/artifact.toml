@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "CPA Planning Platform"
+version = "1.0.0"
+id = "artifacts/cpa-planning"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18220
+
+[services.development]
+run = "pnpm --filter @workspace/cpa-planning run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cpa-planning", "run", "build" ]
+publicDir = "artifacts/cpa-planning/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18220"
+BASE_PATH = "/"

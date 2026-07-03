@@ -1,0 +1,225 @@
+Agreed. Since this is a **small internal application**, the BRD should focus on the core business requirements without introducing AI capabilities.
+
+---
+
+# Business Requirements Document (BRD)
+
+## Planning Department Interactive Platform
+
+**Consumer Protection Authority (CPA)**
+
+**Version:** 1.0
+
+---
+
+# 1. Project Overview
+
+The Consumer Protection Authority (CPA) intends to develop a simple, responsive internal web application for the Planning Department. The platform will serve as a centralized communication and collaboration hub where employees can access planning information, submit inquiries and suggestions, participate in discussions, and view planning-related announcements.
+
+The application should be simple, user-friendly, and accessible from desktop and mobile devices.
+
+---
+
+# 2. Business Objectives
+
+The objectives of the application are to:
+
+* Improve communication between the Planning Department and employees.
+* Centralize planning-related information in one location.
+* Reduce email communication for planning matters.
+* Encourage employee participation and engagement.
+* Provide an organized channel for inquiries and suggestions.
+* Improve awareness of planning initiatives and updates.
+
+---
+
+# 3. Scope
+
+The system will consist of a single responsive dashboard that provides access to the following functions:
+
+* Announcements & Updates
+* Participatory Discussions
+* Employee Inquiries
+* Knowledge Base
+* Frequently Asked Questions (FAQ)
+* Suggestions
+
+---
+
+# 4. Functional Requirements
+
+## 4.1 Dashboard
+
+The system shall provide a home page displaying all available modules in a simple dashboard layout.
+
+---
+
+## 4.2 Announcements & Updates
+
+The Planning Department shall be able to:
+
+* Publish announcements.
+* Share planning updates.
+* Publish circulars.
+* Inform employees about important dates and deadlines.
+* Archive previous announcements.
+
+Employees shall be able to:
+
+* View announcements.
+* Search previous announcements.
+
+---
+
+## 4.3 Participatory Discussions
+
+Employees shall be able to:
+
+* Participate in planning discussions.
+* Post comments.
+* Reply to existing discussions.
+
+Planning Department staff shall be able to:
+
+* Create discussion topics.
+* Moderate discussions.
+* Close discussions when required.
+
+---
+
+## 4.4 Employee Inquiries
+
+Employees shall be able to:
+
+* Submit planning-related inquiries.
+* Track the status of their inquiries.
+* View responses from the Planning Department.
+
+Planning Department staff shall be able to:
+
+* View submitted inquiries.
+* Respond to inquiries.
+* Mark inquiries as resolved.
+
+---
+
+## 4.5 Knowledge Base
+
+The system shall provide access to planning reference documents, including:
+
+* Planning manuals.
+* Operational planning guidelines.
+* KPI guidelines.
+* Policies.
+* Templates.
+* Other planning documents.
+
+Employees shall be able to search and download available documents.
+
+---
+
+## 4.6 Frequently Asked Questions (FAQ)
+
+The system shall display commonly asked planning questions and answers.
+
+Planning Department staff shall be able to add, edit, and remove FAQ entries.
+
+---
+
+## 4.7 Suggestions
+
+Employees shall be able to submit suggestions related to:
+
+* Planning improvements.
+* New initiatives.
+* Process enhancements.
+* General feedback.
+
+Planning Department staff shall be able to:
+
+* Review submitted suggestions.
+* Update their status (New, Under Review, Accepted, Rejected, Implemented).
+* Provide feedback to employees.
+
+---
+
+# 5. User Roles
+
+### Employee
+
+* View announcements.
+* Participate in discussions.
+* Submit inquiries.
+* Submit suggestions.
+* Access the knowledge base.
+* View FAQs.
+
+### Planning Department Officer
+
+* Manage announcements.
+* Respond to inquiries.
+* Moderate discussions.
+* Review suggestions.
+* Manage knowledge base documents.
+* Maintain FAQs.
+
+### Planning Department Manager
+
+* Monitor platform usage.
+* Review discussions.
+* Oversee inquiries and suggestions.
+* Approve published content.
+
+### System Administrator
+
+* Manage users.
+* Configure permissions.
+* Maintain system settings.
+
+---
+
+# 6. Non-Functional Requirements
+
+The application shall:
+
+* Be responsive and accessible on desktop, tablet, and mobile devices.
+* Support both Arabic and English.
+* Integrate with CPA user authentication (Single Sign-On if available).
+* Provide secure access based on user roles.
+* Offer a simple and intuitive user interface.
+* Ensure acceptable response times for all users.
+
+---
+
+# 7. Technology Recommendation
+
+* **Platform:** Joget DX
+* **Database:** PostgreSQL or Microsoft SQL Server
+* **Authentication:** Microsoft Entra ID / Active Directory
+* **Deployment:** CPA internal infrastructure or private cloud
+
+---
+
+# 8. Expected Benefits
+
+* Centralized planning communication.
+* Improved employee engagement.
+* Faster dissemination of planning updates.
+* Better management of employee inquiries and suggestions.
+* Reduced dependency on emails.
+* Easy access to planning knowledge and reference materials.
+
+---
+
+# 9. Future Enhancements
+
+The following features may be considered in future phases:
+
+* Annual and operational plan monitoring.
+* KPI tracking dashboards.
+* Approval workflows.
+* Notifications and reminders.
+* Reporting and analytics.
+* Integration with Microsoft Teams and Outlook.
+
+This version keeps the application intentionally lightweight and practical, making it suitable for rapid implementation while covering the Planning Department's essential communication and collaboration needs.
