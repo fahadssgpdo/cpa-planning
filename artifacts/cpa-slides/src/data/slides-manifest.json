@@ -1,0 +1,74 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567891",
+    "position": 1,
+    "filepath": "src/pages/slides/Slide1Title.tsx",
+    "title": "منصة دائرة التخطيط التفاعلية",
+    "description": "الشريحة التعريفية — هيئة حماية المستهلك 2026",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567892",
+    "position": 2,
+    "filepath": "src/pages/slides/Slide2Problem.tsx",
+    "title": "ما المشكلة التي تحلها المنصة؟",
+    "description": "أربعة تحديات رئيسية يعالجها النظام",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567893",
+    "position": 3,
+    "filepath": "src/pages/slides/Slide3Overview.tsx",
+    "title": "المنصة: نظرة عامة",
+    "description": "8 وحدات، 4 أدوار، واجهة RTL عربية أصيلة",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567894",
+    "position": 4,
+    "filepath": "src/pages/slides/Slide4Dashboard.tsx",
+    "title": "لوحة التحكم والإعلانات",
+    "description": "إحصائيات فورية وتعميمات مركزية",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567895",
+    "position": 5,
+    "filepath": "src/pages/slides/Slide5Discussions.tsx",
+    "title": "النقاشات والاستفسارات",
+    "description": "نقاشات تشاركية واستفسارات بإدارة حالة كاملة",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567896",
+    "position": 6,
+    "filepath": "src/pages/slides/Slide6Knowledge.tsx",
+    "title": "قاعدة المعرفة والأسئلة الشائعة",
+    "description": "8 وثائق مصنفة وأسئلة شائعة قابلة للتحرير",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567897",
+    "position": 7,
+    "filepath": "src/pages/slides/Slide7Suggestions.tsx",
+    "title": "المقترحات وإدارة المستخدمين",
+    "description": "دورة حياة المقترح وجدول إدارة الأدوار",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567898",
+    "position": 8,
+    "filepath": "src/pages/slides/Slide8Tech.tsx",
+    "title": "التقنيات المستخدمة",
+    "description": "React + Express + PostgreSQL + OpenAPI",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567899",
+    "position": 9,
+    "filepath": "src/pages/slides/Slide9Next.tsx",
+    "title": "المرحلة التالية",
+    "description": "جاهزة للاستخدام — خارطة طريق التوسع",
+    "speakerNotes": ""
+  }
+]

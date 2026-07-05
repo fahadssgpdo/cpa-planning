@@ -1,0 +1,31 @@
+kind = "slides"
+previewPath = "/cpa-slides/"
+title = "CPA Planning Platform"
+version = "1.0.0"
+id = "artifacts/cpa-slides"
+router = "path"
+
+[[integratedSkills]]
+name = "slides"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/cpa-slides/" ]
+localPort = 21235
+
+[services.development]
+run = "pnpm --filter @workspace/cpa-slides run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cpa-slides", "run", "build" ]
+publicDir = "artifacts/cpa-slides/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21235"
+BASE_PATH = "/cpa-slides/"
