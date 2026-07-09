@@ -24,6 +24,7 @@ const formatSuggestion = async (row: typeof suggestionsTable.$inferSelect) => {
     status: row.status,
     date: row.createdAt.toISOString().slice(0, 10),
     feedback: row.feedback ?? null,
+    attachment: row.attachment ?? null,
   };
 };
 
@@ -53,6 +54,7 @@ router.post("/suggestions", async (req, res): Promise<void> => {
       userId: parsed.data.userId,
       category: parsed.data.category,
       text: parsed.data.text,
+      attachment: parsed.data.attachment ?? null,
       status: "new",
     })
     .returning();

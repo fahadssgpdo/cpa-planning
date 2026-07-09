@@ -861,6 +861,8 @@ components:
           type: string
         feedback:
           type: ["string", "null"]
+        attachment:
+          type: ["string", "null"]
 
     SuggestionInput:
       type: object
@@ -872,6 +874,8 @@ components:
           type: string
           enum: [improvement, initiative, process, feedback]
         text:
+          type: string
+        attachment:
           type: string
 
     SuggestionUpdate:

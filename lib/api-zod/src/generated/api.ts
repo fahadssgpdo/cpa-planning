@@ -457,7 +457,8 @@ export const ListSuggestionsResponseItem = zod.object({
   "text": zod.string(),
   "status": zod.enum(['new', 'under_review', 'accepted', 'rejected', 'implemented']),
   "date": zod.string(),
-  "feedback": zod.string().nullish()
+  "feedback": zod.string().nullish(),
+  "attachment": zod.string().nullish()
 })
 export const ListSuggestionsResponse = zod.array(ListSuggestionsResponseItem)
 
@@ -468,7 +469,8 @@ export const ListSuggestionsResponse = zod.array(ListSuggestionsResponseItem)
 export const CreateSuggestionBody = zod.object({
   "userId": zod.number(),
   "category": zod.enum(['improvement', 'initiative', 'process', 'feedback']),
-  "text": zod.string()
+  "text": zod.string(),
+  "attachment": zod.string().optional()
 })
 
 export const CreateSuggestionResponse = zod.object({
@@ -479,7 +481,8 @@ export const CreateSuggestionResponse = zod.object({
   "text": zod.string(),
   "status": zod.enum(['new', 'under_review', 'accepted', 'rejected', 'implemented']),
   "date": zod.string(),
-  "feedback": zod.string().nullish()
+  "feedback": zod.string().nullish(),
+  "attachment": zod.string().nullish()
 })
 
 
@@ -503,7 +506,8 @@ export const UpdateSuggestionResponse = zod.object({
   "text": zod.string(),
   "status": zod.enum(['new', 'under_review', 'accepted', 'rejected', 'implemented']),
   "date": zod.string(),
-  "feedback": zod.string().nullish()
+  "feedback": zod.string().nullish(),
+  "attachment": zod.string().nullish()
 })
 
 

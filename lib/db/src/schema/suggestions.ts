@@ -10,6 +10,7 @@ export const suggestionsTable = pgTable("suggestions", {
   text: text("text").notNull(),
   status: text("status").notNull().default("new"),
   feedback: text("feedback"),
+  attachment: text("attachment"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
