@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserPlus, Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -193,10 +193,9 @@ export default function RegisterPage() {
     <div dir={dir} lang={lang} className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-start justify-center py-8 px-4">
       <div className="w-full max-w-2xl space-y-6">
         {/* Header card */}
-        <div className="bg-primary rounded-2xl p-6 text-primary-foreground shadow-lg flex items-center gap-4">
-          <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-            <UserPlus className="w-8 h-8" />
-          </div>
+        <div className="bg-primary rounded-2xl p-5 text-primary-foreground shadow-lg flex items-center gap-5">
+          <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-14 w-auto object-contain brightness-0 invert shrink-0" />
+          <div className="w-px self-stretch bg-white/25 shrink-0" />
           <div>
             <div className="text-sm opacity-75">{t.orgName}</div>
             <h1 className="text-2xl font-bold">{r.title}</h1>

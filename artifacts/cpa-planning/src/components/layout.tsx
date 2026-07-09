@@ -14,6 +14,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const ctx = useUser();
   const { t, lang, setLang } = useLocale();
+  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
   // During HMR transitions user can briefly be null before AuthGuard redirects
   if (!ctx.user) return null;
@@ -37,10 +38,9 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className={`min-h-screen bg-background flex flex-col md:flex-row ${lang === "ar" ? "rtl" : "ltr"}`}>
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-sidebar border-l border-sidebar-border flex-shrink-0 flex-col hidden md:flex">
-        <div className="p-5 text-center border-b border-sidebar-border bg-sidebar relative overflow-hidden">
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent"></div>
-          <h1 className="text-lg font-bold text-white mb-0.5 leading-tight">{t.appName}</h1>
-          <p className="text-sidebar-primary text-xs font-semibold tracking-wider">{t.orgShort}</p>
+        <div className="px-5 py-4 border-b border-sidebar-border bg-sidebar relative overflow-hidden flex items-center justify-center">
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-secondary to-accent"></div>
+          <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-12 w-auto object-contain brightness-0 invert" />
         </div>
         <nav className="flex-1 py-4 px-3 flex flex-col gap-0.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
@@ -77,8 +77,8 @@ export function Layout({ children }: { children: ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 border-b bg-card px-4 md:px-6 flex items-center justify-between sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="font-bold text-base text-primary md:hidden">{t.orgShort}</div>
-            <div className="hidden md:block text-sm text-muted-foreground font-medium">{t.orgName}</div>
+            <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-7 w-auto object-contain md:hidden" />
+            <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-6 w-auto object-contain hidden md:block" />
           </div>
 
           <div className="flex items-center gap-2">

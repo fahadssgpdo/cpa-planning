@@ -6,7 +6,7 @@ import type { AppUser } from "@/hooks/use-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Eye, EyeOff, AlertCircle, Globe } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Globe } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -77,12 +77,8 @@ export default function LoginPage() {
         </div>
 
         {/* Branding card */}
-        <div className="bg-primary rounded-2xl p-6 text-primary-foreground shadow-lg text-center space-y-1">
-          <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <h1 className="text-xl font-bold">{t.appName}</h1>
-          <p className="text-primary-foreground/70 text-sm font-medium">{t.orgName}</p>
+        <div className="bg-primary rounded-2xl px-6 py-5 shadow-lg flex items-center justify-center">
+          <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-16 w-auto object-contain brightness-0 invert" />
         </div>
 
         {/* Login form */}
