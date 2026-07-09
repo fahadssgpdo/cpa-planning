@@ -52,17 +52,21 @@ export function Layout({ children }: { children: ReactNode }) {
               </span>
             </Link>
           ))}
-          {isAdmin && (
-            <Link href="/admin" className="w-full block mt-2 border-t border-sidebar-border pt-2">
-              <span className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm ${location.startsWith('/admin') ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}>
-                <ShieldCheck className="w-4 h-4 flex-shrink-0" />
-                <span>{t.nav.admin}</span>
+          <Link href="/admin" className="w-full block mt-2 border-t border-sidebar-border pt-2">
+            <span className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm ${location.startsWith('/admin') ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' : isAdmin ? 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground' : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground/70'}`}>
+              <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+              <span>{t.nav.admin}</span>
+              {isAdmin ? (
                 <Badge variant="outline" className="ms-auto text-[10px] px-1.5 py-0 border-sidebar-primary text-sidebar-primary">
                   {lang === "ar" ? "إدارة" : "Admin"}
                 </Badge>
-              </span>
-            </Link>
-          )}
+              ) : (
+                <Badge variant="outline" className="ms-auto text-[10px] px-1.5 py-0 opacity-50">
+                  {lang === "ar" ? "مقيّد" : "Restricted"}
+                </Badge>
+              )}
+            </span>
+          </Link>
         </nav>
       </aside>
 

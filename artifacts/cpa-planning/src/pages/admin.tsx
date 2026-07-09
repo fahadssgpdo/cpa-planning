@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useUser } from "@/hooks/use-user";
+import { useUser, USERS } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import {
   useListUsers, useUpdateUser, useCreateUser,
@@ -95,7 +95,7 @@ function emptyEdit(): Omit<EditState, "id"> {
 }
 
 export default function AdminPage() {
-  const { isAdmin, user } = useUser();
+  const { isAdmin, user, setUser } = useUser();
   const { t, lang } = useLocale();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -142,11 +142,34 @@ export default function AdminPage() {
   });
 
   if (!isAdmin) {
+    const adminUser = USERS.find((u) => u.role === "admin")!;
     return (
-      <div className="text-center py-24">
-        <ShieldCheck className="w-14 h-14 text-destructive/40 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-destructive">{u.noPermission}</h2>
-        <p className="text-muted-foreground mt-2 text-sm">{u.noPermissionMsg}</p>
+      <div className="text-center py-20 max-w-md mx-auto">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-destructive/10 mb-5">
+          <ShieldCheck className="w-10 h-10 text-destructive/60" />
+        </div>
+        <h2 className="text-2xl font-bold text-foreground mb-2">
+          {lang === "ar" ? "لوحة الإدارة" : "Admin Panel"}
+        </h2>
+        <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+          {lang === "ar"
+            ? `هذه اللوحة مخصصة لمسؤولي النظام فقط. حسابك الحالي (${user.name}) لا يملك صلاحية الوصول.`
+            : `This panel is for system administrators only. Your current account (${user.name}) does not have access.`}
+        </p>
+        <div className="bg-muted/40 border rounded-xl p-5 text-start space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {lang === "ar" ? "تسجيل الدخول كمسؤول للمتابعة:" : "Sign in as admin to continue:"}
+          </p>
+          <div className="flex items-center justify-between gap-3 bg-card border rounded-lg px-4 py-3">
+            <div>
+              <p className="font-semibold text-sm">{adminUser.name}</p>
+              <p className="text-xs text-muted-foreground">{adminUser.designation}</p>
+            </div>
+            <Button size="sm" onClick={() => setUser(adminUser)}>
+              {lang === "ar" ? "تبديل" : "Switch"}
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
