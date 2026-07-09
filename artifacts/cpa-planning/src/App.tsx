@@ -16,6 +16,7 @@ import FaqPage from "@/pages/faq";
 import Suggestions from "@/pages/suggestions";
 import AdminPage from "@/pages/admin";
 import ManualPage from "@/pages/manual";
+import RegisterPage from "@/pages/register";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -29,21 +30,26 @@ const queryClient = new QueryClient({
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/announcements" component={Announcements} />
-        <Route path="/discussions" component={Discussions} />
-        <Route path="/discussions/:id" component={DiscussionDetail} />
-        <Route path="/inquiries" component={Inquiries} />
-        <Route path="/knowledge" component={KnowledgeBase} />
-        <Route path="/faq" component={FaqPage} />
-        <Route path="/suggestions" component={Suggestions} />
-        <Route path="/admin" component={AdminPage} />
-        <Route path="/manual" component={ManualPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/register" component={RegisterPage} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/announcements" component={Announcements} />
+            <Route path="/discussions" component={Discussions} />
+            <Route path="/discussions/:id" component={DiscussionDetail} />
+            <Route path="/inquiries" component={Inquiries} />
+            <Route path="/knowledge" component={KnowledgeBase} />
+            <Route path="/faq" component={FaqPage} />
+            <Route path="/suggestions" component={Suggestions} />
+            <Route path="/admin" component={AdminPage} />
+            <Route path="/manual" component={ManualPage} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

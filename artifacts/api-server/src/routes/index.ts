@@ -9,9 +9,11 @@ import faqsRouter from "./faqs";
 import suggestionsRouter from "./suggestions";
 import dashboardRouter from "./dashboard";
 import auditLogsRouter from "./audit-logs";
+import authRouter from "./auth";
 
 const router: IRouter = Router();
 
+router.use(authRouter);
 router.use(healthRouter);
 router.use(usersRouter);
 router.use(announcementsRouter);
