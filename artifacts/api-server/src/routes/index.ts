@@ -10,10 +10,12 @@ import suggestionsRouter from "./suggestions";
 import dashboardRouter from "./dashboard";
 import auditLogsRouter from "./audit-logs";
 import authRouter from "./auth";
+import bootstrapRouter from "./bootstrap";
 
 const router: IRouter = Router();
 
 router.use(authRouter);
+router.use(bootstrapRouter);
 router.use(healthRouter);
 router.use(usersRouter);
 router.use(announcementsRouter);
