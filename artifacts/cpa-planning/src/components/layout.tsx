@@ -5,7 +5,7 @@ import { useLocale } from "@/hooks/use-locale";
 import {
   LayoutDashboard, Megaphone, MessagesSquare,
   HelpCircle, BookOpen, MessageCircleQuestion,
-  Lightbulb, Users, ChevronDown, BookMarked, ShieldCheck, Globe
+  Lightbulb, Users, ChevronDown, BookMarked, ShieldCheck, Globe, UserPlus
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,7 +52,15 @@ export function Layout({ children }: { children: ReactNode }) {
               </span>
             </Link>
           ))}
-          <Link href="/admin" className="w-full block mt-2 border-t border-sidebar-border pt-2">
+          {isAdmin && (
+            <Link href="/register" className="w-full block mt-2 border-t border-sidebar-border pt-2">
+              <span className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm ${location === '/register' ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}>
+                <UserPlus className="w-4 h-4 flex-shrink-0" />
+                <span>{lang === "ar" ? "تسجيل موظف جديد" : "Register Employee"}</span>
+              </span>
+            </Link>
+          )}
+          <Link href="/admin" className="w-full block mt-1">
             <span className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm ${location.startsWith('/admin') ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' : isAdmin ? 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground' : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground/70'}`}>
               <ShieldCheck className="w-4 h-4 flex-shrink-0" />
               <span>{t.nav.admin}</span>

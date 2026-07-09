@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Users, Shield, UserX, UserCheck, Plus, RefreshCw,
   CheckCircle2, XCircle, Activity, Settings, ShieldCheck,
-  Search, Download, Briefcase, Building2, Layers
+  Search, Download, Briefcase, Building2, Layers, UserPlus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -334,9 +334,17 @@ export default function AdminPage() {
                   {users?.length || 0} {u.totalUsers}
                 </CardDescription>
               </div>
-              <Button size="sm" onClick={() => setCreateDialog(true)} className="gap-1.5 self-start sm:self-auto">
-                <Plus className="w-4 h-4" />{u.add}
-              </Button>
+              <div className="flex gap-2 self-start sm:self-auto flex-wrap">
+                <a href={`${BASE}/register`} target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" variant="outline" className="gap-1.5">
+                    <UserPlus className="w-4 h-4" />
+                    {lang === "ar" ? "نموذج تسجيل الموظفين" : "Employee Registration Form"}
+                  </Button>
+                </a>
+                <Button size="sm" onClick={() => setCreateDialog(true)} className="gap-1.5">
+                  <Plus className="w-4 h-4" />{u.add}
+                </Button>
+              </div>
             </CardHeader>
 
             {/* Filters */}
