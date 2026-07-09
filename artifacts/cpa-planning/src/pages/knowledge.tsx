@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BookOpen, Plus, Download, FileText, Trash2 } from "lucide-react";
+import { BookOpen, Plus, Download, FileText, Trash2, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -37,7 +37,7 @@ const CATEGORIES = [
 ];
 
 export default function KnowledgeBase() {
-  const { canManage } = useUser();
+  const { canCloseInquiry } = useUser();
   const [tab, setTab] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -101,11 +101,11 @@ export default function KnowledgeBase() {
           <p className="text-muted-foreground mt-1">الوثائق والأدلة والنماذج المعتمدة في الدائرة</p>
         </div>
         
-        {canManage && (
+        {canCloseInquiry ? (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 me-2" />
                 إضافة وثيقة
               </Button>
             </DialogTrigger>
@@ -148,6 +148,11 @@ export default function KnowledgeBase() {
               </form>
             </DialogContent>
           </Dialog>
+        ) : (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 border rounded-lg px-3 py-2">
+            <Lock className="w-4 h-4 shrink-0" />
+            <span>الإضافة والحذف لمدير الدائرة ومسؤول النظام فقط</span>
+          </div>
         )}
       </div>
 
@@ -201,7 +206,7 @@ export default function KnowledgeBase() {
                           <Download className="w-4 h-4" />
                         </a>
                       </Button>
-                      {canManage && (
+                      {canCloseInquiry && (
                         <Button 
                           variant="ghost" 
                           size="icon" 
