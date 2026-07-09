@@ -1,241 +1,346 @@
 import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
-import { 
+import { useLocale } from "@/hooks/use-locale";
+import {
   useListInquiries, useCreateInquiry, useUpdateInquiry,
-  getListInquiriesQueryKey
+  getListInquiriesQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { ar, enUS } from "date-fns/locale";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { HelpCircle, Plus, Send, CheckCircle2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  HelpCircle, Plus, Send, CheckCircle2, Pencil, X, Search,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
+type StatusFilter = "all" | "open" | "answered" | "resolved";
+
 export default function Inquiries() {
-  const { user, canManage } = useUser();
-  const [tab, setTab] = useState(canManage ? "all" : "mine");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [responseDialogId, setResponseDialogId] = useState<number | null>(null);
-  
+  const { user, canManage, canCloseInquiry } = useUser();
+  const { t, locale } = useLocale();
+  const dateFnsLocale = locale === "ar" ? ar : enUS;
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
-  const queryParams = tab === "mine" ? { userId: user.id } : {};
+
+  /* ── UI state ── */
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
+  const [search, setSearch] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [replyOpenId, setReplyOpenId] = useState<number | null>(null);
+  const [editReplyId, setEditReplyId] = useState<number | null>(null);
+  const [editReplyText, setEditReplyText] = useState("");
+
+  /* ── Data ── */
+  const queryParams = ownerFilter === "mine" ? { userId: user.id } : {};
   const { data: inquiries, isLoading } = useListInquiries(queryParams, {
-    query: {
-      queryKey: getListInquiriesQueryKey(queryParams)
-    }
+    query: { queryKey: getListInquiriesQueryKey(queryParams) },
   });
-  
+
   const createMutation = useCreateInquiry({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListInquiriesQueryKey() });
-        setIsDialogOpen(false);
-        toast({ title: "تم إرسال استفسارك بنجاح" });
-      }
-    }
+        setCreateOpen(false);
+        toast({ title: locale === "ar" ? "تم إرسال استفسارك بنجاح" : "Inquiry submitted successfully" });
+      },
+    },
   });
 
   const updateMutation = useUpdateInquiry({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListInquiriesQueryKey() });
-        setResponseDialogId(null);
-        toast({ title: "تم تحديث الاستفسار" });
-      }
-    }
+        setReplyOpenId(null);
+        setEditReplyId(null);
+        toast({ title: locale === "ar" ? "تم تحديث الاستفسار" : "Inquiry updated" });
+      },
+    },
   });
 
-  const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
+  /* ── Handlers ── */
+  function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const fd = new FormData(e.currentTarget);
     createMutation.mutate({
       data: {
-        subject: formData.get("subject") as string,
-        details: formData.get("details") as string,
-        userId: user.id
-      }
+        subject: fd.get("subject") as string,
+        details: fd.get("details") as string,
+        userId: user.id,
+      },
     });
-  };
+  }
 
-  const handleResponse = (e: React.FormEvent<HTMLFormElement>, id: number) => {
+  function handleReply(e: React.FormEvent<HTMLFormElement>, id: number) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const fd = new FormData(e.currentTarget);
     updateMutation.mutate({
       id,
       data: {
-        response: formData.get("response") as string,
+        response: fd.get("response") as string,
         responderId: user.id,
-        status: "answered"
-      }
+        status: "answered",
+      },
     });
-  };
+  }
 
-  const markResolved = (id: number) => {
+  function handleEditReply(id: number) {
     updateMutation.mutate({
       id,
-      data: { status: "resolved" }
+      data: { response: editReplyText },
     });
-  };
+  }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'open': return <Badge className="bg-blue-500 hover:bg-blue-600 text-white">مفتوح</Badge>;
-      case 'answered': return <Badge className="bg-secondary text-secondary-foreground">تم الرد</Badge>;
-      case 'resolved': return <Badge className="bg-accent text-accent-foreground">مغلق / محلول</Badge>;
-      default: return <Badge>{status}</Badge>;
+  function handleClose(id: number) {
+    updateMutation.mutate({ id, data: { status: "resolved" } });
+  }
+
+  /* ── Filtering ── */
+  const filtered = (inquiries ?? []).filter((inq) => {
+    if (statusFilter !== "all" && inq.status !== statusFilter) return false;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      if (!inq.subject.toLowerCase().includes(q) && !inq.details.toLowerCase().includes(q)) return false;
     }
-  };
+    return true;
+  });
+
+  /* ── Status badge ── */
+  function statusBadge(status: string) {
+    if (status === "open")
+      return <Badge className="bg-blue-500 hover:bg-blue-600 text-white">{locale === "ar" ? "مفتوح" : "Open"}</Badge>;
+    if (status === "answered")
+      return <Badge className="bg-amber-500 hover:bg-amber-600 text-white">{locale === "ar" ? "تم الرد" : "Answered"}</Badge>;
+    return <Badge className="bg-teal-600 hover:bg-teal-700 text-white">{locale === "ar" ? "مغلق" : "Closed"}</Badge>;
+  }
+
+  const statusColor = (status: string) =>
+    status === "open" ? "#3b82f6" : status === "answered" ? "#f59e0b" : "#0d9488";
+
+  const STATUS_FILTERS: { key: StatusFilter; ar: string; en: string }[] = [
+    { key: "all",      ar: "الكل",     en: "All" },
+    { key: "open",     ar: "مفتوح",    en: "Open" },
+    { key: "answered", ar: "تم الرد",  en: "Answered" },
+    { key: "resolved", ar: "مغلق",     en: "Closed" },
+  ];
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
             <HelpCircle className="w-6 h-6 text-primary" />
-            استفسارات الموظفين
+            {t.nav.inquiries}
           </h1>
-          <p className="text-muted-foreground mt-1">اطرح استفساراتك وسيقوم المختصون بالرد عليها</p>
+          <p className="text-muted-foreground mt-1">
+            {locale === "ar" ? "اطرح استفساراتك وسيقوم المختصون بالرد عليها" : "Submit your inquiries and specialists will respond"}
+          </p>
         </div>
-        
-        {!canManage && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                استفسار جديد
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>إرسال استفسار جديد</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleCreate} className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="subject">موضوع الاستفسار</Label>
-                  <Input id="subject" name="subject" required placeholder="مثال: استفسار حول تعميم رقم..." />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="details">التفاصيل</Label>
-                  <Textarea id="details" name="details" required rows={5} placeholder="اكتب تفاصيل استفسارك بوضوح..." />
-                </div>
-                <div className="pt-4 flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
-                  <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? "جاري الإرسال..." : "إرسال"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
+        <Button
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          onClick={() => setCreateOpen(true)}
+        >
+          <Plus className="w-4 h-4 me-2" />
+          {locale === "ar" ? "استفسار جديد" : "New Inquiry"}
+        </Button>
       </div>
 
-      {canManage && (
-        <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid grid-cols-2 w-full max-w-md mb-6">
-            <TabsTrigger value="all">كل الاستفسارات</TabsTrigger>
-            <TabsTrigger value="mine">استفساراتي</TabsTrigger>
-          </TabsList>
-        </Tabs>
+      {/* Filter toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between bg-card p-3 rounded-lg border">
+        {/* Status tabs */}
+        <div className="flex flex-wrap gap-1">
+          {STATUS_FILTERS.map(({ key, ar: arLabel, en: enLabel }) => (
+            <button
+              key={key}
+              onClick={() => setStatusFilter(key)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                statusFilter === key
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              {locale === "ar" ? arLabel : enLabel}
+            </button>
+          ))}
+          {canManage && (
+            <>
+              <span className="text-muted-foreground/30 mx-1 self-center">|</span>
+              {(["all", "mine"] as const).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setOwnerFilter(key)}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    ownerFilter === key
+                      ? "bg-secondary text-secondary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {key === "all"
+                    ? locale === "ar" ? "كل الاستفسارات" : "All"
+                    : locale === "ar" ? "استفساراتي" : "Mine"}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+
+        {/* Search */}
+        <div className="relative w-full sm:w-auto">
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder={locale === "ar" ? "بحث في الاستفسارات..." : "Search inquiries..."}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-background ps-9 w-full sm:w-64"
+          />
+        </div>
+      </div>
+
+      {/* Count */}
+      {!isLoading && (
+        <p className="text-xs text-muted-foreground">
+          {locale === "ar"
+            ? `${filtered.length} استفسار`
+            : `${filtered.length} inquiry(ies)`}
+        </p>
       )}
 
-      <div className="grid grid-cols-1 gap-4">
+      {/* List */}
+      <div className="space-y-4">
         {isLoading ? (
-          Array(4).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full rounded-xl" />
-          ))
-        ) : inquiries?.length === 0 ? (
+          Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12 bg-card rounded-xl border border-dashed">
             <HelpCircle className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-muted-foreground">لا توجد استفسارات</h3>
+            <h3 className="text-lg font-medium text-muted-foreground">
+              {locale === "ar" ? "لا توجد استفسارات" : "No inquiries found"}
+            </h3>
           </div>
         ) : (
-          inquiries?.map((inquiry) => (
-            <Card key={inquiry.id} className="overflow-hidden border-r-4" style={{ borderRightColor: inquiry.status === 'open' ? '#3b82f6' : inquiry.status === 'answered' ? '#c6972d' : '#0ab0a2' }}>
+          filtered.map((inq) => (
+            <Card
+              key={inq.id}
+              className="overflow-hidden border-s-4"
+              style={{ borderInlineStartColor: statusColor(inq.status) }}
+            >
               <div className="flex flex-col md:flex-row">
-                <div className="flex-1 p-5 border-b md:border-b-0 md:border-l">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-bold text-lg text-primary">{inquiry.subject}</h3>
-                    {getStatusBadge(inquiry.status)}
+                {/* Question side */}
+                <div className="flex-1 p-5 border-b md:border-b-0 md:border-e">
+                  <div className="flex justify-between items-start mb-3 gap-3">
+                    <h3 className="font-bold text-base text-primary leading-snug">{inq.subject}</h3>
+                    {statusBadge(inq.status)}
                   </div>
-                  <p className="text-sm text-foreground/80 mb-4 whitespace-pre-wrap">{inquiry.details}</p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-                    <div className="flex items-center gap-1">
-                      <span>بواسطة:</span>
-                      <span className="text-foreground">{inquiry.userName}</span>
+                  <p className="text-sm text-foreground/80 mb-4 whitespace-pre-wrap leading-relaxed">{inq.details}</p>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground font-medium gap-2">
+                    <div>
+                      <span className="font-semibold text-foreground">{inq.userName}</span>
+                      {inq.userDesignation && (
+                        <span className="block text-muted-foreground mt-0.5">{inq.userDesignation}</span>
+                      )}
                     </div>
-                    <span>{format(new Date(inquiry.date), 'dd MMM yyyy, hh:mm a', { locale: ar })}</span>
+                    <span className="shrink-0">
+                      {format(new Date(inq.date), "dd MMM yyyy", { locale: dateFnsLocale })}
+                    </span>
                   </div>
                 </div>
-                
+
+                {/* Response side */}
                 <div className="flex-1 p-5 bg-muted/30">
-                  {inquiry.response ? (
-                    <div>
-                      <h4 className="font-semibold text-sm mb-2 text-secondary-foreground flex items-center gap-2">
-                        الرد:
-                      </h4>
-                      <p className="text-sm text-foreground mb-3 whitespace-pre-wrap">{inquiry.response}</p>
-                      <div className="text-xs text-muted-foreground flex justify-between items-center">
-                        <span>رد بواسطة: {inquiry.responderName}</span>
-                        {canManage && inquiry.status !== 'resolved' && (
-                          <Button variant="ghost" size="sm" className="h-7 text-accent hover:text-accent hover:bg-accent/10" onClick={() => markResolved(inquiry.id)}>
-                            <CheckCircle2 className="w-4 h-4 ml-1" />
-                            تحديد كمحلول
+                  {inq.response ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h4 className="font-semibold text-sm text-secondary-foreground">
+                          {locale === "ar" ? "رد دائرة التخطيط:" : "Planning Dept. Reply:"}
+                        </h4>
+                        {/* Edit reply — manager/admin only */}
+                        {canCloseInquiry && inq.status !== "resolved" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                            onClick={() => {
+                              setEditReplyId(inq.id);
+                              setEditReplyText(inq.response ?? "");
+                            }}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {editReplyId === inq.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editReplyText}
+                            onChange={(e) => setEditReplyText(e.target.value)}
+                            rows={3}
+                            className="text-sm bg-background"
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditReplyId(null)}
+                            >
+                              <X className="w-3.5 h-3.5 me-1" />
+                              {locale === "ar" ? "إلغاء" : "Cancel"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={updateMutation.isPending}
+                              onClick={() => handleEditReply(inq.id)}
+                            >
+                              {locale === "ar" ? "حفظ" : "Save"}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{inq.response}</p>
+                      )}
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
+                        <span>{locale === "ar" ? `رد بواسطة: ${inq.responderName}` : `Replied by: ${inq.responderName}`}</span>
+                        {/* Close — manager/admin only */}
+                        {canCloseInquiry && inq.status !== "resolved" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                            onClick={() => handleClose(inq.id)}
+                            disabled={updateMutation.isPending}
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 me-1" />
+                            {locale === "ar" ? "إغلاق" : "Close"}
                           </Button>
                         )}
                       </div>
                     </div>
                   ) : canManage ? (
-                    <div className="h-full flex flex-col justify-center">
-                      <Dialog open={responseDialogId === inquiry.id} onOpenChange={(open) => setResponseDialogId(open ? inquiry.id : null)}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" className="w-full border-secondary text-secondary-foreground hover:bg-secondary/10">
-                            <Send className="w-4 h-4 mr-2 rotate-180" />
-                            إضافة رد
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>الرد على الاستفسار</DialogTitle>
-                          </DialogHeader>
-                          <form onSubmit={(e) => handleResponse(e, inquiry.id)} className="space-y-4 mt-4">
-                            <div className="space-y-2">
-                              <Label>الاستفسار الأساسي</Label>
-                              <div className="p-3 bg-muted rounded-md text-sm">{inquiry.details}</div>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="response">نص الرد</Label>
-                              <Textarea id="response" name="response" required rows={4} placeholder="اكتب ردك هنا..." />
-                            </div>
-                            <div className="pt-4 flex justify-end gap-2">
-                              <Button type="button" variant="outline" onClick={() => setResponseDialogId(null)}>إلغاء</Button>
-                              <Button type="submit" disabled={updateMutation.isPending}>
-                                {updateMutation.isPending ? "جاري الإرسال..." : "إرسال الرد"}
-                              </Button>
-                            </div>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
+                    <div className="h-full flex flex-col justify-center gap-2">
+                      <Button
+                        variant="outline"
+                        className="w-full border-secondary text-secondary-foreground hover:bg-secondary/10"
+                        onClick={() => setReplyOpenId(inq.id)}
+                      >
+                        <Send className="w-4 h-4 me-2 rotate-180" />
+                        {locale === "ar" ? "إضافة رد" : "Add Reply"}
+                      </Button>
                     </div>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-sm text-muted-foreground italic">
-                      في انتظار الرد من المختصين...
+                    <div className="h-full flex items-center justify-center text-sm text-muted-foreground italic py-4">
+                      {locale === "ar" ? "في انتظار الرد من المختصين..." : "Awaiting response from specialists..."}
                     </div>
                   )}
                 </div>
@@ -244,6 +349,72 @@ export default function Inquiries() {
           ))
         )}
       </div>
+
+      {/* ── Create Inquiry Dialog ── */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle>{locale === "ar" ? "إرسال استفسار جديد" : "Submit New Inquiry"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreate} className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label>{locale === "ar" ? "موضوع الاستفسار" : "Subject"}</Label>
+              <Input name="subject" required placeholder={locale === "ar" ? "مثال: استفسار حول تعميم رقم..." : "e.g. Inquiry about circular no..."} />
+            </div>
+            <div className="space-y-2">
+              <Label>{locale === "ar" ? "التفاصيل" : "Details"}</Label>
+              <Textarea name="details" required rows={5} placeholder={locale === "ar" ? "اكتب تفاصيل استفسارك بوضوح..." : "Describe your inquiry in detail..."} />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
+                {locale === "ar" ? "إلغاء" : "Cancel"}
+              </Button>
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending
+                  ? (locale === "ar" ? "جاري الإرسال..." : "Sending...")
+                  : (locale === "ar" ? "إرسال" : "Submit")}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Reply Dialog (officer / manager / admin) ── */}
+      <Dialog open={replyOpenId !== null} onOpenChange={(open) => !open && setReplyOpenId(null)}>
+        <DialogContent className="sm:max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle>{locale === "ar" ? "الرد على الاستفسار" : "Reply to Inquiry"}</DialogTitle>
+          </DialogHeader>
+          {replyOpenId !== null && (() => {
+            const inq = (inquiries ?? []).find((i) => i.id === replyOpenId);
+            if (!inq) return null;
+            return (
+              <form onSubmit={(e) => handleReply(e, inq.id)} className="space-y-4 mt-2">
+                <div className="space-y-2">
+                  <Label>{locale === "ar" ? "الاستفسار" : "Inquiry"}</Label>
+                  <ScrollArea className="max-h-32">
+                    <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap leading-relaxed">{inq.details}</div>
+                  </ScrollArea>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="response">{locale === "ar" ? "نص الرد" : "Reply Text"}</Label>
+                  <Textarea id="response" name="response" required rows={4} placeholder={locale === "ar" ? "اكتب ردك هنا..." : "Write your reply here..."} />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setReplyOpenId(null)}>
+                    {locale === "ar" ? "إلغاء" : "Cancel"}
+                  </Button>
+                  <Button type="submit" disabled={updateMutation.isPending}>
+                    {updateMutation.isPending
+                      ? (locale === "ar" ? "جاري الإرسال..." : "Sending...")
+                      : (locale === "ar" ? "إرسال الرد" : "Send Reply")}
+                  </Button>
+                </div>
+              </form>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

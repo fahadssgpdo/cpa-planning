@@ -14,7 +14,10 @@ import {
 const router: IRouter = Router();
 
 const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
-  const [user] = await db.select({ nameAr: usersTable.nameAr }).from(usersTable).where(eq(usersTable.id, row.userId));
+  const [user] = await db
+    .select({ nameAr: usersTable.nameAr, designation: usersTable.designation })
+    .from(usersTable)
+    .where(eq(usersTable.id, row.userId));
   let responderName: string | null = null;
   if (row.responderId) {
     const [r] = await db.select({ nameAr: usersTable.nameAr }).from(usersTable).where(eq(usersTable.id, row.responderId));
@@ -24,6 +27,7 @@ const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
     id: row.id,
     userId: row.userId,
     userName: user?.nameAr ?? "",
+    userDesignation: user?.designation ?? null,
     subject: row.subject,
     details: row.details,
     status: row.status,

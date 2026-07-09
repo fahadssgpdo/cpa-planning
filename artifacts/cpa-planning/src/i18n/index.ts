@@ -12,7 +12,7 @@ export const translations = {
       dashboard: "لوحة التحكم",
       announcements: "الإعلانات والمستجدات",
       discussions: "النقاشات التشاركية",
-      inquiries: "استفسارات الموظفين",
+      inquiries: "استفسارات",
       knowledge: "قاعدة المعرفة",
       faq: "الأسئلة الشائعة",
       suggestions: "المقترحات",
