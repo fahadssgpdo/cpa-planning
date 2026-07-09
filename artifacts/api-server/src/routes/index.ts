@@ -8,6 +8,7 @@ import documentsRouter from "./documents";
 import faqsRouter from "./faqs";
 import suggestionsRouter from "./suggestions";
 import dashboardRouter from "./dashboard";
+import auditLogsRouter from "./audit-logs";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(documentsRouter);
 router.use(faqsRouter);
 router.use(suggestionsRouter);
 router.use(dashboardRouter);
+router.use(auditLogsRouter);
 
 export default router;
