@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/hooks/use-user";
-import { LocaleProvider } from "@/hooks/use-locale";
+import { LocaleProvider } from "@/hooks/locale-provider";
 import { Layout } from "@/components/layout";
 
 import Dashboard from "@/pages/dashboard";
