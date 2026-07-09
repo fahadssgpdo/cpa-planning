@@ -24,6 +24,14 @@ export interface User {
   nameAr: string;
   /** @nullable */
   nameEn?: string | null;
+  /** @nullable */
+  username?: string | null;
+  /** @nullable */
+  designation?: string | null;
+  /** @nullable */
+  directorate?: string | null;
+  /** @nullable */
+  section?: string | null;
   role: UserRole;
   active: boolean;
   createdAt: string;
@@ -43,6 +51,14 @@ export interface UserInput {
   nameAr: string;
   /** @nullable */
   nameEn?: string | null;
+  /** @nullable */
+  username?: string | null;
+  /** @nullable */
+  designation?: string | null;
+  /** @nullable */
+  directorate?: string | null;
+  /** @nullable */
+  section?: string | null;
   role: UserInputRole;
 }
 
@@ -60,6 +76,14 @@ export interface UserUpdate {
   nameAr?: string;
   /** @nullable */
   nameEn?: string | null;
+  /** @nullable */
+  username?: string | null;
+  /** @nullable */
+  designation?: string | null;
+  /** @nullable */
+  directorate?: string | null;
+  /** @nullable */
+  section?: string | null;
   role?: UserUpdateRole;
   active?: boolean;
 }

@@ -24,6 +24,10 @@ export const ListUsersResponseItem = zod.object({
   "id": zod.number(),
   "nameAr": zod.string(),
   "nameEn": zod.string().nullish(),
+  "username": zod.string().nullish(),
+  "designation": zod.string().nullish(),
+  "directorate": zod.string().nullish(),
+  "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']),
   "active": zod.boolean(),
   "createdAt": zod.string()
@@ -37,6 +41,10 @@ export const ListUsersResponse = zod.array(ListUsersResponseItem)
 export const CreateUserBody = zod.object({
   "nameAr": zod.string(),
   "nameEn": zod.string().nullish(),
+  "username": zod.string().nullish(),
+  "designation": zod.string().nullish(),
+  "directorate": zod.string().nullish(),
+  "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin'])
 })
 
@@ -44,6 +52,10 @@ export const CreateUserResponse = zod.object({
   "id": zod.number(),
   "nameAr": zod.string(),
   "nameEn": zod.string().nullish(),
+  "username": zod.string().nullish(),
+  "designation": zod.string().nullish(),
+  "directorate": zod.string().nullish(),
+  "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']),
   "active": zod.boolean(),
   "createdAt": zod.string()
@@ -60,6 +72,10 @@ export const UpdateUserParams = zod.object({
 export const UpdateUserBody = zod.object({
   "nameAr": zod.string().optional(),
   "nameEn": zod.string().nullish(),
+  "username": zod.string().nullish(),
+  "designation": zod.string().nullish(),
+  "directorate": zod.string().nullish(),
+  "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']).optional(),
   "active": zod.boolean().optional()
 })
@@ -68,6 +84,10 @@ export const UpdateUserResponse = zod.object({
   "id": zod.number(),
   "nameAr": zod.string(),
   "nameEn": zod.string().nullish(),
+  "username": zod.string().nullish(),
+  "designation": zod.string().nullish(),
+  "directorate": zod.string().nullish(),
+  "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']),
   "active": zod.boolean(),
   "createdAt": zod.string()

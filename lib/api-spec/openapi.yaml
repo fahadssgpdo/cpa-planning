@@ -553,6 +553,14 @@ components:
           type: string
         nameEn:
           type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        designation:
+          type: ["string", "null"]
+        directorate:
+          type: ["string", "null"]
+        section:
+          type: ["string", "null"]
         role:
           type: string
           enum: [employee, officer, manager, admin]
@@ -569,6 +577,14 @@ components:
           type: string
         nameEn:
           type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        designation:
+          type: ["string", "null"]
+        directorate:
+          type: ["string", "null"]
+        section:
+          type: ["string", "null"]
         role:
           type: string
           enum: [employee, officer, manager, admin]
@@ -579,6 +595,14 @@ components:
         nameAr:
           type: string
         nameEn:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        designation:
+          type: ["string", "null"]
+        directorate:
+          type: ["string", "null"]
+        section:
           type: ["string", "null"]
         role:
           type: string
