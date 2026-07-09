@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
+import { useLocale } from "@/hooks/use-locale";
 import { 
   useListFaqs, useCreateFaq, useUpdateFaq, useDeleteFaq,
   getListFaqsQueryKey 
@@ -29,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FaqPage() {
   const { canManage } = useUser();
+  const { t } = useLocale();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<any>(null);
   
@@ -42,7 +44,7 @@ export default function FaqPage() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListFaqsQueryKey() });
         setIsDialogOpen(false);
-        toast({ title: "تم إضافة السؤال بنجاح" });
+        toast({ title: t.faq.addedSuccess });
       }
     }
   });
@@ -53,7 +55,7 @@ export default function FaqPage() {
         queryClient.invalidateQueries({ queryKey: getListFaqsQueryKey() });
         setIsDialogOpen(false);
         setEditingFaq(null);
-        toast({ title: "تم تحديث السؤال" });
+        toast({ title: t.faq.updatedSuccess });
       }
     }
   });
@@ -62,7 +64,7 @@ export default function FaqPage() {
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListFaqsQueryKey() });
-        toast({ title: "تم حذف السؤال" });
+        toast({ title: t.faq.deletedSuccess });
       }
     }
   });
@@ -99,9 +101,9 @@ export default function FaqPage() {
         <div className="relative z-10">
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <MessageCircleQuestion className="w-8 h-8 text-secondary" />
-            الأسئلة الشائعة
+            {t.faq.title}
           </h1>
-          <p className="text-primary-foreground/80 mt-2 text-lg">إجابات سريعة للأسئلة المتكررة حول التخطيط والتطوير</p>
+          <p className="text-primary-foreground/80 mt-2 text-lg">{t.faq.subtitle}</p>
         </div>
         
         {canManage && (
@@ -109,27 +111,27 @@ export default function FaqPage() {
             <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if(!open) setEditingFaq(null); }}>
               <DialogTrigger asChild>
                 <Button variant="secondary" onClick={openCreateDialog} className="shadow-sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  إضافة سؤال
+                  <Plus className="w-4 h-4 me-2" />
+                  {t.faq.addQuestion}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>{editingFaq ? "تعديل السؤال" : "إضافة سؤال جديد"}</DialogTitle>
+                  <DialogTitle>{editingFaq ? t.faq.editTitle : t.faq.addTitle}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSave} className="space-y-4 mt-4 text-right rtl">
+                <form onSubmit={handleSave} className="space-y-4 mt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="question">السؤال</Label>
+                    <Label htmlFor="question">{t.faq.questionLabel}</Label>
                     <Input id="question" name="question" required defaultValue={editingFaq?.question} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="answer">الإجابة</Label>
+                    <Label htmlFor="answer">{t.faq.answerLabel}</Label>
                     <Textarea id="answer" name="answer" required rows={5} defaultValue={editingFaq?.answer} />
                   </div>
                   <div className="pt-4 flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t.faq.cancel}</Button>
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                      {(createMutation.isPending || updateMutation.isPending) ? "جاري الحفظ..." : "حفظ"}
+                      {(createMutation.isPending || updateMutation.isPending) ? t.faq.saving : t.faq.save}
                     </Button>
                   </div>
                 </form>
@@ -149,14 +151,14 @@ export default function FaqPage() {
             </div>
           ) : faqs?.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground bg-card sm:bg-transparent rounded-lg border sm:border-0">
-              لا توجد أسئلة شائعة حالياً.
+              {t.faq.noFaqs}
             </div>
           ) : (
             <Accordion type="single" collapsible className="w-full space-y-3">
               {faqs?.map((faq) => (
                 <AccordionItem key={faq.id} value={`item-${faq.id}`} className="border bg-card rounded-lg px-4 shadow-sm hover:border-primary/50 transition-colors">
-                  <AccordionTrigger className="text-right hover:no-underline font-semibold text-primary [&[data-state=open]]:text-accent py-4">
-                    <span className="flex-1 text-right">{faq.question}</span>
+                  <AccordionTrigger className="text-start hover:no-underline font-semibold text-primary [&[data-state=open]]:text-accent py-4">
+                    <span className="flex-1 text-start">{faq.question}</span>
                   </AccordionTrigger>
                   <AccordionContent className="text-foreground/80 leading-relaxed pb-4 pt-1 border-t mt-2">
                     <div className="flex flex-col gap-4">
@@ -164,10 +166,10 @@ export default function FaqPage() {
                       {canManage && (
                         <div className="flex justify-end gap-2 pt-2 border-t border-border/50">
                           <Button variant="ghost" size="sm" onClick={() => openEditDialog(faq)} className="text-muted-foreground hover:text-primary h-8 px-2">
-                            <Pencil className="w-3.5 h-3.5 ml-1.5" /> تعديل
+                            <Pencil className="w-3.5 h-3.5 me-1.5" /> {t.common.edit}
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate({ id: faq.id })} className="text-muted-foreground hover:text-destructive h-8 px-2">
-                            <Trash2 className="w-3.5 h-3.5 ml-1.5" /> حذف
+                            <Trash2 className="w-3.5 h-3.5 me-1.5" /> {t.common.delete}
                           </Button>
                         </div>
                       )}

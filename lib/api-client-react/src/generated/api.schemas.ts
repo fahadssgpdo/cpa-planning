@@ -215,6 +215,8 @@ export interface Inquiry {
   responderId?: number | null;
   /** @nullable */
   responderName?: string | null;
+  /** @nullable */
+  userDesignation?: string | null;
 }
 
 export interface InquiryInput {
@@ -327,6 +329,8 @@ export interface Suggestion {
   date: string;
   /** @nullable */
   feedback?: string | null;
+  /** @nullable */
+  attachment?: string | null;
 }
 
 export type SuggestionInputCategory = typeof SuggestionInputCategory[keyof typeof SuggestionInputCategory];
@@ -343,6 +347,7 @@ export interface SuggestionInput {
   userId: number;
   category: SuggestionInputCategory;
   text: string;
+  attachment?: string;
 }
 
 export type SuggestionUpdateStatus = typeof SuggestionUpdateStatus[keyof typeof SuggestionUpdateStatus];

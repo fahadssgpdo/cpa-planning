@@ -3,6 +3,7 @@ import { translations, Lang, Translations } from "@/i18n";
 
 interface LocaleContextType {
   lang: Lang;
+  locale: Lang;
   setLang: (lang: Lang) => void;
   t: Translations;
   dir: "rtl" | "ltr";
@@ -33,10 +34,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = dir;
   }, [lang, dir]);
 
-  const t = translations[lang];
+  const t = translations[lang] as unknown as Translations;
 
   return (
-    <LocaleContext.Provider value={{ lang, setLang, t, dir }}>
+    <LocaleContext.Provider value={{ lang, locale: lang, setLang, t, dir }}>
       {children}
     </LocaleContext.Provider>
   );

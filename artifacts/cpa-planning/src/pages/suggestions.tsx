@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
+import { useLocale } from "@/hooks/use-locale";
 import { 
   useListSuggestions, useCreateSuggestion, useUpdateSuggestion,
   getListSuggestionsQueryKey, SuggestionCategory, SuggestionStatus 
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ar } from "date-fns/locale";
+import { ar, enUS } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,55 +27,48 @@ import { Lightbulb, Plus, CheckCircle, XCircle, Clock, Settings, FileText, Paper
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const SUGGESTION_TYPES: { value: SuggestionCategory; label: string }[] = [
-  { value: "improvement", label: "تحسين مستمر" },
-  { value: "initiative",  label: "مبادرة جديدة" },
-  { value: "process",     label: "إجراءات العمل" },
-  { value: "feedback",    label: "تغذية راجعة" },
-];
-
-type FieldDef = { name: string; label: string; type: "text" | "textarea"; required?: boolean; placeholder?: string };
+type FieldDef = { name: string; labelAr: string; labelEn: string; type: "text" | "textarea"; required?: boolean; placeholderAr?: string; placeholderEn?: string };
 
 const TYPE_FIELDS: Record<SuggestionCategory, FieldDef[]> = {
   improvement: [
-    { name: "current",  label: "المشكلة / الوضع الحالي",   type: "textarea", required: true,  placeholder: "صف المشكلة أو الوضع الذي تريد تحسينه..." },
-    { name: "proposed", label: "التحسين المقترح",           type: "textarea", required: true,  placeholder: "ما الذي تقترح تغييره أو تحسينه؟" },
-    { name: "benefits", label: "الفوائد المتوقعة",          type: "textarea", required: false, placeholder: "ما الفوائد التي ستعود على الدائرة أو الموظفين؟" },
+    { name: "current",  labelAr: "المشكلة / الوضع الحالي",   labelEn: "Problem / Current Situation", type: "textarea", required: true,  placeholderAr: "صف المشكلة أو الوضع الذي تريد تحسينه...", placeholderEn: "Describe the problem or situation you want to improve..." },
+    { name: "proposed", labelAr: "التحسين المقترح",           labelEn: "Proposed Improvement",        type: "textarea", required: true,  placeholderAr: "ما الذي تقترح تغييره أو تحسينه؟",        placeholderEn: "What do you propose to change or improve?" },
+    { name: "benefits", labelAr: "الفوائد المتوقعة",          labelEn: "Expected Benefits",           type: "textarea", required: false, placeholderAr: "ما الفوائد التي ستعود على الدائرة؟",     placeholderEn: "What benefits will this bring to the department?" },
   ],
   initiative: [
-    { name: "title",       label: "عنوان المبادرة",         type: "text",     required: true,  placeholder: "اكتب عنواناً واضحاً للمبادرة" },
-    { name: "goal",        label: "الهدف من المبادرة",      type: "textarea", required: true,  placeholder: "ما الذي تريد تحقيقه من خلال هذه المبادرة؟" },
-    { name: "beneficiary", label: "الفئة المستفيدة",        type: "text",     required: false, placeholder: "من سيستفيد؟ (موظفون، جمهور، إدارة...)" },
-    { name: "resources",   label: "الموارد المطلوبة",       type: "textarea", required: false, placeholder: "ما الموارد البشرية أو المادية المطلوبة؟" },
+    { name: "title",       labelAr: "عنوان المبادرة",         labelEn: "Initiative Title",      type: "text",     required: true,  placeholderAr: "اكتب عنواناً واضحاً للمبادرة",    placeholderEn: "Write a clear title for the initiative" },
+    { name: "goal",        labelAr: "الهدف من المبادرة",      labelEn: "Objective",             type: "textarea", required: true,  placeholderAr: "ما الذي تريد تحقيقه؟",            placeholderEn: "What do you want to achieve?" },
+    { name: "beneficiary", labelAr: "الفئة المستفيدة",        labelEn: "Target Audience",       type: "text",     required: false, placeholderAr: "من سيستفيد؟",                     placeholderEn: "Who will benefit?" },
+    { name: "resources",   labelAr: "الموارد المطلوبة",       labelEn: "Required Resources",    type: "textarea", required: false, placeholderAr: "الموارد البشرية أو المادية المطلوبة؟", placeholderEn: "Human or material resources needed?" },
   ],
   process: [
-    { name: "current",   label: "الإجراء الحالي",           type: "textarea", required: true,  placeholder: "صف الإجراء أو الخطوة الحالية..." },
-    { name: "proposed",  label: "التغيير المقترح",          type: "textarea", required: true,  placeholder: "ما الإجراء البديل أو المعدّل الذي تقترحه؟" },
-    { name: "rationale", label: "مبرر التغيير",             type: "textarea", required: false, placeholder: "لماذا هذا التغيير ضروري أو مفيد؟" },
+    { name: "current",   labelAr: "الإجراء الحالي",           labelEn: "Current Procedure",     type: "textarea", required: true,  placeholderAr: "صف الإجراء الحالي...",            placeholderEn: "Describe the current procedure..." },
+    { name: "proposed",  labelAr: "التغيير المقترح",          labelEn: "Proposed Change",       type: "textarea", required: true,  placeholderAr: "ما الإجراء البديل الذي تقترحه؟",  placeholderEn: "What alternative procedure do you propose?" },
+    { name: "rationale", labelAr: "مبرر التغيير",             labelEn: "Rationale",             type: "textarea", required: false, placeholderAr: "لماذا هذا التغيير ضروري؟",        placeholderEn: "Why is this change necessary?" },
   ],
   feedback: [
-    { name: "area",           label: "المجال",              type: "text",     required: true,  placeholder: "مثال: التواصل الداخلي، الأداء، بيئة العمل..." },
-    { name: "details",        label: "التفاصيل",            type: "textarea", required: true,  placeholder: "شارك ملاحظاتك أو تجربتك بشكل مفصّل..." },
-    { name: "recommendation", label: "التوصية",             type: "textarea", required: false, placeholder: "ما الذي توصي به لمعالجة هذا الأمر؟" },
+    { name: "area",           labelAr: "المجال",              labelEn: "Area",                  type: "text",     required: true,  placeholderAr: "مثال: التواصل الداخلي، الأداء...", placeholderEn: "e.g. Internal communication, performance..." },
+    { name: "details",        labelAr: "التفاصيل",            labelEn: "Details",               type: "textarea", required: true,  placeholderAr: "شارك ملاحظاتك بشكل مفصّل...",    placeholderEn: "Share your observations in detail..." },
+    { name: "recommendation", labelAr: "التوصية",             labelEn: "Recommendation",        type: "textarea", required: false, placeholderAr: "ما الذي توصي به؟",                placeholderEn: "What do you recommend?" },
   ],
 };
 
-function buildTextFromFields(category: SuggestionCategory, values: Record<string, string>): string {
+function buildTextFromFields(category: SuggestionCategory, values: Record<string, string>, isEn: boolean): string {
   const fields = TYPE_FIELDS[category];
   return fields
     .filter(f => values[f.name]?.trim())
-    .map(f => `${f.label}:\n${values[f.name].trim()}`)
+    .map(f => `${isEn ? f.labelEn : f.labelAr}:\n${values[f.name].trim()}`)
     .join("\n\n");
 }
 
-function TypedFields({ category }: { category: SuggestionCategory }) {
+function TypedFields({ category, isEn }: { category: SuggestionCategory; isEn: boolean }) {
   const fields = TYPE_FIELDS[category];
   return (
     <>
       {fields.map(f => (
         <div key={f.name} className="space-y-1.5">
           <Label htmlFor={f.name}>
-            {f.label}
+            {isEn ? f.labelEn : f.labelAr}
             {f.required && <span className="text-destructive ms-1">*</span>}
           </Label>
           {f.type === "textarea" ? (
@@ -83,11 +77,11 @@ function TypedFields({ category }: { category: SuggestionCategory }) {
               name={f.name}
               required={f.required}
               rows={3}
-              placeholder={f.placeholder}
+              placeholder={isEn ? f.placeholderEn : f.placeholderAr}
               className="resize-none"
             />
           ) : (
-            <Input id={f.name} name={f.name} required={f.required} placeholder={f.placeholder} />
+            <Input id={f.name} name={f.name} required={f.required} placeholder={isEn ? f.placeholderEn : f.placeholderAr} />
           )}
         </div>
       ))}
@@ -97,6 +91,10 @@ function TypedFields({ category }: { category: SuggestionCategory }) {
 
 export default function Suggestions() {
   const { user, canManage } = useUser();
+  const { t, locale } = useLocale();
+  const isEn = locale === "en";
+  const dateFnsLocale = isEn ? enUS : ar;
+
   const [tab, setTab] = useState(canManage ? "all" : "mine");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [feedbackDialogId, setFeedbackDialogId] = useState<number | null>(null);
@@ -118,7 +116,7 @@ export default function Suggestions() {
         setIsDialogOpen(false);
         setSelectedCategory("improvement");
         setAttachmentName("");
-        toast({ title: "تم تقديم مقترحك بنجاح" });
+        toast({ title: t.suggestions.submittedSuccess });
       }
     }
   });
@@ -128,7 +126,7 @@ export default function Suggestions() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListSuggestionsQueryKey() });
         setFeedbackDialogId(null);
-        toast({ title: "تم تحديث حالة المقترح" });
+        toast({ title: t.suggestions.statusUpdated });
       }
     }
   });
@@ -140,7 +138,7 @@ export default function Suggestions() {
     for (const [k, v] of formData.entries()) {
       if (typeof v === "string") values[k] = v;
     }
-    const text = buildTextFromFields(selectedCategory, values);
+    const text = buildTextFromFields(selectedCategory, values, isEn);
     createMutation.mutate({
       data: {
         category: selectedCategory,
@@ -164,18 +162,25 @@ export default function Suggestions() {
   };
 
   const getStatusInfo = (status: string) => {
+    const s = t.suggestions.statuses;
     switch (status) {
-      case 'new':          return { label: "جديد",           color: "bg-blue-100 text-blue-800",   icon: FileText };
-      case 'under_review': return { label: "قيد المراجعة",   color: "bg-yellow-100 text-yellow-800", icon: Clock };
-      case 'accepted':     return { label: "مقبول",          color: "bg-green-100 text-green-800",  icon: CheckCircle };
-      case 'rejected':     return { label: "مرفوض",          color: "bg-red-100 text-red-800",      icon: XCircle };
-      case 'implemented':  return { label: "منفّذ",          color: "bg-teal-100 text-teal-800",    icon: Settings };
-      default:             return { label: status,           color: "bg-gray-100 text-gray-800",    icon: FileText };
+      case 'new':          return { label: s.new,          color: "bg-blue-100 text-blue-800",   icon: FileText };
+      case 'under_review': return { label: s.under_review, color: "bg-yellow-100 text-yellow-800", icon: Clock };
+      case 'accepted':     return { label: s.accepted,     color: "bg-green-100 text-green-800",  icon: CheckCircle };
+      case 'rejected':     return { label: s.rejected,     color: "bg-red-100 text-red-800",      icon: XCircle };
+      case 'implemented':  return { label: s.implemented,  color: "bg-teal-100 text-teal-800",    icon: Settings };
+      default:             return { label: status,         color: "bg-gray-100 text-gray-800",    icon: FileText };
     }
   };
 
-  const getCategoryLabel = (category: string) =>
-    SUGGESTION_TYPES.find(t => t.value === category)?.label ?? category;
+  const SUGGESTION_TYPES = [
+    { value: "improvement" as SuggestionCategory, label: t.suggestions.types.improvement },
+    { value: "initiative"  as SuggestionCategory, label: t.suggestions.types.initiative },
+    { value: "process"     as SuggestionCategory, label: t.suggestions.types.process },
+    { value: "feedback"    as SuggestionCategory, label: t.suggestions.types.feedback },
+  ];
+
+  const getCategoryLabel = (cat: string) => SUGGESTION_TYPES.find(x => x.value === cat)?.label ?? cat;
 
   const canCreate = !canManage || user.role === "manager";
 
@@ -185,9 +190,9 @@ export default function Suggestions() {
         <div>
           <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
             <Lightbulb className="w-6 h-6 text-yellow-500" />
-            المقترحات والأفكار
+            {t.suggestions.title}
           </h1>
-          <p className="text-muted-foreground mt-1">شارك أفكارك لتطوير وتحسين بيئة العمل والتخطيط</p>
+          <p className="text-muted-foreground mt-1">{t.suggestions.subtitle}</p>
         </div>
 
         {canCreate && (
@@ -198,55 +203,55 @@ export default function Suggestions() {
             <DialogTrigger asChild>
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Plus className="w-4 h-4 me-2" />
-                تقديم مقترح
+                {t.suggestions.submit}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>تقديم مقترح أو فكرة جديدة</DialogTitle>
+                <DialogTitle>{t.suggestions.submitTitle}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleCreate} className="space-y-4 mt-2">
                 <div className="space-y-1.5">
-                  <Label>نوع المقترح <span className="text-destructive">*</span></Label>
+                  <Label>{t.suggestions.typeLabel} <span className="text-destructive">*</span></Label>
                   <Select
                     value={selectedCategory}
                     onValueChange={(v) => setSelectedCategory(v as SuggestionCategory)}
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="اختر النوع" />
+                      <SelectValue placeholder={t.suggestions.typeRequired} />
                     </SelectTrigger>
                     <SelectContent>
-                      {SUGGESTION_TYPES.map(t => (
-                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                      {SUGGESTION_TYPES.map(tp => (
+                        <SelectItem key={tp.value} value={tp.value}>{tp.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
-                  <TypedFields category={selectedCategory} />
+                  <TypedFields category={selectedCategory} isEn={isEn} />
                 </div>
 
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1.5">
                     <Paperclip className="w-4 h-4" />
-                    المرفق (اختياري)
+                    {t.suggestions.attachmentOptional}
                   </Label>
                   <div className="flex items-center gap-2">
                     <label
-                      htmlFor="file-upload"
+                      htmlFor="suggestion-file-upload"
                       className="cursor-pointer flex-1 flex items-center gap-2 border border-dashed rounded-lg px-4 py-3 text-sm text-muted-foreground hover:border-primary/50 hover:bg-muted/30 transition-colors"
                     >
                       <Paperclip className="w-4 h-4 shrink-0" />
                       {attachmentName ? (
                         <span className="text-foreground font-medium truncate">{attachmentName}</span>
                       ) : (
-                        <span>انقر لاختيار ملف (PDF, Word, صورة...)</span>
+                        <span>{t.suggestions.attachmentHint}</span>
                       )}
                     </label>
                     <input
-                      id="file-upload"
+                      id="suggestion-file-upload"
                       type="file"
                       className="hidden"
                       accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
@@ -263,16 +268,16 @@ export default function Suggestions() {
                         className="text-destructive hover:text-destructive"
                         onClick={() => setAttachmentName("")}
                       >
-                        إزالة
+                        {t.suggestions.remove}
                       </Button>
                     )}
                   </div>
                 </div>
 
                 <div className="pt-2 flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t.suggestions.cancel}</Button>
                   <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? "جاري الإرسال..." : "إرسال المقترح"}
+                    {createMutation.isPending ? t.suggestions.sending : t.suggestions.send}
                   </Button>
                 </div>
               </form>
@@ -284,8 +289,8 @@ export default function Suggestions() {
       {canManage && (
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="grid grid-cols-2 w-full max-w-md mb-6">
-            <TabsTrigger value="all">كل المقترحات</TabsTrigger>
-            <TabsTrigger value="mine">مقترحاتي</TabsTrigger>
+            <TabsTrigger value="all">{t.suggestions.tabAll}</TabsTrigger>
+            <TabsTrigger value="mine">{t.suggestions.tabMine}</TabsTrigger>
           </TabsList>
         </Tabs>
       )}
@@ -298,7 +303,7 @@ export default function Suggestions() {
         ) : suggestions?.length === 0 ? (
           <div className="col-span-full text-center py-12 bg-card rounded-xl border border-dashed">
             <Lightbulb className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-muted-foreground">لا توجد مقترحات</h3>
+            <h3 className="text-lg font-medium text-muted-foreground">{t.suggestions.noSuggestions}</h3>
           </div>
         ) : (
           suggestions?.map((suggestion) => {
@@ -330,7 +335,7 @@ export default function Suggestions() {
 
                   {suggestion.feedback && (
                     <div className="mt-4 p-3 bg-secondary/10 border border-secondary/20 rounded-md">
-                      <p className="text-xs font-semibold text-secondary-foreground mb-1">رد الإدارة:</p>
+                      <p className="text-xs font-semibold text-secondary-foreground mb-1">{t.suggestions.managerReply}</p>
                       <p className="text-sm text-foreground/80">{suggestion.feedback}</p>
                     </div>
                   )}
@@ -338,41 +343,41 @@ export default function Suggestions() {
                 <CardFooter className="pt-3 flex justify-between items-center text-xs text-muted-foreground bg-muted/10 border-t mt-auto">
                   <div className="font-medium text-foreground">{suggestion.userName}</div>
                   <div className="flex items-center gap-4">
-                    <span>{format(new Date(suggestion.date), 'dd MMM yyyy', { locale: ar })}</span>
+                    <span>{format(new Date(suggestion.date), 'dd MMM yyyy', { locale: dateFnsLocale })}</span>
 
                     {canManage && (
                       <Dialog open={feedbackDialogId === suggestion.id} onOpenChange={(open) => setFeedbackDialogId(open ? suggestion.id : null)}>
                         <DialogTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-7 px-2 text-primary hover:bg-primary/10">
-                            تحديث الحالة
+                            {t.suggestions.updateStatus}
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>تحديث حالة المقترح</DialogTitle>
+                            <DialogTitle>{t.suggestions.updateStatusTitle}</DialogTitle>
                           </DialogHeader>
                           <form onSubmit={(e) => handleFeedback(e, suggestion.id)} className="space-y-4 mt-4">
                             <div className="space-y-2">
-                              <Label>الحالة</Label>
+                              <Label>{t.suggestions.statusLabel}</Label>
                               <Select name="status" required defaultValue={suggestion.status}>
-                                <SelectTrigger><SelectValue placeholder="اختر الحالة" /></SelectTrigger>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="new">جديد</SelectItem>
-                                  <SelectItem value="under_review">قيد المراجعة</SelectItem>
-                                  <SelectItem value="accepted">مقبول</SelectItem>
-                                  <SelectItem value="rejected">مرفوض</SelectItem>
-                                  <SelectItem value="implemented">منفّذ</SelectItem>
+                                  <SelectItem value="new">{t.suggestions.statuses.new}</SelectItem>
+                                  <SelectItem value="under_review">{t.suggestions.statuses.under_review}</SelectItem>
+                                  <SelectItem value="accepted">{t.suggestions.statuses.accepted}</SelectItem>
+                                  <SelectItem value="rejected">{t.suggestions.statuses.rejected}</SelectItem>
+                                  <SelectItem value="implemented">{t.suggestions.statuses.implemented}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>الرد / التغذية الراجعة</Label>
-                              <Textarea name="feedback" rows={4} defaultValue={suggestion.feedback || ""} placeholder="اكتب ردك على المقترح هنا..." />
+                              <Label>{t.suggestions.feedbackLabel}</Label>
+                              <Textarea name="feedback" rows={4} defaultValue={suggestion.feedback || ""} placeholder={t.suggestions.feedbackPlaceholder} />
                             </div>
                             <div className="pt-4 flex justify-end gap-2">
-                              <Button type="button" variant="outline" onClick={() => setFeedbackDialogId(null)}>إلغاء</Button>
+                              <Button type="button" variant="outline" onClick={() => setFeedbackDialogId(null)}>{t.suggestions.cancel}</Button>
                               <Button type="submit" disabled={updateMutation.isPending}>
-                                {updateMutation.isPending ? "جاري الحفظ..." : "حفظ التحديث"}
+                                {updateMutation.isPending ? t.suggestions.saving : t.suggestions.saveUpdate}
                               </Button>
                             </div>
                           </form>
