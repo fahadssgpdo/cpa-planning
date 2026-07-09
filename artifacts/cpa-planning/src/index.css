@@ -364,3 +364,22 @@
     inset: -1px;
   }
 }
+
+/* ── Accessibility utility classes ─────────────────────────── */
+.high-contrast {
+  --border: 231 40% 55%;
+  --card-border: 231 40% 55%;
+  --muted-foreground: 231 30% 30%;
+  --foreground: 231 60% 8%;
+}
+.dark.high-contrast {
+  --border: 231 40% 65%;
+  --card-border: 231 40% 65%;
+  --muted-foreground: 231 20% 75%;
+  --foreground: 0 0% 100%;
+}
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

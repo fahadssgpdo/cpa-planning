@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider, UserContext } from "@/hooks/use-user";
 import { LocaleProvider } from "@/hooks/locale-provider";
+import { PreferencesProvider } from "@/hooks/use-preferences";
 import { Layout } from "@/components/layout";
 
 import Dashboard from "@/pages/dashboard";
@@ -17,6 +18,7 @@ import FaqPage from "@/pages/faq";
 import Suggestions from "@/pages/suggestions";
 import AdminPage from "@/pages/admin";
 import ManualPage from "@/pages/manual";
+import ProfilePage from "@/pages/profile";
 import RegisterPage from "@/pages/register";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
@@ -55,6 +57,7 @@ function Router() {
               <Route path="/suggestions" component={Suggestions} />
               <Route path="/admin" component={AdminPage} />
               <Route path="/manual" component={ManualPage} />
+              <Route path="/profile" component={ProfilePage} />
               <Route component={NotFound} />
             </Switch>
           </Layout>
@@ -70,9 +73,11 @@ function App() {
       <TooltipProvider>
         <LocaleProvider>
           <UserProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
+            <PreferencesProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+            </PreferencesProvider>
           </UserProvider>
         </LocaleProvider>
         <Toaster />

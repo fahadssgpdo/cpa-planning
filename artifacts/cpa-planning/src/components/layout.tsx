@@ -93,13 +93,15 @@ export function Layout({ children }: { children: ReactNode }) {
               {t.switchLang}
             </Button>
 
-            {/* User info + logout */}
-            <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/30">
-              <div className="flex flex-col items-start text-start">
-                <span className="text-xs font-semibold leading-none">{user.name}</span>
-                <span className="text-[10px] text-muted-foreground mt-0.5">{roleLabel}</span>
+            {/* User info → profile link */}
+            <Link href="/profile">
+              <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/30 hover:bg-muted/60 transition-colors cursor-pointer">
+                <div className="flex flex-col items-start text-start">
+                  <span className="text-xs font-semibold leading-none">{user.name}</span>
+                  <span className="text-[10px] text-muted-foreground mt-0.5">{roleLabel}</span>
+                </div>
               </div>
-            </div>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
