@@ -62,6 +62,22 @@ export const translations = {
       reuse: "إعادة استخدام",
     },
 
+    login: {
+      title: "تسجيل الدخول",
+      subtitle: "أدخل بيانات حسابك للوصول إلى المنصة",
+      username: "اسم المستخدم",
+      usernamePlaceholder: "أدخل اسم المستخدم",
+      password: "كلمة المرور",
+      passwordPlaceholder: "أدخل كلمة المرور",
+      submit: "دخول",
+      submitting: "جاري التحقق...",
+      noAccount: "ليس لديك حساب؟",
+      registerLink: "سجّل الآن",
+      errorInvalid: "اسم المستخدم أو كلمة المرور غير صحيحة.",
+      errorInactive: "هذا الحساب غير نشط. يرجى التواصل مع مسؤول النظام.",
+      errorGeneric: "حدث خطأ، يرجى المحاولة مجدداً.",
+    },
+
     register: {
       title: "تسجيل موظف جديد",
       subtitle: "أنشئ حسابك للوصول إلى منصة دائرة التخطيط",
@@ -539,6 +555,22 @@ export const translations = {
       archive: "Archive",
       reactivate: "Reactivate",
       reuse: "Reuse",
+    },
+
+    login: {
+      title: "Sign In",
+      subtitle: "Enter your credentials to access the platform",
+      username: "Username",
+      usernamePlaceholder: "Enter your username",
+      password: "Password",
+      passwordPlaceholder: "Enter your password",
+      submit: "Sign In",
+      submitting: "Verifying...",
+      noAccount: "Don't have an account?",
+      registerLink: "Register now",
+      errorInvalid: "Incorrect username or password.",
+      errorInactive: "This account is inactive. Please contact the system administrator.",
+      errorGeneric: "An error occurred, please try again.",
     },
 
     register: {

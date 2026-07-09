@@ -95,7 +95,7 @@ function emptyEdit(): Omit<EditState, "id"> {
 }
 
 export default function AdminPage() {
-  const { isAdmin, user, setUser } = useUser();
+  const { isAdmin, user, logout } = useUser();
   const { t, lang } = useLocale();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -231,7 +231,6 @@ export default function AdminPage() {
 
   // ── Access guard (AFTER all hooks) ──────────────────────────────────────
   if (!isAdmin) {
-    const adminUser = USERS.find((u) => u.role === "admin")!;
     return (
       <div className="text-center py-20 max-w-md mx-auto">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-destructive/10 mb-5">
@@ -245,20 +244,9 @@ export default function AdminPage() {
             ? `هذه اللوحة مخصصة لمسؤولي النظام فقط. حسابك الحالي (${user.name}) لا يملك صلاحية الوصول.`
             : `This panel is for system administrators only. Your current account (${user.name}) does not have access.`}
         </p>
-        <div className="bg-muted/40 border rounded-xl p-5 text-start space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            {lang === "ar" ? "تسجيل الدخول كمسؤول للمتابعة:" : "Sign in as admin to continue:"}
-          </p>
-          <div className="flex items-center justify-between gap-3 bg-card border rounded-lg px-4 py-3">
-            <div>
-              <p className="font-semibold text-sm">{adminUser.name}</p>
-              <p className="text-xs text-muted-foreground">{adminUser.designation}</p>
-            </div>
-            <Button size="sm" onClick={() => setUser(adminUser)}>
-              {lang === "ar" ? "تبديل" : "Switch"}
-            </Button>
-          </div>
-        </div>
+        <Button variant="outline" onClick={() => logout()}>
+          {lang === "ar" ? "تسجيل خروج والدخول بحساب آخر" : "Sign out and log in with another account"}
+        </Button>
       </div>
     );
   }

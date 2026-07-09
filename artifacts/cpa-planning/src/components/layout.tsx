@@ -1,25 +1,24 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { useUser, USERS } from "@/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import {
   LayoutDashboard, Megaphone, MessagesSquare,
   HelpCircle, BookOpen, MessageCircleQuestion,
-  Lightbulb, Users, ChevronDown, BookMarked, ShieldCheck, Globe, UserPlus
+  Lightbulb, BookMarked, ShieldCheck, Globe, UserPlus, LogOut
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
-  const { user, setUser, isAdmin } = useUser();
+  const ctx = useUser();
   const { t, lang, setLang } = useLocale();
+
+  // During HMR transitions user can briefly be null before AuthGuard redirects
+  if (!ctx.user) return null;
+
+  const { user, logout, isAdmin } = ctx;
 
   const NAV_ITEMS = [
     { href: "/", label: t.nav.dashboard, icon: LayoutDashboard },
@@ -98,34 +97,23 @@ export function Layout({ children }: { children: ReactNode }) {
               {t.switchLang}
             </Button>
 
-            {/* User switcher */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2 h-9">
-                  <div className="flex flex-col items-start text-start">
-                    <span className="text-xs font-semibold leading-none">{user.name}</span>
-                    <span className="text-[10px] text-muted-foreground mt-0.5">{roleLabel}</span>
-                  </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                {USERS.map((u) => (
-                  <DropdownMenuItem
-                    key={u.id}
-                    onClick={() => setUser(u)}
-                    className={user.id === u.id ? "bg-accent/10 text-accent font-medium" : ""}
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-sm">{u.name}</span>
-                      <span className="text-xs opacity-60">
-                        {t.roles[u.role as keyof typeof t.roles]}
-                      </span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* User info + logout */}
+            <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/30">
+              <div className="flex flex-col items-start text-start">
+                <span className="text-xs font-semibold leading-none">{user.name}</span>
+                <span className="text-[10px] text-muted-foreground mt-0.5">{roleLabel}</span>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="gap-1.5 text-muted-foreground hover:text-destructive text-xs"
+              title={lang === "ar" ? "تسجيل الخروج" : "Sign out"}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{lang === "ar" ? "خروج" : "Sign out"}</span>
+            </Button>
           </div>
         </header>
 

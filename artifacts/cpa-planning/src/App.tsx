@@ -1,8 +1,9 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useContext } from "react";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { UserProvider } from "@/hooks/use-user";
+import { UserProvider, UserContext } from "@/hooks/use-user";
 import { LocaleProvider } from "@/hooks/locale-provider";
 import { Layout } from "@/components/layout";
 
@@ -17,6 +18,7 @@ import Suggestions from "@/pages/suggestions";
 import AdminPage from "@/pages/admin";
 import ManualPage from "@/pages/manual";
 import RegisterPage from "@/pages/register";
+import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -28,26 +30,35 @@ const queryClient = new QueryClient({
   },
 });
 
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const ctx = useContext(UserContext)!;
+  if (!ctx.user) return <Redirect to="/login" />;
+  return <>{children}</>;
+}
+
 function Router() {
   return (
     <Switch>
+      <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route>
-        <Layout>
-          <Switch>
-            <Route path="/" component={Dashboard} />
-            <Route path="/announcements" component={Announcements} />
-            <Route path="/discussions" component={Discussions} />
-            <Route path="/discussions/:id" component={DiscussionDetail} />
-            <Route path="/inquiries" component={Inquiries} />
-            <Route path="/knowledge" component={KnowledgeBase} />
-            <Route path="/faq" component={FaqPage} />
-            <Route path="/suggestions" component={Suggestions} />
-            <Route path="/admin" component={AdminPage} />
-            <Route path="/manual" component={ManualPage} />
-            <Route component={NotFound} />
-          </Switch>
-        </Layout>
+        <AuthGuard>
+          <Layout>
+            <Switch>
+              <Route path="/" component={Dashboard} />
+              <Route path="/announcements" component={Announcements} />
+              <Route path="/discussions" component={Discussions} />
+              <Route path="/discussions/:id" component={DiscussionDetail} />
+              <Route path="/inquiries" component={Inquiries} />
+              <Route path="/knowledge" component={KnowledgeBase} />
+              <Route path="/faq" component={FaqPage} />
+              <Route path="/suggestions" component={Suggestions} />
+              <Route path="/admin" component={AdminPage} />
+              <Route path="/manual" component={ManualPage} />
+              <Route component={NotFound} />
+            </Switch>
+          </Layout>
+        </AuthGuard>
       </Route>
     </Switch>
   );

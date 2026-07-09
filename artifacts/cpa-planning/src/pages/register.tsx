@@ -180,8 +180,8 @@ export default function RegisterPage() {
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
             <h2 className="text-2xl font-bold text-primary">{lang === "ar" ? "تم التسجيل بنجاح!" : "Registration Successful!"}</h2>
             <p className="text-muted-foreground">{r.success}</p>
-            <Link href="/">
-              <Button className="w-full mt-4">{lang === "ar" ? "الذهاب للرئيسية" : "Go to Home"}</Button>
+            <Link href="/login">
+              <Button className="w-full mt-4">{lang === "ar" ? "تسجيل الدخول" : "Sign In"}</Button>
             </Link>
           </div>
         </div>

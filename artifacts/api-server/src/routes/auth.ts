@@ -80,7 +80,50 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     nameAr: user.nameAr,
     username: user.username,
     role: user.role,
+    designation: user.designation,
     createdAt: user.createdAt.toISOString(),
+  });
+});
+
+router.post("/auth/login", async (req, res): Promise<void> => {
+  const { username, password } = req.body as Record<string, unknown>;
+
+  if (typeof username !== "string" || !username.trim() || typeof password !== "string" || !password) {
+    res.status(400).json({ error: "username and password are required" });
+    return;
+  }
+
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.username, username.trim()))
+    .limit(1);
+
+  if (!user) {
+    res.status(401).json({ error: "invalid_credentials" });
+    return;
+  }
+
+  if (!user.active) {
+    res.status(403).json({ error: "account_inactive" });
+    return;
+  }
+
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) {
+    res.status(401).json({ error: "invalid_credentials" });
+    return;
+  }
+
+  res.json({
+    id: user.id,
+    nameAr: user.nameAr,
+    nameEn: user.nameEn,
+    username: user.username,
+    role: user.role,
+    designation: user.designation,
+    directorate: user.directorate,
+    section: user.section,
   });
 });
 
