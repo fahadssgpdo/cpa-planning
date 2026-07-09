@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { isNotNull, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db, usersTable } from "@workspace/db";
 
@@ -8,24 +8,10 @@ const router: IRouter = Router();
 /**
  * POST /api/internal/bootstrap
  *
- * One-time seed of demo usernames + passwords.
- * Self-disabling: returns 409 the moment any user already has a password set.
+ * Idempotent seed of demo usernames + passwords.
+ * Always overwrites — safe to call multiple times.
  */
 router.post("/internal/bootstrap", async (req, res): Promise<void> => {
-  const alreadySeeded = await db
-    .select({ id: usersTable.id })
-    .from(usersTable)
-    .where(isNotNull(usersTable.passwordHash))
-    .limit(1);
-
-  if (alreadySeeded.length > 0) {
-    res.status(409).json({
-      error: "already_bootstrapped",
-      message: "Users already have passwords — bootstrap is disabled.",
-    });
-    return;
-  }
-
   const seeds = [
     { id: 1, username: "salem.harthi",   password: "Salem@1234"  },
     { id: 2, username: "mariam.balushi", password: "Mariam@1234" },
@@ -45,7 +31,7 @@ router.post("/internal/bootstrap", async (req, res): Promise<void> => {
         .set({ username: seed.username, passwordHash: hash })
         .where(eq(usersTable.id, seed.id));
       results.push({ id: seed.id, username: seed.username, ok: true });
-    } catch {
+    } catch (err) {
       results.push({ id: seed.id, username: seed.username, ok: false });
     }
   }

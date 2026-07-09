@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db, usersTable } from "@workspace/db";
 
@@ -96,7 +96,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   const [user] = await db
     .select()
     .from(usersTable)
-    .where(eq(usersTable.username, username.trim()))
+    .where(sql`trim(${usersTable.username}) = ${username.trim()}`)
     .limit(1);
 
   if (!user) {
