@@ -31,6 +31,8 @@ export interface User {
   /** @nullable */
   directorate?: string | null;
   /** @nullable */
+  department?: string | null;
+  /** @nullable */
   section?: string | null;
   role: UserRole;
   active: boolean;
@@ -58,6 +60,8 @@ export interface UserInput {
   /** @nullable */
   directorate?: string | null;
   /** @nullable */
+  department?: string | null;
+  /** @nullable */
   section?: string | null;
   role: UserInputRole;
 }
@@ -82,6 +86,8 @@ export interface UserUpdate {
   designation?: string | null;
   /** @nullable */
   directorate?: string | null;
+  /** @nullable */
+  department?: string | null;
   /** @nullable */
   section?: string | null;
   role?: UserUpdateRole;

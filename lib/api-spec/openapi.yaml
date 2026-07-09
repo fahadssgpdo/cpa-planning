@@ -559,6 +559,8 @@ components:
           type: ["string", "null"]
         directorate:
           type: ["string", "null"]
+        department:
+          type: ["string", "null"]
         section:
           type: ["string", "null"]
         role:
@@ -583,6 +585,8 @@ components:
           type: ["string", "null"]
         directorate:
           type: ["string", "null"]
+        department:
+          type: ["string", "null"]
         section:
           type: ["string", "null"]
         role:
@@ -601,6 +605,8 @@ components:
         designation:
           type: ["string", "null"]
         directorate:
+          type: ["string", "null"]
+        department:
           type: ["string", "null"]
         section:
           type: ["string", "null"]

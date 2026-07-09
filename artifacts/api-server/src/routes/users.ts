@@ -19,6 +19,7 @@ const mapUser = (u: typeof usersTable.$inferSelect) => ({
   username: u.username ?? null,
   designation: u.designation ?? null,
   directorate: u.directorate ?? null,
+  department: u.department ?? null,
   section: u.section ?? null,
   role: u.role,
   active: u.active,
@@ -44,6 +45,7 @@ router.post("/users", async (req, res): Promise<void> => {
       username: parsed.data.username ?? null,
       designation: parsed.data.designation ?? null,
       directorate: parsed.data.directorate ?? null,
+      department: parsed.data.department ?? null,
       section: parsed.data.section ?? null,
       role: parsed.data.role,
       active: true,
@@ -70,6 +72,7 @@ router.patch("/users/:id", async (req, res): Promise<void> => {
   if (parsed.data.username !== undefined) updateData.username = parsed.data.username;
   if (parsed.data.designation !== undefined) updateData.designation = parsed.data.designation;
   if (parsed.data.directorate !== undefined) updateData.directorate = parsed.data.directorate;
+  if (parsed.data.department !== undefined) updateData.department = parsed.data.department;
   if (parsed.data.section !== undefined) updateData.section = parsed.data.section;
   if (parsed.data.role !== undefined) updateData.role = parsed.data.role;
   if (parsed.data.active !== undefined) updateData.active = parsed.data.active;

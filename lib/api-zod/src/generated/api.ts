@@ -27,6 +27,7 @@ export const ListUsersResponseItem = zod.object({
   "username": zod.string().nullish(),
   "designation": zod.string().nullish(),
   "directorate": zod.string().nullish(),
+  "department": zod.string().nullish(),
   "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']),
   "active": zod.boolean(),
@@ -44,6 +45,7 @@ export const CreateUserBody = zod.object({
   "username": zod.string().nullish(),
   "designation": zod.string().nullish(),
   "directorate": zod.string().nullish(),
+  "department": zod.string().nullish(),
   "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin'])
 })
@@ -55,6 +57,7 @@ export const CreateUserResponse = zod.object({
   "username": zod.string().nullish(),
   "designation": zod.string().nullish(),
   "directorate": zod.string().nullish(),
+  "department": zod.string().nullish(),
   "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']),
   "active": zod.boolean(),
@@ -75,6 +78,7 @@ export const UpdateUserBody = zod.object({
   "username": zod.string().nullish(),
   "designation": zod.string().nullish(),
   "directorate": zod.string().nullish(),
+  "department": zod.string().nullish(),
   "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']).optional(),
   "active": zod.boolean().optional()
@@ -87,6 +91,7 @@ export const UpdateUserResponse = zod.object({
   "username": zod.string().nullish(),
   "designation": zod.string().nullish(),
   "directorate": zod.string().nullish(),
+  "department": zod.string().nullish(),
   "section": zod.string().nullish(),
   "role": zod.enum(['employee', 'officer', 'manager', 'admin']),
   "active": zod.boolean(),

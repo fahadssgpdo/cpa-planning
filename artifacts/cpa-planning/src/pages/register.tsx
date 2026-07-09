@@ -42,6 +42,20 @@ const DIRECTORATES = [
   "inspection",
 ] as const;
 
+const DEPARTMENTS = [
+  "strategicPlanning",
+  "performanceDev",
+  "riskGovernance",
+  "legalAffairs",
+  "contracts",
+  "hr",
+  "finance",
+  "media",
+  "itSystems",
+  "consumerServices",
+  "inspectionOps",
+] as const;
+
 const SECTIONS = [
   "strategicPlanning",
   "performanceMonitoring",
@@ -69,6 +83,7 @@ type FormState = {
   confirmPassword: string;
   designation: string;
   directorate: string;
+  department: string;
   section: string;
 };
 
@@ -84,6 +99,7 @@ export default function RegisterPage() {
     confirmPassword: "",
     designation: "",
     directorate: "",
+    department: "",
     section: "",
   });
 
@@ -108,6 +124,7 @@ export default function RegisterPage() {
     if (form.password !== form.confirmPassword) errs.confirmPassword = r.errorPasswordMismatch;
     if (!form.designation) errs.designation = lang === "ar" ? "مطلوب" : "Required";
     if (!form.directorate) errs.directorate = lang === "ar" ? "مطلوب" : "Required";
+    if (!form.department) errs.department = lang === "ar" ? "مطلوب" : "Required";
     if (!form.section) errs.section = lang === "ar" ? "مطلوب" : "Required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -129,6 +146,7 @@ export default function RegisterPage() {
           password: form.password,
           designation: form.designation,
           directorate: form.directorate,
+          department: form.department,
           section: form.section,
         }),
       });
@@ -323,22 +341,39 @@ export default function RegisterPage() {
                 {errors.designation && <p className="text-xs text-destructive">{errors.designation}</p>}
               </div>
 
+              <div className="space-y-1.5">
+                <Label>{r.directorate} <span className="text-destructive">*</span></Label>
+                <Select value={form.directorate} onValueChange={set("directorate")}>
+                  <SelectTrigger className={errors.directorate ? "border-destructive" : ""}>
+                    <SelectValue placeholder={r.directoratePlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DIRECTORATES.map((key) => (
+                      <SelectItem key={key} value={r.directorates[key]}>
+                        {r.directorates[key]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.directorate && <p className="text-xs text-destructive">{errors.directorate}</p>}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>{r.directorate} <span className="text-destructive">*</span></Label>
-                  <Select value={form.directorate} onValueChange={set("directorate")}>
-                    <SelectTrigger className={errors.directorate ? "border-destructive" : ""}>
-                      <SelectValue placeholder={r.directoratePlaceholder} />
+                  <Label>{r.department} <span className="text-destructive">*</span></Label>
+                  <Select value={form.department} onValueChange={set("department")}>
+                    <SelectTrigger className={errors.department ? "border-destructive" : ""}>
+                      <SelectValue placeholder={r.departmentPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {DIRECTORATES.map((key) => (
-                        <SelectItem key={key} value={r.directorates[key]}>
-                          {r.directorates[key]}
+                      {DEPARTMENTS.map((key) => (
+                        <SelectItem key={key} value={r.departments[key]}>
+                          {r.departments[key]}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.directorate && <p className="text-xs text-destructive">{errors.directorate}</p>}
+                  {errors.department && <p className="text-xs text-destructive">{errors.department}</p>}
                 </div>
 
                 <div className="space-y-1.5">

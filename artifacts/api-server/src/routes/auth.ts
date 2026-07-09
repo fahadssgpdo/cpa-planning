@@ -6,7 +6,7 @@ import { db, usersTable } from "@workspace/db";
 const router: IRouter = Router();
 
 router.post("/auth/register", async (req, res): Promise<void> => {
-  const { nameAr, nameEn, username, password, designation, directorate, section } =
+  const { nameAr, nameEn, username, password, designation, directorate, department, section } =
     req.body as Record<string, unknown>;
 
   if (
@@ -45,6 +45,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       passwordHash,
       designation: typeof designation === "string" && designation ? designation : null,
       directorate: typeof directorate === "string" && directorate ? directorate : null,
+      department: typeof department === "string" && department ? department : null,
       section: typeof section === "string" && section ? section : null,
       role: "employee",
       active: true,
