@@ -98,6 +98,7 @@ export default function Suggestions() {
   const [tab, setTab] = useState(canManage ? "all" : "mine");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [feedbackDialogId, setFeedbackDialogId] = useState<number | null>(null);
+  const [viewId, setViewId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<SuggestionCategory>("improvement");
   const [attachmentName, setAttachmentName] = useState<string>("");
 
@@ -311,7 +312,7 @@ export default function Suggestions() {
             const StatusIcon = statusInfo.icon;
 
             return (
-              <Card key={suggestion.id} className="flex flex-col h-full hover:shadow-md transition-shadow">
+              <Card key={suggestion.id} className="flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer group" onClick={() => setViewId(suggestion.id)}>
                 <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
                   <div className="flex justify-between items-start">
                     <Badge variant="outline" className="bg-background">
@@ -348,7 +349,7 @@ export default function Suggestions() {
                     {canManage && (
                       <Dialog open={feedbackDialogId === suggestion.id} onOpenChange={(open) => setFeedbackDialogId(open ? suggestion.id : null)}>
                         <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-primary hover:bg-primary/10">
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-primary hover:bg-primary/10" onClick={(e) => e.stopPropagation()}>
                             {t.suggestions.updateStatus}
                           </Button>
                         </DialogTrigger>
@@ -391,6 +392,84 @@ export default function Suggestions() {
           })
         )}
       </div>
+
+      {/* ── View Suggestion Detail Dialog ── */}
+      {(() => {
+        const sg = (suggestions ?? []).find((s) => s.id === viewId);
+        if (!sg) return (
+          <Dialog open={viewId !== null} onOpenChange={(open) => !open && setViewId(null)}>
+            <DialogContent />
+          </Dialog>
+        );
+        const statusInfo = getStatusInfo(sg.status);
+        const StatusIcon = statusInfo.icon;
+        return (
+          <Dialog open={viewId !== null} onOpenChange={(open) => !open && setViewId(null)}>
+            <DialogContent className="sm:max-w-[580px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+              {/* Header */}
+              <div className="p-5 border-b bg-muted/20 shrink-0">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <Badge variant="outline" className="bg-background">
+                    {getCategoryLabel(sg.category)}
+                  </Badge>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusInfo.color}`}>
+                    <StatusIcon className="w-3.5 h-3.5" />
+                    {statusInfo.label}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">{sg.userName}</span>
+                  <span>{format(new Date(sg.date), "dd MMM yyyy", { locale: dateFnsLocale })}</span>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                    {isEn ? "Suggestion" : "المقترح"}
+                  </p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed bg-muted/30 rounded-lg p-4 border">
+                    {sg.text}
+                  </p>
+                </div>
+
+                {sg.attachment && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border rounded-md px-3 py-2">
+                    <Paperclip className="w-3.5 h-3.5 shrink-0 text-primary" />
+                    <span className="truncate">{sg.attachment}</span>
+                  </div>
+                )}
+
+                {sg.feedback && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-secondary-foreground mb-2">
+                      {t.suggestions.managerReply}
+                    </p>
+                    <div className="bg-secondary/5 border border-secondary/20 rounded-lg p-4">
+                      <p className="text-sm text-foreground leading-relaxed">{sg.feedback}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              {canManage && (
+                <div className="p-4 border-t bg-background shrink-0 flex justify-end">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => { setViewId(null); setFeedbackDialogId(sg.id); }}
+                  >
+                    <Settings className="w-4 h-4 me-2" />
+                    {t.suggestions.updateStatus}
+                  </Button>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
     </div>
   );
 }

@@ -38,6 +38,7 @@ export default function Inquiries() {
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [viewId, setViewId] = useState<number | null>(null);
   const [replyOpenId, setReplyOpenId] = useState<number | null>(null);
   const [editReplyId, setEditReplyId] = useState<number | null>(null);
   const [editReplyText, setEditReplyText] = useState("");
@@ -232,8 +233,9 @@ export default function Inquiries() {
           filtered.map((inq) => (
             <Card
               key={inq.id}
-              className="overflow-hidden border-s-4"
+              className="overflow-hidden border-s-4 cursor-pointer group hover:shadow-md transition-shadow"
               style={{ borderInlineStartColor: statusColor(inq.status) }}
+              onClick={() => setViewId(inq.id)}
             >
               <div className="flex flex-col md:flex-row">
                 {/* Question side */}
@@ -270,7 +272,8 @@ export default function Inquiries() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setEditReplyId(inq.id);
                               setEditReplyText(inq.response ?? "");
                             }}
@@ -292,7 +295,7 @@ export default function Inquiries() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setEditReplyId(null)}
+                              onClick={(e) => { e.stopPropagation(); setEditReplyId(null); }}
                             >
                               <X className="w-3.5 h-3.5 me-1" />
                               {locale === "ar" ? "إلغاء" : "Cancel"}
@@ -300,7 +303,7 @@ export default function Inquiries() {
                             <Button
                               size="sm"
                               disabled={updateMutation.isPending}
-                              onClick={() => handleEditReply(inq.id)}
+                              onClick={(e) => { e.stopPropagation(); handleEditReply(inq.id); }}
                             >
                               {locale === "ar" ? "حفظ" : "Save"}
                             </Button>
@@ -318,7 +321,7 @@ export default function Inquiries() {
                             variant="ghost"
                             size="sm"
                             className="h-7 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
-                            onClick={() => handleClose(inq.id)}
+                            onClick={(e) => { e.stopPropagation(); handleClose(inq.id); }}
                             disabled={updateMutation.isPending}
                           >
                             <CheckCircle2 className="w-3.5 h-3.5 me-1" />
@@ -332,7 +335,7 @@ export default function Inquiries() {
                       <Button
                         variant="outline"
                         className="w-full border-secondary text-secondary-foreground hover:bg-secondary/10"
-                        onClick={() => setReplyOpenId(inq.id)}
+                        onClick={(e) => { e.stopPropagation(); setReplyOpenId(inq.id); }}
                       >
                         <Send className="w-4 h-4 me-2 rotate-180" />
                         {locale === "ar" ? "إضافة رد" : "Add Reply"}
@@ -349,6 +352,96 @@ export default function Inquiries() {
           ))
         )}
       </div>
+
+      {/* ── View Inquiry Detail Dialog ── */}
+      {(() => {
+        const inq = (inquiries ?? []).find((i) => i.id === viewId);
+        return (
+          <Dialog open={viewId !== null} onOpenChange={(open) => !open && setViewId(null)}>
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+              {inq && (
+                <>
+                  {/* Header */}
+                  <div className="p-5 border-b bg-muted/30 shrink-0"
+                       style={{ borderInlineStartWidth: 4, borderInlineStartStyle: "solid", borderInlineStartColor: statusColor(inq.status) }}>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      {statusBadge(inq.status)}
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(inq.date), "dd MMM yyyy", { locale: dateFnsLocale })}
+                      </span>
+                    </div>
+                    <h2 className="text-lg font-bold leading-snug text-primary mb-1">{inq.subject}</h2>
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-semibold text-foreground">{inq.userName}</span>
+                      {inq.userDesignation && <span className="ms-2">· {inq.userDesignation}</span>}
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <ScrollArea className="flex-1 p-5">
+                    <div className="space-y-5">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                          {locale === "ar" ? "تفاصيل الاستفسار" : "Inquiry Details"}
+                        </p>
+                        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed bg-muted/30 rounded-lg p-4 border">
+                          {inq.details}
+                        </p>
+                      </div>
+
+                      {inq.response ? (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-secondary-foreground mb-2">
+                            {locale === "ar" ? "رد دائرة التخطيط" : "Planning Dept. Reply"}
+                          </p>
+                          <div className="bg-secondary/5 border border-secondary/20 rounded-lg p-4">
+                            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{inq.response}</p>
+                            {inq.responderName && (
+                              <p className="text-xs text-muted-foreground mt-3 pt-2 border-t">
+                                {locale === "ar" ? `رد بواسطة: ${inq.responderName}` : `Replied by: ${inq.responderName}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-sm text-muted-foreground italic bg-muted/20 rounded-lg border border-dashed">
+                          {locale === "ar" ? "في انتظار الرد من المختصين..." : "Awaiting response from specialists..."}
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+
+                  {/* Footer actions */}
+                  {(canManage || canCloseInquiry) && inq.status !== "resolved" && (
+                    <div className="p-4 border-t bg-background shrink-0 flex gap-2 justify-end flex-wrap">
+                      {canManage && !inq.response && (
+                        <Button
+                          variant="default"
+                          onClick={() => { setViewId(null); setReplyOpenId(inq.id); }}
+                        >
+                          <Send className="w-4 h-4 me-2 rotate-180" />
+                          {locale === "ar" ? "إضافة رد" : "Add Reply"}
+                        </Button>
+                      )}
+                      {canCloseInquiry && (
+                        <Button
+                          variant="outline"
+                          className="text-teal-600 border-teal-200 hover:bg-teal-50"
+                          onClick={() => { setViewId(null); handleClose(inq.id); }}
+                          disabled={updateMutation.isPending}
+                        >
+                          <CheckCircle2 className="w-4 h-4 me-1.5" />
+                          {locale === "ar" ? "إغلاق الاستفسار" : "Close Inquiry"}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
 
       {/* ── Create Inquiry Dialog ── */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
