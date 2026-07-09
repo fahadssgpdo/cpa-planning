@@ -89,6 +89,7 @@ export const translations = {
       errorUsernameTaken: "اسم المستخدم مستخدم بالفعل، يرجى اختيار آخر.",
       errorPasswordMismatch: "كلمتا المرور غير متطابقتين.",
       errorPasswordShort: "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+      errorAccountLimit: "لقد وصلت إلى الحد الأقصى لعدد الحسابات المسموح بها لهذا الموظف. يُسمح بحسابين فقط لمنسوبي دائرة التخطيط والمسؤولين.",
       backToLogin: "← العودة لصفحة الدخول",
       alreadyHaveAccount: "لديك حساب بالفعل؟",
       designations: {
@@ -567,6 +568,7 @@ export const translations = {
       errorUsernameTaken: "Username is already taken. Please choose another.",
       errorPasswordMismatch: "Passwords do not match.",
       errorPasswordShort: "Password must be at least 8 characters.",
+      errorAccountLimit: "Account limit reached for this employee. Only Planning Department staff and administrators may hold up to 2 accounts.",
       backToLogin: "← Back to Login",
       alreadyHaveAccount: "Already have an account?",
       designations: {

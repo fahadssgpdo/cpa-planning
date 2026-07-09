@@ -152,7 +152,13 @@ export default function RegisterPage() {
       });
 
       if (res.status === 409) {
-        setErrors({ username: r.errorUsernameTaken });
+        const body = await res.json().catch(() => ({}));
+        const errCode = (body as { error?: string }).error;
+        if (errCode === "account_limit_reached") {
+          setErrors({ form: r.errorAccountLimit });
+        } else {
+          setErrors({ username: r.errorUsernameTaken });
+        }
         return;
       }
       if (!res.ok) {

@@ -34,6 +34,29 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
+  // Enforce per-person account limits keyed on Arabic name.
+  // Admins and planning-directorate staff may hold up to 2 accounts; everyone else max 1.
+  const sameNameUsers = await db
+    .select({ role: usersTable.role, directorate: usersTable.directorate })
+    .from(usersTable)
+    .where(eq(usersTable.nameAr, nameAr.trim()));
+
+  if (sameNameUsers.length > 0) {
+    const isPlanning = (d: string | null) =>
+      !!d && (d.includes("تخطيط") || d.toLowerCase().includes("planning"));
+
+    const existingHasAdminOrPlanning = sameNameUsers.some(
+      (u) => u.role === "admin" || isPlanning(u.directorate)
+    );
+    const newIsPlanning = typeof directorate === "string" && isPlanning(directorate);
+    const maxAccounts = existingHasAdminOrPlanning || newIsPlanning ? 2 : 1;
+
+    if (sameNameUsers.length >= maxAccounts) {
+      res.status(409).json({ error: "account_limit_reached" });
+      return;
+    }
+  }
+
   const passwordHash = await bcrypt.hash(password, 12);
 
   const [user] = await db
