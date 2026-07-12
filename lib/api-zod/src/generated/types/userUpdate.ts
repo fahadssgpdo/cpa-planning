@@ -11,6 +11,16 @@ export interface UserUpdate {
   nameAr?: string;
   /** @nullable */
   nameEn?: string | null;
+  /** @nullable */
+  username?: string | null;
+  /** @nullable */
+  designation?: string | null;
+  /** @nullable */
+  directorate?: string | null;
+  /** @nullable */
+  department?: string | null;
+  /** @nullable */
+  section?: string | null;
   role?: UserUpdateRole;
   active?: boolean;
 }

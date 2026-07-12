@@ -222,6 +222,21 @@ export interface CommentInput {
   text: string;
 }
 
+export type InquiryCategory = typeof InquiryCategory[keyof typeof InquiryCategory];
+
+
+export const InquiryCategory = {
+  strategic_planning: 'strategic_planning',
+  annual_plan: 'annual_plan',
+  projects: 'projects',
+  kpis: 'kpis',
+  monitoring: 'monitoring',
+  performance_platform: 'performance_platform',
+  templates: 'templates',
+  policies: 'policies',
+  other: 'other',
+} as const;
+
 export type InquiryStatus = typeof InquiryStatus[keyof typeof InquiryStatus];
 
 
@@ -235,8 +250,11 @@ export interface Inquiry {
   id: number;
   userId: number;
   userName: string;
+  /** @nullable */
+  userDesignation?: string | null;
   subject: string;
   details: string;
+  category?: InquiryCategory;
   status: InquiryStatus;
   date: string;
   /** @nullable */
@@ -245,14 +263,13 @@ export interface Inquiry {
   responderId?: number | null;
   /** @nullable */
   responderName?: string | null;
-  /** @nullable */
-  userDesignation?: string | null;
 }
 
 export interface InquiryInput {
   userId: number;
   subject: string;
   details: string;
+  category?: InquiryCategory;
 }
 
 export type InquiryUpdateStatus = typeof InquiryUpdateStatus[keyof typeof InquiryUpdateStatus];
@@ -336,6 +353,9 @@ export const SuggestionCategory = {
   initiative: 'initiative',
   process: 'process',
   feedback: 'feedback',
+  projects_initiatives: 'projects_initiatives',
+  service_dev: 'service_dev',
+  process_improvement: 'process_improvement',
 } as const;
 
 export type SuggestionStatus = typeof SuggestionStatus[keyof typeof SuggestionStatus];
@@ -344,15 +364,20 @@ export type SuggestionStatus = typeof SuggestionStatus[keyof typeof SuggestionSt
 export const SuggestionStatus = {
   new: 'new',
   under_review: 'under_review',
+  needs_info: 'needs_info',
   accepted: 'accepted',
   rejected: 'rejected',
+  in_progress: 'in_progress',
   implemented: 'implemented',
+  completed: 'completed',
 } as const;
 
 export interface Suggestion {
   id: number;
   userId: number;
   userName: string;
+  /** @nullable */
+  userDesignation?: string | null;
   category: SuggestionCategory;
   text: string;
   status: SuggestionStatus;
@@ -363,37 +388,34 @@ export interface Suggestion {
   attachment?: string | null;
 }
 
-export type SuggestionInputCategory = typeof SuggestionInputCategory[keyof typeof SuggestionInputCategory];
-
-
-export const SuggestionInputCategory = {
-  improvement: 'improvement',
-  initiative: 'initiative',
-  process: 'process',
-  feedback: 'feedback',
-} as const;
-
 export interface SuggestionInput {
   userId: number;
-  category: SuggestionInputCategory;
+  category: SuggestionCategory;
   text: string;
   attachment?: string;
 }
 
-export type SuggestionUpdateStatus = typeof SuggestionUpdateStatus[keyof typeof SuggestionUpdateStatus];
-
-
-export const SuggestionUpdateStatus = {
-  new: 'new',
-  under_review: 'under_review',
-  accepted: 'accepted',
-  rejected: 'rejected',
-  implemented: 'implemented',
-} as const;
-
 export interface SuggestionUpdate {
-  status?: SuggestionUpdateStatus;
+  status?: SuggestionStatus;
   feedback?: string;
+}
+
+export interface GlossaryEntry {
+  id: number;
+  termAr: string;
+  /** @nullable */
+  termEn?: string | null;
+  definition: string;
+  /** @nullable */
+  examples?: string | null;
+  date: string;
+}
+
+export interface GlossaryInput {
+  termAr: string;
+  termEn?: string;
+  definition: string;
+  examples?: string;
 }
 
 export interface DashboardStats {

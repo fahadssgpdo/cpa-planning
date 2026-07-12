@@ -5,9 +5,10 @@
  * CPA Planning Department Interactive Platform API
  * OpenAPI spec version: 0.1.0
  */
-import type { SuggestionStatus } from './suggestionStatus';
 
-export interface SuggestionUpdate {
-  status?: SuggestionStatus;
-  feedback?: string;
+export interface GlossaryInput {
+  termAr: string;
+  termEn?: string;
+  definition: string;
+  examples?: string;
 }

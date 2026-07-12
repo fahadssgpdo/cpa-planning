@@ -8,6 +8,7 @@ export const inquiriesTable = pgTable("inquiries", {
   userId: integer("user_id").notNull().references(() => usersTable.id),
   subject: text("subject").notNull(),
   details: text("details").notNull(),
+  category: text("category").default("other"),
   status: text("status").notNull().default("open"),
   response: text("response"),
   responderId: integer("responder_id").references(() => usersTable.id),

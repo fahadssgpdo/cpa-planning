@@ -23,11 +23,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lightbulb, Plus, CheckCircle, XCircle, Clock, Settings, FileText, Paperclip } from "lucide-react";
+import { Lightbulb, Plus, CheckCircle, XCircle, Clock, Settings, FileText, Paperclip, Info, Play, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type FieldDef = { name: string; labelAr: string; labelEn: string; type: "text" | "textarea"; required?: boolean; placeholderAr?: string; placeholderEn?: string };
+type FieldDef = {
+  name: string;
+  labelAr: string;
+  labelEn: string;
+  type: "text" | "textarea";
+  required?: boolean;
+  placeholderAr?: string;
+  placeholderEn?: string;
+};
 
 const TYPE_FIELDS: Record<SuggestionCategory, FieldDef[]> = {
   improvement: [
@@ -50,6 +58,37 @@ const TYPE_FIELDS: Record<SuggestionCategory, FieldDef[]> = {
     { name: "area",           labelAr: "المجال",              labelEn: "Area",                  type: "text",     required: true,  placeholderAr: "مثال: التواصل الداخلي، الأداء...", placeholderEn: "e.g. Internal communication, performance..." },
     { name: "details",        labelAr: "التفاصيل",            labelEn: "Details",               type: "textarea", required: true,  placeholderAr: "شارك ملاحظاتك بشكل مفصّل...",    placeholderEn: "Share your observations in detail..." },
     { name: "recommendation", labelAr: "التوصية",             labelEn: "Recommendation",        type: "textarea", required: false, placeholderAr: "ما الذي توصي به؟",                placeholderEn: "What do you recommend?" },
+  ],
+  projects_initiatives: [
+    { name: "title",               labelAr: "عنوان المشروع / المبادرة",   labelEn: "Project / Initiative Title",   type: "text",     required: true,  placeholderAr: "عنوان واضح ومختصر...",                      placeholderEn: "Clear and concise title..." },
+    { name: "description",         labelAr: "وصف المشروع",               labelEn: "Project Description",          type: "textarea", required: true,  placeholderAr: "اشرح المشروع وأهميته...",                    placeholderEn: "Describe the project and its importance..." },
+    { name: "problem",             labelAr: "المشكلة أو الفرصة",          labelEn: "Problem / Opportunity",        type: "textarea", required: true,  placeholderAr: "ما المشكلة التي يعالجها أو الفرصة التي يستغلها؟", placeholderEn: "What problem does it solve or opportunity exploit?" },
+    { name: "impacts",             labelAr: "الأثر المتوقع",              labelEn: "Expected Impact",              type: "textarea", required: false, placeholderAr: "الأثر على الدائرة والجهات المستفيدة...",    placeholderEn: "Impact on the department and beneficiaries..." },
+    { name: "beneficiary",         labelAr: "الفئة المستفيدة",            labelEn: "Beneficiaries",                type: "text",     required: false, placeholderAr: "من سيستفيد من هذا المشروع؟",               placeholderEn: "Who will benefit from this project?" },
+    { name: "strategic_alignment", labelAr: "الارتباط بالأهداف الاستراتيجية", labelEn: "Strategic Alignment",    type: "textarea", required: false, placeholderAr: "كيف يدعم هذا المشروع أهداف الهيئة؟",       placeholderEn: "How does this project support HEMA's strategic goals?" },
+    { name: "estimated_cost",      labelAr: "التكلفة التقديرية",          labelEn: "Estimated Cost",               type: "text",     required: false, placeholderAr: "مثال: 50,000 ريال",                          placeholderEn: "e.g. OMR 50,000" },
+    { name: "duration",            labelAr: "المدة الزمنية",              labelEn: "Duration",                     type: "text",     required: false, placeholderAr: "مثال: 6 أشهر",                               placeholderEn: "e.g. 6 months" },
+    { name: "implementing_entity", labelAr: "الجهة المنفذة",              labelEn: "Implementing Entity",          type: "text",     required: false, placeholderAr: "الإدارة أو الوحدة المسؤولة عن التنفيذ",    placeholderEn: "Department or unit responsible for implementation" },
+  ],
+  service_dev: [
+    { name: "title",               labelAr: "عنوان التحسين",              labelEn: "Improvement Title",            type: "text",     required: true,  placeholderAr: "اسم الخدمة أو عنوان التحسين...",           placeholderEn: "Service name or improvement title..." },
+    { name: "target_service",      labelAr: "الخدمة المستهدفة",           labelEn: "Target Service",               type: "text",     required: true,  placeholderAr: "اذكر الخدمة أو العملية المراد تطويرها...",  placeholderEn: "Name the service or process to be developed..." },
+    { name: "current_status",      labelAr: "الوضع الحالي للخدمة",        labelEn: "Current Service Status",       type: "textarea", required: true,  placeholderAr: "صف الخدمة كما هي الآن...",                 placeholderEn: "Describe the service as it is now..." },
+    { name: "current_challenges",  labelAr: "التحديات الحالية",           labelEn: "Current Challenges",           type: "textarea", required: true,  placeholderAr: "ما التحديات أو العقبات التي تواجهها؟",      placeholderEn: "What challenges or obstacles do you face?" },
+    { name: "proposed_improvement",labelAr: "التحسين المقترح",            labelEn: "Proposed Improvement",         type: "textarea", required: true,  placeholderAr: "ما التغيير الذي تقترحه على الخدمة؟",        placeholderEn: "What change do you propose to the service?" },
+    { name: "expected_benefits",   labelAr: "الفوائد المتوقعة",           labelEn: "Expected Benefits",            type: "textarea", required: false, placeholderAr: "الفوائد للمستفيدين والدائرة...",            placeholderEn: "Benefits for beneficiaries and the department..." },
+    { name: "stakeholders",        labelAr: "الأطراف المعنية",            labelEn: "Stakeholders",                 type: "text",     required: false, placeholderAr: "الإدارات أو الجهات التي ستتأثر...",         placeholderEn: "Departments or entities that will be affected..." },
+    { name: "estimated_cost",      labelAr: "التكلفة التقديرية",          labelEn: "Estimated Cost",               type: "text",     required: false, placeholderAr: "إذا كان هناك تكلفة مالية متوقعة...",         placeholderEn: "If there is an expected financial cost..." },
+  ],
+  process_improvement: [
+    { name: "title",              labelAr: "عنوان الإجراء",               labelEn: "Procedure Title",              type: "text",     required: true,  placeholderAr: "اسم الإجراء أو العملية...",                 placeholderEn: "Name of the procedure or process..." },
+    { name: "current_procedure",  labelAr: "الإجراء الحالي",              labelEn: "Current Procedure",            type: "textarea", required: true,  placeholderAr: "صف الإجراء الحالي بالتفصيل...",            placeholderEn: "Describe the current procedure in detail..." },
+    { name: "problem_description",labelAr: "وصف المشكلة",                 labelEn: "Problem Description",          type: "textarea", required: true,  placeholderAr: "ما المشكلة في الإجراء الحالي؟",             placeholderEn: "What is the problem with the current procedure?" },
+    { name: "proposed_procedure", labelAr: "الإجراء المقترح",             labelEn: "Proposed Procedure",           type: "textarea", required: true,  placeholderAr: "اشرح الإجراء البديل المقترح...",            placeholderEn: "Explain the proposed alternative procedure..." },
+    { name: "current_time",       labelAr: "الوقت الحالي للإنجاز",        labelEn: "Current Completion Time",      type: "text",     required: false, placeholderAr: "مثال: 5 أيام عمل",                          placeholderEn: "e.g. 5 working days" },
+    { name: "expected_time",      labelAr: "الوقت المتوقع بعد التحسين",   labelEn: "Expected Time After Improvement", type: "text",  required: false, placeholderAr: "مثال: 2 يوم عمل",                           placeholderEn: "e.g. 2 working days" },
+    { name: "expected_savings",   labelAr: "الوفورات المتوقعة",           labelEn: "Expected Savings",             type: "textarea", required: false, placeholderAr: "وفورات في الوقت، الموارد، التكاليف...",    placeholderEn: "Savings in time, resources, costs..." },
+    { name: "affected_departments",labelAr: "الإدارات المتأثرة",          labelEn: "Affected Departments",         type: "text",     required: false, placeholderAr: "الإدارات التي ستتأثر بالتغيير...",          placeholderEn: "Departments that will be affected by the change..." },
   ],
 };
 
@@ -99,7 +138,7 @@ export default function Suggestions() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [feedbackDialogId, setFeedbackDialogId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<SuggestionCategory>("improvement");
+  const [selectedCategory, setSelectedCategory] = useState<SuggestionCategory>("projects_initiatives");
   const [attachmentName, setAttachmentName] = useState<string>("");
 
   const queryClient = useQueryClient();
@@ -115,7 +154,7 @@ export default function Suggestions() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListSuggestionsQueryKey() });
         setIsDialogOpen(false);
-        setSelectedCategory("improvement");
+        setSelectedCategory("projects_initiatives");
         setAttachmentName("");
         toast({ title: t.suggestions.submittedSuccess });
       }
@@ -165,23 +204,29 @@ export default function Suggestions() {
   const getStatusInfo = (status: string) => {
     const s = t.suggestions.statuses;
     switch (status) {
-      case 'new':          return { label: s.new,          color: "bg-blue-100 text-blue-800",   icon: FileText };
-      case 'under_review': return { label: s.under_review, color: "bg-yellow-100 text-yellow-800", icon: Clock };
-      case 'accepted':     return { label: s.accepted,     color: "bg-green-100 text-green-800",  icon: CheckCircle };
-      case 'rejected':     return { label: s.rejected,     color: "bg-red-100 text-red-800",      icon: XCircle };
-      case 'implemented':  return { label: s.implemented,  color: "bg-teal-100 text-teal-800",    icon: Settings };
+      case 'new':          return { label: s.new,          color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",    icon: FileText };
+      case 'under_review': return { label: s.under_review, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300", icon: Clock };
+      case 'needs_info':   return { label: s.needs_info,   color: "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300", icon: Info };
+      case 'accepted':     return { label: s.accepted,     color: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",  icon: CheckCircle };
+      case 'rejected':     return { label: s.rejected,     color: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",         icon: XCircle };
+      case 'in_progress':  return { label: s.in_progress,  color: "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300", icon: Play };
+      case 'implemented':  return { label: s.implemented,  color: "bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300",    icon: Settings };
+      case 'completed':    return { label: s.completed,    color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300", icon: CheckCircle2 };
       default:             return { label: status,         color: "bg-gray-100 text-gray-800",    icon: FileText };
     }
   };
 
-  const SUGGESTION_TYPES = [
-    { value: "improvement" as SuggestionCategory, label: t.suggestions.types.improvement },
-    { value: "initiative"  as SuggestionCategory, label: t.suggestions.types.initiative },
-    { value: "process"     as SuggestionCategory, label: t.suggestions.types.process },
-    { value: "feedback"    as SuggestionCategory, label: t.suggestions.types.feedback },
+  const ALL_TYPES: { value: SuggestionCategory; label: string }[] = [
+    { value: "projects_initiatives", label: t.suggestions.types.projects_initiatives },
+    { value: "service_dev",          label: t.suggestions.types.service_dev },
+    { value: "process_improvement",  label: t.suggestions.types.process_improvement },
+    { value: "improvement",          label: t.suggestions.types.improvement },
+    { value: "initiative",           label: t.suggestions.types.initiative },
+    { value: "process",              label: t.suggestions.types.process },
+    { value: "feedback",             label: t.suggestions.types.feedback },
   ];
 
-  const getCategoryLabel = (cat: string) => SUGGESTION_TYPES.find(x => x.value === cat)?.label ?? cat;
+  const getCategoryLabel = (cat: string) => ALL_TYPES.find(x => x.value === cat)?.label ?? cat;
 
   const canCreate = !canManage || user.role === "manager";
 
@@ -199,7 +244,7 @@ export default function Suggestions() {
         {canCreate && (
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
-            if (!open) { setSelectedCategory("improvement"); setAttachmentName(""); }
+            if (!open) { setSelectedCategory("projects_initiatives"); setAttachmentName(""); }
           }}>
             <DialogTrigger asChild>
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -207,11 +252,32 @@ export default function Suggestions() {
                 {t.suggestions.submit}
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{t.suggestions.submitTitle}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleCreate} className="space-y-4 mt-2">
+
+                {/* Submitter info section */}
+                <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.suggestions.submitterSection}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground text-xs block mb-0.5">{t.suggestions.submitterName}</span>
+                      <span className="font-medium">{user.name}</span>
+                    </div>
+                    {user.designation && (
+                      <div>
+                        <span className="text-muted-foreground text-xs block mb-0.5">{t.suggestions.submitterDesignation}</span>
+                        <span className="font-medium">{user.designation}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Type selector */}
                 <div className="space-y-1.5">
                   <Label>{t.suggestions.typeLabel} <span className="text-destructive">*</span></Label>
                   <Select
@@ -223,17 +289,19 @@ export default function Suggestions() {
                       <SelectValue placeholder={t.suggestions.typeRequired} />
                     </SelectTrigger>
                     <SelectContent>
-                      {SUGGESTION_TYPES.map(tp => (
+                      {ALL_TYPES.map(tp => (
                         <SelectItem key={tp.value} value={tp.value}>{tp.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
+                {/* Typed fields */}
                 <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
                   <TypedFields category={selectedCategory} isEn={isEn} />
                 </div>
 
+                {/* Attachment */}
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1.5">
                     <Paperclip className="w-4 h-4" />
@@ -315,7 +383,7 @@ export default function Suggestions() {
               <Card key={suggestion.id} className="flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer group" onClick={() => setViewId(suggestion.id)}>
                 <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
                   <div className="flex justify-between items-start">
-                    <Badge variant="outline" className="bg-background">
+                    <Badge variant="outline" className="bg-background text-xs">
                       {getCategoryLabel(suggestion.category)}
                     </Badge>
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusInfo.color}`}>
@@ -325,7 +393,7 @@ export default function Suggestions() {
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1 pt-4 pb-2">
-                  <p className="text-foreground leading-relaxed whitespace-pre-wrap text-sm">{suggestion.text}</p>
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap text-sm line-clamp-4">{suggestion.text}</p>
 
                   {suggestion.attachment && (
                     <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border rounded-md px-3 py-2">
@@ -337,7 +405,7 @@ export default function Suggestions() {
                   {suggestion.feedback && (
                     <div className="mt-4 p-3 bg-secondary/10 border border-secondary/20 rounded-md">
                       <p className="text-xs font-semibold text-secondary-foreground mb-1">{t.suggestions.managerReply}</p>
-                      <p className="text-sm text-foreground/80">{suggestion.feedback}</p>
+                      <p className="text-sm text-foreground/80 line-clamp-2">{suggestion.feedback}</p>
                     </div>
                   )}
                 </CardContent>
@@ -365,9 +433,12 @@ export default function Suggestions() {
                                 <SelectContent>
                                   <SelectItem value="new">{t.suggestions.statuses.new}</SelectItem>
                                   <SelectItem value="under_review">{t.suggestions.statuses.under_review}</SelectItem>
+                                  <SelectItem value="needs_info">{t.suggestions.statuses.needs_info}</SelectItem>
                                   <SelectItem value="accepted">{t.suggestions.statuses.accepted}</SelectItem>
                                   <SelectItem value="rejected">{t.suggestions.statuses.rejected}</SelectItem>
+                                  <SelectItem value="in_progress">{t.suggestions.statuses.in_progress}</SelectItem>
                                   <SelectItem value="implemented">{t.suggestions.statuses.implemented}</SelectItem>
+                                  <SelectItem value="completed">{t.suggestions.statuses.completed}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -405,8 +476,7 @@ export default function Suggestions() {
         const StatusIcon = statusInfo.icon;
         return (
           <Dialog open={viewId !== null} onOpenChange={(open) => !open && setViewId(null)}>
-            <DialogContent className="sm:max-w-[580px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
-              {/* Header */}
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
               <div className="p-5 border-b bg-muted/20 shrink-0">
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <Badge variant="outline" className="bg-background">
@@ -423,11 +493,10 @@ export default function Suggestions() {
                 </div>
               </div>
 
-              {/* Body */}
               <div className="flex-1 overflow-y-auto p-5 space-y-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                    {isEn ? "Suggestion" : "المقترح"}
+                    {isEn ? "Suggestion Details" : "تفاصيل المقترح"}
                   </p>
                   <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed bg-muted/30 rounded-lg p-4 border">
                     {sg.text}
@@ -453,7 +522,6 @@ export default function Suggestions() {
                 )}
               </div>
 
-              {/* Footer */}
               {canManage && (
                 <div className="p-4 border-t bg-background shrink-0 flex justify-end">
                   <Button

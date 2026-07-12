@@ -4,6 +4,9 @@ import { useLocale } from "@/hooks/use-locale";
 import {
   useListInquiries, useCreateInquiry, useUpdateInquiry,
   getListInquiriesQueryKey,
+  useListDocuments, getListDocumentsQueryKey,
+  useListFaqs, getListFaqsQueryKey,
+  InquiryCategory,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -15,16 +18,103 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  HelpCircle, Plus, Send, CheckCircle2, Pencil, X, Search,
+  HelpCircle, Plus, Send, CheckCircle2, Pencil, X, Search, BookOpen, Lightbulb,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type StatusFilter = "all" | "open" | "answered" | "resolved";
+
+/* ── Inquiry categories ── */
+const INQUIRY_CATEGORIES: { value: InquiryCategory; ar: string; en: string }[] = [
+  { value: "strategic_planning",    ar: "التخطيط الاستراتيجي",  en: "Strategic Planning" },
+  { value: "annual_plan",           ar: "الخطة السنوية",        en: "Annual Plan" },
+  { value: "projects",              ar: "المشاريع",              en: "Projects" },
+  { value: "kpis",                  ar: "مؤشرات الأداء",        en: "KPIs" },
+  { value: "monitoring",            ar: "المتابعة والتقارير",    en: "Monitoring & Reports" },
+  { value: "performance_platform",  ar: "منصة الأداء",          en: "Performance Platform" },
+  { value: "templates",             ar: "النماذج والقوالب",     en: "Templates & Forms" },
+  { value: "policies",              ar: "السياسات والإجراءات",  en: "Policies & Procedures" },
+  { value: "other",                 ar: "أخرى",                  en: "Other" },
+];
+
+function getCategoryLabel(value: string, locale: "ar" | "en") {
+  const cat = INQUIRY_CATEGORIES.find(c => c.value === value);
+  if (!cat) return value;
+  return locale === "ar" ? cat.ar : cat.en;
+}
+
+/* ── Pre-submit knowledge search panel ── */
+function KnowledgeHints({
+  subject,
+  locale,
+}: {
+  subject: string;
+  locale: "ar" | "en";
+}) {
+  const q = subject.trim().toLowerCase();
+
+  const { data: docs } = useListDocuments({}, {
+    query: { queryKey: getListDocumentsQueryKey(), staleTime: 60_000 }
+  });
+  const { data: faqs } = useListFaqs({
+    query: { queryKey: getListFaqsQueryKey(), staleTime: 60_000 }
+  });
+
+  if (!q || q.length < 3) return null;
+
+  const matchDocs = (docs ?? []).filter(d =>
+    d.name.toLowerCase().includes(q) || d.description.toLowerCase().includes(q)
+  ).slice(0, 3);
+
+  const matchFaqs = (faqs ?? []).filter(f =>
+    f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q)
+  ).slice(0, 3);
+
+  const total = matchDocs.length + matchFaqs.length;
+  if (total === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-3 space-y-2">
+      <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+        <Lightbulb className="w-4 h-4 shrink-0" />
+        <span className="text-xs font-semibold">
+          {locale === "ar"
+            ? `وجدنا ${total} نتيجة مشابهة في قاعدة المعرفة — ربما تجد إجابتك هنا`
+            : `Found ${total} related result${total > 1 ? "s" : ""} in the Knowledge Base — you may find your answer there`}
+        </span>
+      </div>
+      {matchFaqs.length > 0 && (
+        <div className="space-y-1.5">
+          {matchFaqs.map(f => (
+            <div key={f.id} className="text-xs bg-white dark:bg-background border rounded-md p-2.5 space-y-0.5">
+              <p className="font-semibold text-foreground flex items-center gap-1.5">
+                <HelpCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                {f.question}
+              </p>
+              <p className="text-muted-foreground line-clamp-2 ps-4">{f.answer}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      {matchDocs.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {matchDocs.map(d => (
+            <div key={d.id} className="flex items-center gap-1.5 text-xs bg-white dark:bg-background border rounded-md px-2.5 py-1.5">
+              <BookOpen className="w-3 h-3 text-primary shrink-0" />
+              <span className="font-medium text-foreground">{d.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Inquiries() {
   const { user, canManage, canCloseInquiry } = useUser();
@@ -42,6 +132,7 @@ export default function Inquiries() {
   const [replyOpenId, setReplyOpenId] = useState<number | null>(null);
   const [editReplyId, setEditReplyId] = useState<number | null>(null);
   const [editReplyText, setEditReplyText] = useState("");
+  const [subjectDraft, setSubjectDraft] = useState("");
 
   /* ── Data ── */
   const queryParams = ownerFilter === "mine" ? { userId: user.id } : {};
@@ -54,6 +145,7 @@ export default function Inquiries() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListInquiriesQueryKey() });
         setCreateOpen(false);
+        setSubjectDraft("");
         toast({ title: locale === "ar" ? "تم إرسال استفسارك بنجاح" : "Inquiry submitted successfully" });
       },
     },
@@ -79,6 +171,7 @@ export default function Inquiries() {
         subject: fd.get("subject") as string,
         details: fd.get("details") as string,
         userId: user.id,
+        category: (fd.get("category") as InquiryCategory) || "other",
       },
     });
   }
@@ -160,7 +253,6 @@ export default function Inquiries() {
 
       {/* Filter toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between bg-card p-3 rounded-lg border">
-        {/* Status tabs */}
         <div className="flex flex-wrap gap-1">
           {STATUS_FILTERS.map(({ key, ar: arLabel, en: enLabel }) => (
             <button
@@ -196,8 +288,6 @@ export default function Inquiries() {
             </>
           )}
         </div>
-
-        {/* Search */}
         <div className="relative w-full sm:w-auto">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
@@ -241,7 +331,14 @@ export default function Inquiries() {
                 {/* Question side */}
                 <div className="flex-1 p-5 border-b md:border-b-0 md:border-e">
                   <div className="flex justify-between items-start mb-3 gap-3">
-                    <h3 className="font-bold text-base text-primary leading-snug">{inq.subject}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-base text-primary leading-snug">{inq.subject}</h3>
+                      {inq.category && inq.category !== "other" && (
+                        <Badge variant="outline" className="mt-1.5 text-[10px] font-normal">
+                          {getCategoryLabel(inq.category, locale)}
+                        </Badge>
+                      )}
+                    </div>
                     {statusBadge(inq.status)}
                   </div>
                   <p className="text-sm text-foreground/80 mb-4 whitespace-pre-wrap leading-relaxed">{inq.details}</p>
@@ -266,7 +363,6 @@ export default function Inquiries() {
                         <h4 className="font-semibold text-sm text-secondary-foreground">
                           {locale === "ar" ? "رد دائرة التخطيط:" : "Planning Dept. Reply:"}
                         </h4>
-                        {/* Edit reply — manager/admin only */}
                         {canCloseInquiry && inq.status !== "resolved" && (
                           <Button
                             variant="ghost"
@@ -315,7 +411,6 @@ export default function Inquiries() {
 
                       <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
                         <span>{locale === "ar" ? `رد بواسطة: ${inq.responderName}` : `Replied by: ${inq.responderName}`}</span>
-                        {/* Close — manager/admin only */}
                         {canCloseInquiry && inq.status !== "resolved" && (
                           <Button
                             variant="ghost"
@@ -361,12 +456,18 @@ export default function Inquiries() {
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
               {inq && (
                 <>
-                  {/* Header */}
                   <div className="p-5 border-b bg-muted/30 shrink-0"
                        style={{ borderInlineStartWidth: 4, borderInlineStartStyle: "solid", borderInlineStartColor: statusColor(inq.status) }}>
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      {statusBadge(inq.status)}
-                      <span className="text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {statusBadge(inq.status)}
+                        {inq.category && inq.category !== "other" && (
+                          <Badge variant="outline" className="text-xs font-normal">
+                            {getCategoryLabel(inq.category, locale)}
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">
                         {format(new Date(inq.date), "dd MMM yyyy", { locale: dateFnsLocale })}
                       </span>
                     </div>
@@ -377,7 +478,6 @@ export default function Inquiries() {
                     </div>
                   </div>
 
-                  {/* Body */}
                   <ScrollArea className="flex-1 p-5">
                     <div className="space-y-5">
                       <div>
@@ -411,7 +511,6 @@ export default function Inquiries() {
                     </div>
                   </ScrollArea>
 
-                  {/* Footer actions */}
                   {(canManage || canCloseInquiry) && inq.status !== "resolved" && (
                     <div className="p-4 border-t bg-background shrink-0 flex gap-2 justify-end flex-wrap">
                       {canManage && !inq.response && (
@@ -444,22 +543,52 @@ export default function Inquiries() {
       })()}
 
       {/* ── Create Inquiry Dialog ── */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-[520px]">
+      <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setSubjectDraft(""); }}>
+        <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{locale === "ar" ? "إرسال استفسار جديد" : "Submit New Inquiry"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreate} className="space-y-4 mt-2">
+            {/* Category */}
             <div className="space-y-2">
-              <Label>{locale === "ar" ? "موضوع الاستفسار" : "Subject"}</Label>
-              <Input name="subject" required placeholder={locale === "ar" ? "مثال: استفسار حول تعميم رقم..." : "e.g. Inquiry about circular no..."} />
+              <Label>{locale === "ar" ? "الموضوع / التصنيف" : "Topic / Category"}</Label>
+              <Select name="category" defaultValue="other">
+                <SelectTrigger>
+                  <SelectValue placeholder={locale === "ar" ? "اختر تصنيف الاستفسار" : "Select inquiry category"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {INQUIRY_CATEGORIES.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {locale === "ar" ? cat.ar : cat.en}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Subject */}
             <div className="space-y-2">
-              <Label>{locale === "ar" ? "التفاصيل" : "Details"}</Label>
+              <Label>{locale === "ar" ? "موضوع الاستفسار" : "Subject"} <span className="text-destructive">*</span></Label>
+              <Input
+                name="subject"
+                required
+                value={subjectDraft}
+                onChange={(e) => setSubjectDraft(e.target.value)}
+                placeholder={locale === "ar" ? "مثال: استفسار حول تعميم رقم..." : "e.g. Inquiry about circular no..."}
+              />
+            </div>
+
+            {/* Pre-submit knowledge hints */}
+            <KnowledgeHints subject={subjectDraft} locale={locale} />
+
+            {/* Details */}
+            <div className="space-y-2">
+              <Label>{locale === "ar" ? "التفاصيل" : "Details"} <span className="text-destructive">*</span></Label>
               <Textarea name="details" required rows={5} placeholder={locale === "ar" ? "اكتب تفاصيل استفسارك بوضوح..." : "Describe your inquiry in detail..."} />
             </div>
+
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => { setCreateOpen(false); setSubjectDraft(""); }}>
                 {locale === "ar" ? "إلغاء" : "Cancel"}
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
@@ -472,7 +601,7 @@ export default function Inquiries() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Reply Dialog (officer / manager / admin) ── */}
+      {/* ── Reply Dialog ── */}
       <Dialog open={replyOpenId !== null} onOpenChange={(open) => !open && setReplyOpenId(null)}>
         <DialogContent className="sm:max-w-[520px]">
           <DialogHeader>

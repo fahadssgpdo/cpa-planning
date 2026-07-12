@@ -26,6 +26,8 @@ tags:
     description: Frequently asked questions
   - name: suggestions
     description: Employee suggestions
+  - name: glossary
+    description: Glossary and terminology definitions
   - name: dashboard
     description: Dashboard statistics
 paths:
@@ -520,6 +522,53 @@ paths:
               schema:
                 $ref: "#/components/schemas/Suggestion"
 
+  /glossary:
+    get:
+      operationId: listGlossary
+      tags: [glossary]
+      summary: List glossary entries
+      responses:
+        "200":
+          description: List of glossary entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GlossaryEntry"
+    post:
+      operationId: createGlossaryEntry
+      tags: [glossary]
+      summary: Add a glossary entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GlossaryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlossaryEntry"
+
+  /glossary/{id}:
+    delete:
+      operationId: deleteGlossaryEntry
+      tags: [glossary]
+      summary: Delete a glossary entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /dashboard/stats:
     get:
       operationId: getDashboardStats
@@ -761,6 +810,10 @@ components:
         text:
           type: string
 
+    InquiryCategory:
+      type: string
+      enum: [strategic_planning, annual_plan, projects, kpis, monitoring, performance_platform, templates, policies, other]
+
     Inquiry:
       type: object
       required: [id, userId, userName, subject, details, status, date]
@@ -771,10 +824,14 @@ components:
           type: integer
         userName:
           type: string
+        userDesignation:
+          type: ["string", "null"]
         subject:
           type: string
         details:
           type: string
+        category:
+          $ref: "#/components/schemas/InquiryCategory"
         status:
           type: string
           enum: [open, answered, resolved]
@@ -797,6 +854,8 @@ components:
           type: string
         details:
           type: string
+        category:
+          $ref: "#/components/schemas/InquiryCategory"
 
     InquiryUpdate:
       type: object
@@ -869,6 +928,14 @@ components:
         answer:
           type: string
 
+    SuggestionCategory:
+      type: string
+      enum: [improvement, initiative, process, feedback, projects_initiatives, service_dev, process_improvement]
+
+    SuggestionStatus:
+      type: string
+      enum: [new, under_review, needs_info, accepted, rejected, in_progress, implemented, completed]
+
     Suggestion:
       type: object
       required: [id, userId, userName, category, text, status, date]
@@ -879,14 +946,14 @@ components:
           type: integer
         userName:
           type: string
+        userDesignation:
+          type: ["string", "null"]
         category:
-          type: string
-          enum: [improvement, initiative, process, feedback]
+          $ref: "#/components/schemas/SuggestionCategory"
         text:
           type: string
         status:
-          type: string
-          enum: [new, under_review, accepted, rejected, implemented]
+          $ref: "#/components/schemas/SuggestionStatus"
         date:
           type: string
         feedback:
@@ -901,8 +968,7 @@ components:
         userId:
           type: integer
         category:
-          type: string
-          enum: [improvement, initiative, process, feedback]
+          $ref: "#/components/schemas/SuggestionCategory"
         text:
           type: string
         attachment:
@@ -912,9 +978,38 @@ components:
       type: object
       properties:
         status:
-          type: string
-          enum: [new, under_review, accepted, rejected, implemented]
+          $ref: "#/components/schemas/SuggestionStatus"
         feedback:
+          type: string
+
+    GlossaryEntry:
+      type: object
+      required: [id, termAr, definition, date]
+      properties:
+        id:
+          type: integer
+        termAr:
+          type: string
+        termEn:
+          type: ["string", "null"]
+        definition:
+          type: string
+        examples:
+          type: ["string", "null"]
+        date:
+          type: string
+
+    GlossaryInput:
+      type: object
+      required: [termAr, definition]
+      properties:
+        termAr:
+          type: string
+        termEn:
+          type: string
+        definition:
+          type: string
+        examples:
           type: string
 
     DashboardStats:

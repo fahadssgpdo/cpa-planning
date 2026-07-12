@@ -12,10 +12,14 @@ export interface Suggestion {
   id: number;
   userId: number;
   userName: string;
+  /** @nullable */
+  userDesignation?: string | null;
   category: SuggestionCategory;
   text: string;
   status: SuggestionStatus;
   date: string;
   /** @nullable */
   feedback?: string | null;
+  /** @nullable */
+  attachment?: string | null;
 }

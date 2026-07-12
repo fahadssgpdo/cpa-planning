@@ -11,6 +11,7 @@ import dashboardRouter from "./dashboard";
 import auditLogsRouter from "./audit-logs";
 import authRouter from "./auth";
 import bootstrapRouter from "./bootstrap";
+import glossaryRouter from "./glossary";
 
 const router: IRouter = Router();
 
@@ -24,6 +25,7 @@ router.use(inquiriesRouter);
 router.use(documentsRouter);
 router.use(faqsRouter);
 router.use(suggestionsRouter);
+router.use(glossaryRouter);
 router.use(dashboardRouter);
 router.use(auditLogsRouter);
 

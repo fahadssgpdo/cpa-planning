@@ -303,6 +303,7 @@ export const ListInquiriesResponseItem = zod.object({
   "userDesignation": zod.string().nullish(),
   "subject": zod.string(),
   "details": zod.string(),
+  "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional(),
   "status": zod.enum(['open', 'answered', 'resolved']),
   "date": zod.string(),
   "response": zod.string().nullish(),
@@ -318,7 +319,8 @@ export const ListInquiriesResponse = zod.array(ListInquiriesResponseItem)
 export const CreateInquiryBody = zod.object({
   "userId": zod.number(),
   "subject": zod.string(),
-  "details": zod.string()
+  "details": zod.string(),
+  "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional()
 })
 
 export const CreateInquiryResponse = zod.object({
@@ -328,6 +330,7 @@ export const CreateInquiryResponse = zod.object({
   "userDesignation": zod.string().nullish(),
   "subject": zod.string(),
   "details": zod.string(),
+  "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional(),
   "status": zod.enum(['open', 'answered', 'resolved']),
   "date": zod.string(),
   "response": zod.string().nullish(),
@@ -356,6 +359,7 @@ export const UpdateInquiryResponse = zod.object({
   "userDesignation": zod.string().nullish(),
   "subject": zod.string(),
   "details": zod.string(),
+  "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional(),
   "status": zod.enum(['open', 'answered', 'resolved']),
   "date": zod.string(),
   "response": zod.string().nullish(),
@@ -478,9 +482,10 @@ export const ListSuggestionsResponseItem = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
   "userName": zod.string(),
-  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback']),
+  "userDesignation": zod.string().nullish(),
+  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback', 'projects_initiatives', 'service_dev', 'process_improvement']),
   "text": zod.string(),
-  "status": zod.enum(['new', 'under_review', 'accepted', 'rejected', 'implemented']),
+  "status": zod.enum(['new', 'under_review', 'needs_info', 'accepted', 'rejected', 'in_progress', 'implemented', 'completed']),
   "date": zod.string(),
   "feedback": zod.string().nullish(),
   "attachment": zod.string().nullish()
@@ -493,7 +498,7 @@ export const ListSuggestionsResponse = zod.array(ListSuggestionsResponseItem)
  */
 export const CreateSuggestionBody = zod.object({
   "userId": zod.number(),
-  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback']),
+  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback', 'projects_initiatives', 'service_dev', 'process_improvement']),
   "text": zod.string(),
   "attachment": zod.string().optional()
 })
@@ -502,9 +507,10 @@ export const CreateSuggestionResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
   "userName": zod.string(),
-  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback']),
+  "userDesignation": zod.string().nullish(),
+  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback', 'projects_initiatives', 'service_dev', 'process_improvement']),
   "text": zod.string(),
-  "status": zod.enum(['new', 'under_review', 'accepted', 'rejected', 'implemented']),
+  "status": zod.enum(['new', 'under_review', 'needs_info', 'accepted', 'rejected', 'in_progress', 'implemented', 'completed']),
   "date": zod.string(),
   "feedback": zod.string().nullish(),
   "attachment": zod.string().nullish()
@@ -519,7 +525,7 @@ export const UpdateSuggestionParams = zod.object({
 })
 
 export const UpdateSuggestionBody = zod.object({
-  "status": zod.enum(['new', 'under_review', 'accepted', 'rejected', 'implemented']).optional(),
+  "status": zod.enum(['new', 'under_review', 'needs_info', 'accepted', 'rejected', 'in_progress', 'implemented', 'completed']).optional(),
   "feedback": zod.string().optional()
 })
 
@@ -527,13 +533,58 @@ export const UpdateSuggestionResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
   "userName": zod.string(),
-  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback']),
+  "userDesignation": zod.string().nullish(),
+  "category": zod.enum(['improvement', 'initiative', 'process', 'feedback', 'projects_initiatives', 'service_dev', 'process_improvement']),
   "text": zod.string(),
-  "status": zod.enum(['new', 'under_review', 'accepted', 'rejected', 'implemented']),
+  "status": zod.enum(['new', 'under_review', 'needs_info', 'accepted', 'rejected', 'in_progress', 'implemented', 'completed']),
   "date": zod.string(),
   "feedback": zod.string().nullish(),
   "attachment": zod.string().nullish()
 })
+
+
+/**
+ * @summary List glossary entries
+ */
+export const ListGlossaryResponseItem = zod.object({
+  "id": zod.number(),
+  "termAr": zod.string(),
+  "termEn": zod.string().nullish(),
+  "definition": zod.string(),
+  "examples": zod.string().nullish(),
+  "date": zod.string()
+})
+export const ListGlossaryResponse = zod.array(ListGlossaryResponseItem)
+
+
+/**
+ * @summary Add a glossary entry
+ */
+export const CreateGlossaryEntryBody = zod.object({
+  "termAr": zod.string(),
+  "termEn": zod.string().optional(),
+  "definition": zod.string(),
+  "examples": zod.string().optional()
+})
+
+export const CreateGlossaryEntryResponse = zod.object({
+  "id": zod.number(),
+  "termAr": zod.string(),
+  "termEn": zod.string().nullish(),
+  "definition": zod.string(),
+  "examples": zod.string().nullish(),
+  "date": zod.string()
+})
+
+
+/**
+ * @summary Delete a glossary entry
+ */
+export const DeleteGlossaryEntryParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteGlossaryEntryResponse = zod.void()
 
 
 /**

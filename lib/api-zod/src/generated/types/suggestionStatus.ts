@@ -12,7 +12,10 @@ export type SuggestionStatus = typeof SuggestionStatus[keyof typeof SuggestionSt
 export const SuggestionStatus = {
   new: 'new',
   under_review: 'under_review',
+  needs_info: 'needs_info',
   accepted: 'accepted',
   rejected: 'rejected',
+  in_progress: 'in_progress',
   implemented: 'implemented',
+  completed: 'completed',
 } as const;

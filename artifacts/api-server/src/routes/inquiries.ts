@@ -30,6 +30,7 @@ const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
     userDesignation: user?.designation ?? null,
     subject: row.subject,
     details: row.details,
+    category: row.category ?? "other",
     status: row.status,
     date: row.createdAt.toISOString().slice(0, 10),
     response: row.response ?? null,
@@ -69,6 +70,7 @@ router.post("/inquiries", async (req, res): Promise<void> => {
       userId: parsed.data.userId,
       subject: parsed.data.subject,
       details: parsed.data.details,
+      category: parsed.data.category ?? "other",
       status: "open",
     })
     .returning();

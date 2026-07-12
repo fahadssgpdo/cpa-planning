@@ -5,10 +5,11 @@
  * CPA Planning Department Interactive Platform API
  * OpenAPI spec version: 0.1.0
  */
-import type { SuggestionInputCategory } from './suggestionInputCategory';
+import type { SuggestionCategory } from './suggestionCategory';
 
 export interface SuggestionInput {
   userId: number;
-  category: SuggestionInputCategory;
+  category: SuggestionCategory;
   text: string;
+  attachment?: string;
 }

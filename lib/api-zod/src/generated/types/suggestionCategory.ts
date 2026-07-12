@@ -14,4 +14,7 @@ export const SuggestionCategory = {
   initiative: 'initiative',
   process: 'process',
   feedback: 'feedback',
+  projects_initiatives: 'projects_initiatives',
+  service_dev: 'service_dev',
+  process_improvement: 'process_improvement',
 } as const;

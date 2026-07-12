@@ -5,14 +5,18 @@
  * CPA Planning Department Interactive Platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { InquiryCategory } from './inquiryCategory';
 import type { InquiryStatus } from './inquiryStatus';
 
 export interface Inquiry {
   id: number;
   userId: number;
   userName: string;
+  /** @nullable */
+  userDesignation?: string | null;
   subject: string;
   details: string;
+  category?: InquiryCategory;
   status: InquiryStatus;
   date: string;
   /** @nullable */
