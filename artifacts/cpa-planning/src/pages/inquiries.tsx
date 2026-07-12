@@ -6,6 +6,7 @@ import {
   getListInquiriesQueryKey,
   useListDocuments, getListDocumentsQueryKey,
   useListFaqs, getListFaqsQueryKey,
+  useCreateFaq,
   InquiryCategory,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -133,6 +134,7 @@ export default function Inquiries() {
   const [editReplyId, setEditReplyId] = useState<number | null>(null);
   const [editReplyText, setEditReplyText] = useState("");
   const [subjectDraft, setSubjectDraft] = useState("");
+  const [faqFromInquiry, setFaqFromInquiry] = useState<{ question: string; answer: string } | null>(null);
 
   /* ── Data ── */
   const queryParams = ownerFilter === "mine" ? { userId: user.id } : {};
@@ -158,6 +160,16 @@ export default function Inquiries() {
         setReplyOpenId(null);
         setEditReplyId(null);
         toast({ title: locale === "ar" ? "تم تحديث الاستفسار" : "Inquiry updated" });
+      },
+    },
+  });
+
+  const createFaqMutation = useCreateFaq({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListFaqsQueryKey() });
+        setFaqFromInquiry(null);
+        toast({ title: locale === "ar" ? t.faq.convertedSuccess : t.faq.convertedSuccess });
       },
     },
   });
@@ -411,18 +423,31 @@ export default function Inquiries() {
 
                       <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
                         <span>{locale === "ar" ? `رد بواسطة: ${inq.responderName}` : `Replied by: ${inq.responderName}`}</span>
-                        {canCloseInquiry && inq.status !== "resolved" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
-                            onClick={(e) => { e.stopPropagation(); handleClose(inq.id); }}
-                            disabled={updateMutation.isPending}
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 me-1" />
-                            {locale === "ar" ? "إغلاق" : "Close"}
-                          </Button>
-                        )}
+                        <div className="flex gap-1">
+                          {canCloseInquiry && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                              onClick={(e) => { e.stopPropagation(); setFaqFromInquiry({ question: inq.subject, answer: inq.response ?? "" }); }}
+                            >
+                              <HelpCircle className="w-3.5 h-3.5 me-1" />
+                              {locale === "ar" ? t.faq.convertToFaq : t.faq.convertToFaq}
+                            </Button>
+                          )}
+                          {canCloseInquiry && inq.status !== "resolved" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                              onClick={(e) => { e.stopPropagation(); handleClose(inq.id); }}
+                              disabled={updateMutation.isPending}
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 me-1" />
+                              {locale === "ar" ? "إغلاق" : "Close"}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ) : canManage ? (
@@ -511,9 +536,9 @@ export default function Inquiries() {
                     </div>
                   </ScrollArea>
 
-                  {(canManage || canCloseInquiry) && inq.status !== "resolved" && (
+                  {(canManage || canCloseInquiry) && (
                     <div className="p-4 border-t bg-background shrink-0 flex gap-2 justify-end flex-wrap">
-                      {canManage && !inq.response && (
+                      {canManage && !inq.response && inq.status !== "resolved" && (
                         <Button
                           variant="default"
                           onClick={() => { setViewId(null); setReplyOpenId(inq.id); }}
@@ -523,6 +548,16 @@ export default function Inquiries() {
                         </Button>
                       )}
                       {canCloseInquiry && (
+                        <Button
+                          variant="outline"
+                          className="text-amber-600 border-amber-200 hover:bg-amber-50"
+                          onClick={() => { setViewId(null); setFaqFromInquiry({ question: inq.subject, answer: inq.response ?? "" }); }}
+                        >
+                          <HelpCircle className="w-4 h-4 me-1.5" />
+                          {t.faq.convertToFaq}
+                        </Button>
+                      )}
+                      {canCloseInquiry && inq.status !== "resolved" && (
                         <Button
                           variant="outline"
                           className="text-teal-600 border-teal-200 hover:bg-teal-50"
@@ -598,6 +633,62 @@ export default function Inquiries() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Convert to FAQ Dialog ── */}
+      <Dialog open={faqFromInquiry !== null} onOpenChange={(open) => !open && setFaqFromInquiry(null)}>
+        <DialogContent className="sm:max-w-[540px]">
+          <DialogHeader>
+            <DialogTitle>{t.faq.convertDialogTitle}</DialogTitle>
+          </DialogHeader>
+          {faqFromInquiry && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                createFaqMutation.mutate({
+                  data: {
+                    question: fd.get("question") as string,
+                    answer: fd.get("answer") as string,
+                  },
+                });
+              }}
+              className="space-y-4 mt-2"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="faq-q">{t.faq.questionLabel} <span className="text-destructive">*</span></Label>
+                <Textarea
+                  id="faq-q"
+                  name="question"
+                  required
+                  rows={2}
+                  defaultValue={faqFromInquiry.question}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="faq-a">{t.faq.answerLabel} <span className="text-destructive">*</span></Label>
+                <Textarea
+                  id="faq-a"
+                  name="answer"
+                  required
+                  rows={5}
+                  defaultValue={faqFromInquiry.answer}
+                  placeholder={locale === "ar" ? "أدخل الإجابة..." : "Enter answer..."}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setFaqFromInquiry(null)}>
+                  {locale === "ar" ? "إلغاء" : "Cancel"}
+                </Button>
+                <Button type="submit" disabled={createFaqMutation.isPending}>
+                  {createFaqMutation.isPending
+                    ? (locale === "ar" ? "جاري الحفظ..." : "Saving...")
+                    : (locale === "ar" ? "حفظ كسؤال شائع" : "Save as FAQ")}
+                </Button>
+              </div>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 

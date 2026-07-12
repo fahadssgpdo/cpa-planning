@@ -6,6 +6,8 @@ import {
   getListDocumentsQueryKey, DocumentCategory,
   useListGlossary, useCreateGlossaryEntry, useDeleteGlossaryEntry,
   getListGlossaryQueryKey,
+  useListFaqs, useCreateFaq, useDeleteFaq,
+  getListFaqsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,11 +25,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BookOpen, Plus, Download, FileText, Trash2, Lock, Paperclip, BookMarked } from "lucide-react";
+import { BookOpen, Plus, Download, FileText, Trash2, Lock, Paperclip, BookMarked, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type MainTab = "documents" | "glossary";
+type MainTab = "documents" | "glossary" | "faqs";
 
 export default function KnowledgeBase() {
   const { canCloseInquiry } = useUser();
@@ -36,6 +38,7 @@ export default function KnowledgeBase() {
   const [docCategory, setDocCategory] = useState("all");
   const [isDocDialogOpen, setIsDocDialogOpen] = useState(false);
   const [isGlossaryDialogOpen, setIsGlossaryDialogOpen] = useState(false);
+  const [isFaqDialogOpen, setIsFaqDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [attachmentName, setAttachmentName] = useState("");
   
@@ -102,6 +105,31 @@ export default function KnowledgeBase() {
     }
   });
 
+  /* ── FAQs data ── */
+  const { data: faqs, isLoading: faqsLoading } = useListFaqs({
+    query: { queryKey: getListFaqsQueryKey() }
+  });
+
+  const createFaqMutation = useCreateFaq({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListFaqsQueryKey() });
+        setIsFaqDialogOpen(false);
+        toast({ title: t.faq.addedSuccess });
+      }
+    }
+  });
+
+  const deleteFaqMutation = useDeleteFaq({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListFaqsQueryKey() });
+        toast({ title: t.faq.deletedSuccess });
+      }
+    }
+  });
+
+  /* ── Handlers ── */
   const handleCreateDoc = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -129,6 +157,18 @@ export default function KnowledgeBase() {
     });
   };
 
+  const handleCreateFaq = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    createFaqMutation.mutate({
+      data: {
+        question: formData.get("question") as string,
+        answer: formData.get("answer") as string,
+      }
+    });
+  };
+
+  /* ── Filtered lists ── */
   const getDocCategoryLabel = (cat: string) => DOC_CATEGORIES.find(c => c.id === cat)?.label || cat;
 
   const filteredDocs = (documents ?? []).filter(d => 
@@ -142,6 +182,15 @@ export default function KnowledgeBase() {
     g.definition.toLowerCase().includes(search.toLowerCase())
   );
 
+  const filteredFaqs = (faqs ?? []).filter(f =>
+    f.question.toLowerCase().includes(search.toLowerCase()) ||
+    f.answer.toLowerCase().includes(search.toLowerCase())
+  );
+
+  /* ── Header title/subtitle ── */
+  const pageTitle = mainTab === "glossary" ? t.glossary.title : mainTab === "faqs" ? t.faq.title : t.knowledge.title;
+  const pageSubtitle = mainTab === "glossary" ? t.glossary.subtitle : mainTab === "faqs" ? t.faq.subtitle : t.knowledge.subtitle;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -149,134 +198,168 @@ export default function KnowledgeBase() {
         <div>
           <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-primary" />
-            {mainTab === "glossary" ? t.glossary.title : t.knowledge.title}
+            {pageTitle}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            {mainTab === "glossary" ? t.glossary.subtitle : t.knowledge.subtitle}
-          </p>
+          <p className="text-muted-foreground mt-1">{pageSubtitle}</p>
         </div>
 
         {canCloseInquiry ? (
-          mainTab === "documents" ? (
-            <Dialog open={isDocDialogOpen} onOpenChange={(open) => { setIsDocDialogOpen(open); if (!open) setAttachmentName(""); }}>
-              <DialogTrigger asChild>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Plus className="w-4 h-4 me-2" />
-                  {t.knowledge.addDoc}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[520px]">
-                <DialogHeader>
-                  <DialogTitle>{t.knowledge.addDocTitle}</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleCreateDoc} className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t.knowledge.docName}</Label>
-                    <Input id="name" name="name" required placeholder={t.knowledge.docNamePlaceholder} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">{t.knowledge.classification}</Label>
-                    <Select name="category" required defaultValue="manuals">
-                      <SelectTrigger>
-                        <SelectValue placeholder={t.knowledge.classificationPlaceholder} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DOC_CATEGORIES.filter(c => c.id !== 'all').map(c => (
-                          <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="flex items-center gap-1.5">
-                      <Paperclip className="w-4 h-4" />
-                      {t.knowledge.attachment}
-                    </Label>
-                    <div className="flex items-center gap-2">
-                      <label
-                        htmlFor="doc-file-upload"
-                        className="cursor-pointer flex-1 flex items-center gap-2 border border-dashed rounded-lg px-4 py-3 text-sm text-muted-foreground hover:border-primary/50 hover:bg-muted/30 transition-colors"
-                      >
-                        <Paperclip className="w-4 h-4 shrink-0" />
-                        {attachmentName ? (
-                          <span className="text-foreground font-medium truncate">{attachmentName}</span>
-                        ) : (
-                          <span>{t.knowledge.attachmentHint}</span>
-                        )}
-                      </label>
-                      <input
-                        id="doc-file-upload"
-                        type="file"
-                        className="hidden"
-                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          setAttachmentName(file ? file.name : "");
-                        }}
-                      />
-                      {attachmentName && (
-                        <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive shrink-0" onClick={() => setAttachmentName("")}>
-                          {t.knowledge.removeAttachment}
-                        </Button>
-                      )}
+          <>
+            {mainTab === "documents" && (
+              <Dialog open={isDocDialogOpen} onOpenChange={(open) => { setIsDocDialogOpen(open); if (!open) setAttachmentName(""); }}>
+                <DialogTrigger asChild>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Plus className="w-4 h-4 me-2" />
+                    {t.knowledge.addDoc}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[520px]">
+                  <DialogHeader>
+                    <DialogTitle>{t.knowledge.addDocTitle}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateDoc} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">{t.knowledge.docName}</Label>
+                      <Input id="name" name="name" required placeholder={t.knowledge.docNamePlaceholder} />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="fileUrl">{t.knowledge.externalLink}</Label>
-                    <Input id="fileUrl" name="fileUrl" type="url" placeholder="https://..." />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">{t.knowledge.description}</Label>
-                    <Textarea id="description" name="description" required rows={3} placeholder={t.knowledge.descriptionPlaceholder} />
-                  </div>
-                  <div className="pt-4 flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setIsDocDialogOpen(false)}>{t.common.cancel}</Button>
-                    <Button type="submit" disabled={createDocMutation.isPending}>
-                      {createDocMutation.isPending ? t.knowledge.saving : t.knowledge.save}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <Dialog open={isGlossaryDialogOpen} onOpenChange={setIsGlossaryDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Plus className="w-4 h-4 me-2" />
-                  {t.glossary.addEntry}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[520px]">
-                <DialogHeader>
-                  <DialogTitle>{t.glossary.addTitle}</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleCreateGlossary} className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="termAr">{t.glossary.termAr} <span className="text-destructive">*</span></Label>
-                    <Input id="termAr" name="termAr" required placeholder={t.glossary.termArPlaceholder} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="termEn">{t.glossary.termEn}</Label>
-                    <Input id="termEn" name="termEn" placeholder={t.glossary.termEnPlaceholder} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="definition">{t.glossary.definition} <span className="text-destructive">*</span></Label>
-                    <Textarea id="definition" name="definition" required rows={3} placeholder={t.glossary.definitionPlaceholder} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="examples">{t.glossary.examples}</Label>
-                    <Textarea id="examples" name="examples" rows={2} placeholder={t.glossary.examplesPlaceholder} />
-                  </div>
-                  <div className="pt-4 flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setIsGlossaryDialogOpen(false)}>{t.common.cancel}</Button>
-                    <Button type="submit" disabled={createGlossaryMutation.isPending}>
-                      {createGlossaryMutation.isPending ? t.glossary.saving : t.glossary.save}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          )
+                    <div className="space-y-2">
+                      <Label htmlFor="category">{t.knowledge.classification}</Label>
+                      <Select name="category" required defaultValue="manuals">
+                        <SelectTrigger>
+                          <SelectValue placeholder={t.knowledge.classificationPlaceholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DOC_CATEGORIES.filter(c => c.id !== 'all').map(c => (
+                            <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center gap-1.5">
+                        <Paperclip className="w-4 h-4" />
+                        {t.knowledge.attachment}
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <label
+                          htmlFor="doc-file-upload"
+                          className="cursor-pointer flex-1 flex items-center gap-2 border border-dashed rounded-lg px-4 py-3 text-sm text-muted-foreground hover:border-primary/50 hover:bg-muted/30 transition-colors"
+                        >
+                          <Paperclip className="w-4 h-4 shrink-0" />
+                          {attachmentName ? (
+                            <span className="text-foreground font-medium truncate">{attachmentName}</span>
+                          ) : (
+                            <span>{t.knowledge.attachmentHint}</span>
+                          )}
+                        </label>
+                        <input
+                          id="doc-file-upload"
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            setAttachmentName(file ? file.name : "");
+                          }}
+                        />
+                        {attachmentName && (
+                          <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive shrink-0" onClick={() => setAttachmentName("")}>
+                            {t.knowledge.removeAttachment}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="fileUrl">{t.knowledge.externalLink}</Label>
+                      <Input id="fileUrl" name="fileUrl" type="url" placeholder="https://..." />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">{t.knowledge.description}</Label>
+                      <Textarea id="description" name="description" required rows={3} placeholder={t.knowledge.descriptionPlaceholder} />
+                    </div>
+                    <div className="pt-4 flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setIsDocDialogOpen(false)}>{t.common.cancel}</Button>
+                      <Button type="submit" disabled={createDocMutation.isPending}>
+                        {createDocMutation.isPending ? t.knowledge.saving : t.knowledge.save}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+
+            {mainTab === "glossary" && (
+              <Dialog open={isGlossaryDialogOpen} onOpenChange={setIsGlossaryDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Plus className="w-4 h-4 me-2" />
+                    {t.glossary.addEntry}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[520px]">
+                  <DialogHeader>
+                    <DialogTitle>{t.glossary.addTitle}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateGlossary} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="termAr">{t.glossary.termAr} <span className="text-destructive">*</span></Label>
+                      <Input id="termAr" name="termAr" required placeholder={t.glossary.termArPlaceholder} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="termEn">{t.glossary.termEn}</Label>
+                      <Input id="termEn" name="termEn" placeholder={t.glossary.termEnPlaceholder} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="definition">{t.glossary.definition} <span className="text-destructive">*</span></Label>
+                      <Textarea id="definition" name="definition" required rows={3} placeholder={t.glossary.definitionPlaceholder} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="examples">{t.glossary.examples}</Label>
+                      <Textarea id="examples" name="examples" rows={2} placeholder={t.glossary.examplesPlaceholder} />
+                    </div>
+                    <div className="pt-4 flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setIsGlossaryDialogOpen(false)}>{t.common.cancel}</Button>
+                      <Button type="submit" disabled={createGlossaryMutation.isPending}>
+                        {createGlossaryMutation.isPending ? t.glossary.saving : t.glossary.save}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+
+            {mainTab === "faqs" && (
+              <Dialog open={isFaqDialogOpen} onOpenChange={setIsFaqDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Plus className="w-4 h-4 me-2" />
+                    {t.faq.addQuestion}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[520px]">
+                  <DialogHeader>
+                    <DialogTitle>{t.faq.addTitle}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateFaq} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="faq-question">{t.faq.questionLabel} <span className="text-destructive">*</span></Label>
+                      <Textarea id="faq-question" name="question" required rows={2} placeholder={t.faq.questionLabel + "..."} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="faq-answer">{t.faq.answerLabel} <span className="text-destructive">*</span></Label>
+                      <Textarea id="faq-answer" name="answer" required rows={4} placeholder={t.faq.answerLabel + "..."} />
+                    </div>
+                    <div className="pt-4 flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setIsFaqDialogOpen(false)}>{t.faq.cancel}</Button>
+                      <Button type="submit" disabled={createFaqMutation.isPending}>
+                        {createFaqMutation.isPending ? t.faq.saving : t.faq.save}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+          </>
         ) : (
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 border rounded-lg px-3 py-2">
             <Lock className="w-4 h-4 shrink-0" />
@@ -285,7 +368,7 @@ export default function KnowledgeBase() {
         )}
       </div>
 
-      {/* Main section tabs: Documents | Glossary */}
+      {/* Main section tabs: Documents | Glossary | FAQs */}
       <div className="flex gap-2 border-b pb-0">
         <button
           onClick={() => { setMainTab("documents"); setSearch(""); }}
@@ -309,8 +392,20 @@ export default function KnowledgeBase() {
           <BookMarked className="w-4 h-4" />
           {t.glossary.title}
         </button>
+        <button
+          onClick={() => { setMainTab("faqs"); setSearch(""); }}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            mainTab === "faqs"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <HelpCircle className="w-4 h-4" />
+          {t.faq.title}
+        </button>
       </div>
 
+      {/* ── Documents Tab ── */}
       {mainTab === "documents" && (
         <>
           <div className="flex flex-col gap-4">
@@ -381,6 +476,7 @@ export default function KnowledgeBase() {
         </>
       )}
 
+      {/* ── Glossary Tab ── */}
       {mainTab === "glossary" && (
         <>
           <Input
@@ -425,6 +521,60 @@ export default function KnowledgeBase() {
                           size="icon"
                           className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
                           onClick={() => deleteGlossaryMutation.mutate({ id: entry.id })}
+                          title={t.common.delete}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── FAQs Tab ── */}
+      {mainTab === "faqs" && (
+        <>
+          <Input
+            placeholder={t.faq.searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-background max-w-md"
+          />
+
+          <div className="space-y-3">
+            {faqsLoading ? (
+              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)
+            ) : filteredFaqs.length === 0 ? (
+              <div className="text-center py-12 bg-card rounded-xl border border-dashed">
+                <HelpCircle className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <h3 className="text-lg font-medium text-muted-foreground">{t.faq.noFaqs}</h3>
+              </div>
+            ) : (
+              filteredFaqs.map((faq, idx) => (
+                <Card key={faq.id} className="hover:border-primary/50 transition-colors">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-base text-foreground leading-snug mb-2">
+                          {faq.question}
+                        </p>
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                          {faq.answer}
+                        </p>
+                      </div>
+                      {canCloseInquiry && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                          onClick={() => deleteFaqMutation.mutate({ id: faq.id })}
                           title={t.common.delete}
                         >
                           <Trash2 className="w-4 h-4" />

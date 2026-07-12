@@ -546,6 +546,10 @@ export const translations = {
       addedSuccess: "تم إضافة السؤال بنجاح",
       updatedSuccess: "تم تحديث السؤال",
       deletedSuccess: "تم حذف السؤال",
+      convertToFaq: "تحويل إلى سؤال شائع",
+      convertDialogTitle: "تحويل الاستفسار إلى سؤال شائع",
+      convertedSuccess: "تم تحويل الاستفسار إلى سؤال شائع بنجاح",
+      searchPlaceholder: "ابحث في الأسئلة الشائعة...",
     },
   },
 
@@ -1094,6 +1098,10 @@ export const translations = {
       addedSuccess: "Question added successfully",
       updatedSuccess: "Question updated",
       deletedSuccess: "Question deleted",
+      convertToFaq: "Convert to FAQ",
+      convertDialogTitle: "Convert Inquiry to FAQ",
+      convertedSuccess: "Inquiry successfully converted to FAQ",
+      searchPlaceholder: "Search FAQs...",
     },
   },
 } as const;
