@@ -32,7 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 type MainTab = "documents" | "glossary" | "faqs";
 
 export default function KnowledgeBase() {
-  const { canCloseInquiry } = useUser();
+  const { canCloseInquiry, canManage } = useUser();
   const { t } = useLocale();
   const [mainTab, setMainTab] = useState<MainTab>("documents");
   const [docCategory, setDocCategory] = useState("all");
@@ -203,7 +203,7 @@ export default function KnowledgeBase() {
           <p className="text-muted-foreground mt-1">{pageSubtitle}</p>
         </div>
 
-        {canCloseInquiry ? (
+        {(mainTab === "faqs" ? canManage : canCloseInquiry) ? (
           <>
             {mainTab === "documents" && (
               <Dialog open={isDocDialogOpen} onOpenChange={(open) => { setIsDocDialogOpen(open); if (!open) setAttachmentName(""); }}>
@@ -569,7 +569,7 @@ export default function KnowledgeBase() {
                           {faq.answer}
                         </p>
                       </div>
-                      {canCloseInquiry && (
+                      {canManage && (
                         <Button
                           variant="ghost"
                           size="icon"

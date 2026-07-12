@@ -424,7 +424,7 @@ export default function Inquiries() {
                       <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
                         <span>{locale === "ar" ? `رد بواسطة: ${inq.responderName}` : `Replied by: ${inq.responderName}`}</span>
                         <div className="flex gap-1">
-                          {canCloseInquiry && (
+                          {canManage && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -547,7 +547,7 @@ export default function Inquiries() {
                           {locale === "ar" ? "إضافة رد" : "Add Reply"}
                         </Button>
                       )}
-                      {canCloseInquiry && (
+                      {canManage && (
                         <Button
                           variant="outline"
                           className="text-amber-600 border-amber-200 hover:bg-amber-50"
