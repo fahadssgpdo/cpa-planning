@@ -4,7 +4,7 @@ import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import {
   LayoutDashboard, Megaphone, MessagesSquare,
-  HelpCircle, BookOpen, MessageCircleQuestion,
+  HelpCircle, BookOpen,
   Lightbulb, BookMarked, ShieldCheck, Globe, UserPlus, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,6 @@ export function Layout({ children }: { children: ReactNode }) {
     { href: "/discussions", label: t.nav.discussions, icon: MessagesSquare },
     { href: "/inquiries", label: t.nav.inquiries, icon: HelpCircle },
     { href: "/knowledge", label: t.nav.knowledge, icon: BookOpen },
-    { href: "/faq", label: t.nav.faq, icon: MessageCircleQuestion },
     { href: "/suggestions", label: t.nav.suggestions, icon: Lightbulb },
     { href: "/manual", label: t.nav.manual, icon: BookMarked },
   ];
