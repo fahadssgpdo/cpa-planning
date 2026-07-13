@@ -66,6 +66,24 @@ export const CreateUserResponse = zod.object({
 
 
 /**
+ * @summary Reset a user's password (admin only)
+ */
+export const ResetUserPasswordParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const resetUserPasswordBodyNewPasswordMin = 8;
+
+
+
+export const ResetUserPasswordBody = zod.object({
+  "newPassword": zod.string().min(resetUserPasswordBodyNewPasswordMin)
+})
+
+export const ResetUserPasswordResponse = zod.void()
+
+
+/**
  * @summary Update a user
  */
 export const UpdateUserParams = zod.object({

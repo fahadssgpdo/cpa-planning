@@ -3,6 +3,7 @@ import { useUser, USERS } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import {
   useListUsers, useUpdateUser, useCreateUser,
+  useResetUserPassword,
   getListUsersQueryKey
 } from "@workspace/api-client-react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -22,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Users, Shield, UserX, UserCheck, Plus, RefreshCw,
   CheckCircle2, XCircle, Activity, Settings, ShieldCheck,
-  Search, Download, Briefcase, Building2, Layers, UserPlus
+  Search, Download, Briefcase, Building2, Layers, UserPlus, KeyRound
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -107,6 +108,10 @@ export default function AdminPage() {
   const [createDialog, setCreateDialog] = useState(false);
   const [createForm, setCreateForm] = useState(emptyEdit());
   const [editDialog, setEditDialog] = useState<EditState | null>(null);
+  const [resetPwdDialog, setResetPwdDialog] = useState<{ id: number; name: string } | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [userSearch, setUserSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -138,6 +143,21 @@ export default function AdminPage() {
         setCreateForm(emptyEdit());
         toast({ title: lang === "ar" ? "تم إضافة المستخدم" : "User created" });
       }
+    }
+  });
+
+  const resetPwdMutation = useResetUserPassword({
+    mutation: {
+      onSuccess: (_, vars) => {
+        postAuditLog({ userId: user.id, userName: user.name, action: "reset_password", entityType: "user", entityId: vars.id, details: "Password reset by admin" });
+        setResetPwdDialog(null);
+        setNewPassword("");
+        setConfirmPassword("");
+        toast({ title: lang === "ar" ? "تم إعادة تعيين كلمة المرور بنجاح" : "Password reset successfully" });
+      },
+      onError: () => {
+        toast({ title: lang === "ar" ? "فشل إعادة تعيين كلمة المرور" : "Failed to reset password", variant: "destructive" });
+      },
     }
   });
 
@@ -462,6 +482,16 @@ export default function AdminPage() {
                           </Badge>
                         </td>
                         <td className="px-5 py-3 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs gap-1 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                            onClick={() => { setResetPwdDialog({ id: u.id, name: lang === "ar" ? u.nameAr : (u.nameEn || u.nameAr) }); setNewPassword(""); setConfirmPassword(""); setShowPwd(false); }}
+                          >
+                            <KeyRound className="w-3.5 h-3.5" />
+                            {lang === "ar" ? "إعادة تعيين" : "Reset Pwd"}
+                          </Button>
                           <Button
                             disabled={u.id === 4 || updateMutation.isPending}
                             variant={u.active ? "outline" : "default"}
@@ -475,6 +505,7 @@ export default function AdminPage() {
                               <><UserCheck className="w-3.5 h-3.5" />{t.common.enable}</>
                             )}
                           </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -874,6 +905,80 @@ export default function AdminPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* === RESET PASSWORD DIALOG === */}
+      <Dialog open={!!resetPwdDialog} onOpenChange={(o) => { if (!o) { setResetPwdDialog(null); setNewPassword(""); setConfirmPassword(""); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-blue-600" />
+              {lang === "ar" ? "إعادة تعيين كلمة المرور" : "Reset Password"}
+            </DialogTitle>
+          </DialogHeader>
+          {resetPwdDialog && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (newPassword.length < 8) {
+                toast({ title: lang === "ar" ? "كلمة المرور يجب أن تكون 8 أحرف على الأقل" : "Password must be at least 8 characters", variant: "destructive" });
+                return;
+              }
+              if (newPassword !== confirmPassword) {
+                toast({ title: lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match", variant: "destructive" });
+                return;
+              }
+              resetPwdMutation.mutate({ id: resetPwdDialog.id, data: { newPassword } });
+            }} className="space-y-4 pt-1">
+              <p className="text-sm text-muted-foreground">
+                {lang === "ar"
+                  ? `إعادة تعيين كلمة مرور: ${resetPwdDialog.name}`
+                  : `Resetting password for: ${resetPwdDialog.name}`}
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="new-pwd">{lang === "ar" ? "كلمة المرور الجديدة" : "New Password"}</Label>
+                <div className="relative">
+                  <Input
+                    id="new-pwd"
+                    type={showPwd ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder={lang === "ar" ? "8 أحرف على الأقل" : "Min 8 characters"}
+                    minLength={8}
+                    required
+                  />
+                  <button type="button" onClick={() => setShowPwd(p => !p)}
+                    className="absolute inset-y-0 end-2 flex items-center px-1 text-muted-foreground hover:text-foreground text-xs">
+                    {showPwd ? (lang === "ar" ? "إخفاء" : "Hide") : (lang === "ar" ? "إظهار" : "Show")}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-pwd">{lang === "ar" ? "تأكيد كلمة المرور" : "Confirm Password"}</Label>
+                <Input
+                  id="confirm-pwd"
+                  type={showPwd ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={lang === "ar" ? "أعد إدخال كلمة المرور" : "Re-enter password"}
+                  minLength={8}
+                  required
+                />
+              </div>
+              {confirmPassword && newPassword !== confirmPassword && (
+                <p className="text-xs text-destructive">{lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match"}</p>
+              )}
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => { setResetPwdDialog(null); setNewPassword(""); setConfirmPassword(""); }}>
+                  {lang === "ar" ? "إلغاء" : "Cancel"}
+                </Button>
+                <Button type="submit" disabled={resetPwdMutation.isPending || newPassword !== confirmPassword || newPassword.length < 8}
+                  className="bg-blue-600 hover:bg-blue-700 text-white">
+                  {resetPwdMutation.isPending ? (lang === "ar" ? "جارٍ الحفظ..." : "Saving...") : (lang === "ar" ? "تعيين كلمة المرور" : "Set Password")}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>

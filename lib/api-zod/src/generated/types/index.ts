@@ -42,6 +42,7 @@ export * from './listAnnouncementsParams';
 export * from './listDocumentsParams';
 export * from './listInquiriesParams';
 export * from './listSuggestionsParams';
+export * from './resetPasswordBody';
 export * from './suggestion';
 export * from './suggestionCategory';
 export * from './suggestionInput';

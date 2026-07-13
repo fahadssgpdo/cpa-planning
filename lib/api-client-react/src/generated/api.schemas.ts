@@ -66,6 +66,11 @@ export interface UserInput {
   role: UserInputRole;
 }
 
+export interface ResetPasswordBody {
+  /** @minLength 8 */
+  newPassword: string;
+}
+
 export type UserUpdateRole = typeof UserUpdateRole[keyof typeof UserUpdateRole];
 
 
