@@ -14,6 +14,8 @@ export interface Suggestion {
   userName: string;
   /** @nullable */
   userDesignation?: string | null;
+  /** @nullable */
+  userDepartment?: string | null;
   category: SuggestionCategory;
   text: string;
   status: SuggestionStatus;

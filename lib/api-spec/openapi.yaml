@@ -995,6 +995,8 @@ components:
           type: string
         userDesignation:
           type: ["string", "null"]
+        userDepartment:
+          type: ["string", "null"]
         category:
           $ref: "#/components/schemas/SuggestionCategory"
         text:

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
+import { AuthorHoverCard } from "@/components/author-hover-card";
 import { 
   useListSuggestions, useCreateSuggestion, useUpdateSuggestion,
   getListSuggestionsQueryKey, SuggestionCategory, SuggestionStatus 
@@ -443,7 +444,14 @@ export default function Suggestions() {
                   )}
                 </CardContent>
                 <CardFooter className="pt-3 flex justify-between items-center text-xs text-muted-foreground bg-muted/10 border-t mt-auto">
-                  <div className="font-medium text-foreground">{suggestion.userName}</div>
+                  <AuthorHoverCard
+                    name={suggestion.userName}
+                    designation={suggestion.userDesignation}
+                    department={suggestion.userDepartment}
+                    labelDesignation={t.register.designation}
+                    labelDepartment={t.register.department}
+                    className="font-medium text-foreground"
+                  />
                   <div className="flex items-center gap-4">
                     <span>{format(new Date(suggestion.date), 'dd MMM yyyy', { locale: dateFnsLocale })}</span>
 
@@ -484,7 +492,14 @@ export default function Suggestions() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">{sg.userName}</span>
+                  <AuthorHoverCard
+                    name={sg.userName}
+                    designation={sg.userDesignation}
+                    department={sg.userDepartment}
+                    labelDesignation={t.register.designation}
+                    labelDepartment={t.register.department}
+                    className="font-semibold text-foreground"
+                  />
                   <span>{format(new Date(sg.date), "dd MMM yyyy", { locale: dateFnsLocale })}</span>
                 </div>
               </div>
