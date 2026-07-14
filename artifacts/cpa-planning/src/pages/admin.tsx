@@ -23,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Users, Shield, UserX, UserCheck, Plus, RefreshCw,
   CheckCircle2, XCircle, Activity, Settings, ShieldCheck,
-  Search, Download, Briefcase, Building2, Layers, UserPlus, KeyRound
+  Search, Download, Briefcase, Building2, Layers, UserPlus, KeyRound, Pencil
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -88,11 +88,11 @@ function actionBadgeClass(action: string) {
 
 type EditState = {
   id: number; nameAr: string; nameEn: string;
-  username: string; designation: string; directorate: string; section: string; role: string;
+  username: string; designation: string; directorate: string; department: string; section: string; role: string;
 };
 
 function emptyEdit(): Omit<EditState, "id"> {
-  return { nameAr: "", nameEn: "", username: "", designation: "", directorate: "", section: "", role: "employee" };
+  return { nameAr: "", nameEn: "", username: "", designation: "", directorate: "", department: "", section: "", role: "employee" };
 }
 
 export default function AdminPage() {
@@ -175,6 +175,7 @@ export default function AdminPage() {
         username: createForm.username || null,
         designation: createForm.designation || null,
         directorate: createForm.directorate || null,
+        department: createForm.department || null,
         section: createForm.section || null,
         role: createForm.role as any,
       }
@@ -192,7 +193,9 @@ export default function AdminPage() {
         username: editDialog.username || null,
         designation: editDialog.designation || null,
         directorate: editDialog.directorate || null,
+        department: editDialog.department || null,
         section: editDialog.section || null,
+        role: editDialog.role as any,
       }
     });
     setEditDialog(null);
@@ -442,6 +445,7 @@ export default function AdminPage() {
                                   username: u.username || "",
                                   designation: u.designation || "",
                                   directorate: u.directorate || "",
+                                  department: u.department || "",
                                   section: u.section || "",
                                   role: u.role,
                                 })}
@@ -483,6 +487,25 @@ export default function AdminPage() {
                         </td>
                         <td className="px-5 py-3 text-center">
                           <div className="flex items-center justify-center gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs gap-1 text-primary border-primary/20 hover:bg-primary/8 hover:text-primary"
+                            onClick={() => setEditDialog({
+                              id: u.id,
+                              nameAr: u.nameAr,
+                              nameEn: u.nameEn || "",
+                              username: u.username || "",
+                              designation: u.designation || "",
+                              directorate: u.directorate || "",
+                              department: u.department || "",
+                              section: u.section || "",
+                              role: u.role,
+                            })}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                            {lang === "ar" ? "تعديل" : "Edit"}
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -816,11 +839,17 @@ export default function AdminPage() {
                     onChange={e => setCreateForm(f => ({ ...f, section: e.target.value }))}
                     placeholder={lang === "ar" ? "القسم" : "Section"} />
                 </div>
-                <div className="space-y-1.5 sm:col-span-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="c-directorate" className="text-xs">{u.directorate} <span className="text-muted-foreground">{u.optional}</span></Label>
                   <Input id="c-directorate" value={createForm.directorate}
                     onChange={e => setCreateForm(f => ({ ...f, directorate: e.target.value }))}
                     placeholder={lang === "ar" ? "الإدارة العامة" : "Directorate"} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="c-department" className="text-xs">{lang === "ar" ? "الدائرة" : "Department"} <span className="text-muted-foreground">{u.optional}</span></Label>
+                  <Input id="c-department" value={createForm.department}
+                    onChange={e => setCreateForm(f => ({ ...f, department: e.target.value }))}
+                    placeholder={lang === "ar" ? "الدائرة" : "Department"} />
                 </div>
               </div>
             </div>
@@ -889,13 +918,37 @@ export default function AdminPage() {
                     onChange={e => setEditDialog(d => d ? { ...d, section: e.target.value } : null)}
                     placeholder={lang === "ar" ? "القسم" : "Section"} />
                 </div>
-                <div className="space-y-1.5 sm:col-span-2">
+                <div className="space-y-1.5">
                   <Label className="text-xs">{u.directorate} <span className="text-muted-foreground">{u.optional}</span></Label>
                   <Input value={editDialog?.directorate || ""}
                     onChange={e => setEditDialog(d => d ? { ...d, directorate: e.target.value } : null)}
                     placeholder={lang === "ar" ? "الإدارة العامة" : "Directorate"} />
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{lang === "ar" ? "الدائرة" : "Department"} <span className="text-muted-foreground">{u.optional}</span></Label>
+                  <Input value={editDialog?.department || ""}
+                    onChange={e => setEditDialog(d => d ? { ...d, department: e.target.value } : null)}
+                    placeholder={lang === "ar" ? "الدائرة" : "Department"} />
+                </div>
               </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{lang === "ar" ? "الصلاحية" : "Role"}</span>
+              </div>
+              <Select value={editDialog?.role || "employee"} onValueChange={val => setEditDialog(d => d ? { ...d, role: val } : null)}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">{t.roles.employee}</SelectItem>
+                  <SelectItem value="officer">{t.roles.officer}</SelectItem>
+                  <SelectItem value="manager">{t.roles.manager}</SelectItem>
+                  <SelectItem value="admin">{t.roles.admin}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <DialogFooter className="gap-2 pt-2">
