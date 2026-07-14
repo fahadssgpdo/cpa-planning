@@ -15,6 +15,7 @@ const SECTIONS = [
   { id: "intro", icon: Info },
   { id: "login", icon: Users },
   { id: "dashboard", icon: LayoutDashboard },
+  { id: "analytics", icon: BarChart2 },
   { id: "announcements", icon: Megaphone },
   { id: "discussions", icon: MessagesSquare },
   { id: "inquiries", icon: HelpCircle },
@@ -143,20 +144,119 @@ export default function ManualPage() {
       <div className="space-y-4">
         <p className="text-sm text-foreground/75 leading-relaxed">
           {ar
-            ? "لوحة التحكم تعرض نظرة شاملة وسريعة لنشاط الدائرة، مع إحصائيات فورية وروابط سريعة لجميع الوحدات."
-            : "The dashboard provides a comprehensive overview of department activity, with real-time statistics and quick links to all modules."}
+            ? "لوحة التحكم تعرض نظرة شاملة وسريعة لنشاط الدائرة، مع إحصائيات فورية وروابط سريعة لجميع الوحدات، إضافةً إلى لوحة التحليلات المتقدمة المدعومة بالذكاء الاصطناعي."
+            : "The dashboard provides a comprehensive overview of department activity, with real-time statistics, quick links to all modules, and an advanced AI-powered analytics panel."}
         </p>
         <FeatureList items={ar ? [
           "إحصائيات فورية: عدد الإعلانات، النقاشات، الاستفسارات، المستندات",
           "عداد الاستفسارات المفتوحة والمقترحات النشطة",
           "روابط سريعة لجميع الأقسام",
           "آخر الإعلانات النشطة",
+          "لوحة التحليلات والتقارير المتقدمة (انظر القسم التالي)",
+          "مساعد الرؤى الذكي المدعوم بـ Claude AI",
         ] : [
           "Real-time stats: announcements, discussions, inquiries, documents count",
           "Open inquiries and active suggestions counters",
           "Quick links to all sections",
           "Latest active announcements",
+          "Advanced Analytics & Reports panel (see next section)",
+          "AI Copilot insights powered by Claude AI",
         ]} />
+        <Tip>{ar ? "لوحة التحليلات تظهر تلقائياً أسفل البطاقات الإحصائية للجميع — لا تحتاج إلى أذونات خاصة لعرضها." : "The analytics panel appears automatically below the stat cards for all users — no special permissions needed to view it."}</Tip>
+      </div>
+    ),
+
+    analytics: (
+      <div className="space-y-5">
+        <p className="text-sm text-foreground/75 leading-relaxed">
+          {ar
+            ? "لوحة التحليلات والتقارير توفر رؤية بصرية عميقة لنشاط المنصة، وتشمل خمسة مكونات بيانية مدعومة بمساعد ذكاء اصطناعي يُنتج رؤى ثنائية اللغة."
+            : "The Analytics & Reports panel provides deep visual insight into platform activity, including five chart components backed by an AI assistant that generates bilingual insights."}
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Card className="border shadow-none">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-sm text-primary">
+                <BarChart2 className="w-4 h-4" />{ar ? "اتجاه النشاط الأسبوعي" : "Weekly Activity Trend"}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {ar ? "مخطط مساحي يُظهر حجم المقترحات، الاستفسارات، والنقاشات على مدار آخر 8 أسابيع، مما يُتيح رصد الأنماط الزمنية لنشاط الدائرة." : "Area chart showing the volume of suggestions, inquiries, and discussions over the last 8 weeks, enabling detection of activity patterns over time."}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border shadow-none">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-sm text-primary">
+                <BarChart2 className="w-4 h-4" />{ar ? "المقترحات حسب الحالة" : "Suggestions by Status"}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {ar ? "مخطط دائري يُوضح توزيع المقترحات على جميع حالاتها: جديد، قيد الدراسة، مقبول، مرفوض، منفّذ. يساعد على تتبع كفاءة معالجة المقترحات." : "Donut chart showing distribution of suggestions across all statuses: new, under review, accepted, rejected, implemented. Helps track suggestion processing efficiency."}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border shadow-none">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-sm text-primary">
+                <BarChart2 className="w-4 h-4" />{ar ? "الاستفسارات حسب التصنيف" : "Inquiries by Category"}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {ar ? "مخطط أعمدة أفقي يُرتّب موضوعات الاستفسارات تنازلياً حسب الحجم، ويكشف أكثر المواضيع إثارةً للتساؤلات لدى الموظفين." : "Horizontal bar chart ranking inquiry topics in descending order by volume, revealing the most frequently questioned topics among employees."}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border shadow-none">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-sm text-primary">
+                <Users className="w-4 h-4" />{ar ? "أكثر المساهمين نشاطاً" : "Top Contributors"}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {ar ? "لوحة صدارة تعرض أكثر 7 موظفين تفاعلاً مع المنصة عبر جميع أنواع المحتوى، مع شريط نسبي وميدالية للمراكز الأولى." : "Leaderboard displaying the 7 most active employees across all content types, with a proportional bar and medal icons for top positions."}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border shadow-none md:col-span-2">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-sm text-primary">
+                <BarChart2 className="w-4 h-4" />{ar ? "معدل حل الاستفسارات" : "Inquiry Resolution Rate"}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {ar ? "مقياس دائري يعرض نسبة الاستفسارات المُجابة أو المحلولة من إجمالي الاستفسارات. يتغير لونه تلقائياً: أخضر (ممتاز >80%)، أصفر (متوسط 50–80%)، أحمر (يتطلب اهتماماً <50%)." : "Circular gauge showing the percentage of inquiries that are answered or resolved out of total. Color-coded automatically: green (excellent >80%), amber (moderate 50–80%), red (needs attention <50%)."}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 font-semibold text-sm">
+            <BrainCircuit className="w-4 h-4 text-violet-600" />
+            {ar ? "مساعد الرؤى الذكي (AI Copilot)" : "AI Copilot Insights"}
+          </div>
+          <p className="text-sm text-foreground/75 leading-relaxed">
+            {ar
+              ? "بالضغط على زر 'توليد رؤى جديدة'، يقرأ المساعد جميع بيانات المنصة في الوقت الفعلي ويُصدر 5 رؤى ثنائية اللغة (عربي / إنجليزي) مصنّفة بالألوان حسب نوعها."
+              : "Clicking 'Generate New Insights' (توليد رؤى جديدة) causes the assistant to read all live platform data and produce 5 bilingual (Arabic/English) insights, color-coded by type."}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="flex items-start gap-2 p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg">
+              <span className="text-emerald-600 font-bold mt-0.5">✅</span>
+              <span className="text-emerald-800">{ar ? "إيجابي — مشير إلى نقطة قوة أو إنجاز" : "Positive — highlights a strength or achievement"}</span>
+            </div>
+            <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-100 rounded-lg">
+              <span className="text-amber-600 font-bold mt-0.5">⚠️</span>
+              <span className="text-amber-800">{ar ? "تنبيه — يستدعي متابعة أو انتباهاً" : "Warning — requires follow-up or attention"}</span>
+            </div>
+            <div className="flex items-start gap-2 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+              <span className="text-blue-600 font-bold mt-0.5">ℹ️</span>
+              <span className="text-blue-800">{ar ? "معلومة — حقيقة مفيدة عن النشاط الحالي" : "Informational — useful fact about current activity"}</span>
+            </div>
+            <div className="flex items-start gap-2 p-2.5 bg-purple-50 border border-purple-100 rounded-lg">
+              <span className="text-purple-600 font-bold mt-0.5">⚡</span>
+              <span className="text-purple-800">{ar ? "إجراء موصى به — خطوة تحسينية مقترحة" : "Recommended action — suggested improvement step"}</span>
+            </div>
+          </div>
+          <Tip>{ar ? "يستخدم المساعد نموذج Claude Sonnet المتقدم — كل ضغطة على الزر تُنتج رؤى جديدة محدّثة بناءً على أحدث البيانات." : "The AI uses the advanced Claude Sonnet model — each button press produces fresh insights based on the latest data."}</Tip>
+        </div>
       </div>
     ),
 
@@ -210,13 +310,19 @@ export default function ManualPage() {
           "عرض حالة الموضوع: مفتوح / مغلق",
           "عرض عدد التعليقات لكل موضوع",
           "إغلاق الموضوعات (مدير / مسؤول فقط)",
+          "بطاقة معلومات المعلّق: تظهر بالتمرير على اسم كاتب التعليق",
         ] : [
           "Open a new discussion topic with title and description",
           "Comment on open topics",
           "View topic status: open / closed",
           "View comment count per topic",
           "Close topics (manager / admin only)",
+          "Commenter info card: hover over a comment author's name to see their designation and department",
         ]} />
+        <div className="flex gap-2.5 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-700">
+          <UserCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-500" />
+          <span>{ar ? "بطاقة المعلّق: مرّر المؤشر على اسم أي مستخدم في التعليقات لترى بطاقة منبثقة تعرض المسمى الوظيفي والقسم." : "Author card: hover over any username in the comments to see a pop-up card showing their job title and department."}</span>
+        </div>
       </div>
     ),
 
@@ -224,20 +330,26 @@ export default function ManualPage() {
       <div className="space-y-4">
         <p className="text-sm text-foreground/75 leading-relaxed">
           {ar
-            ? "قسم الاستفسارات يتيح للموظفين رفع أسئلة رسمية يتم الرد عليها من أخصائيي التخطيط أو المدير."
-            : "The Inquiries section allows employees to submit formal questions, responded to by planning officers or the manager."}
+            ? "قسم الاستفسارات يتيح للموظفين رفع أسئلة رسمية يتم الرد عليها من أخصائيي التخطيط أو المدير، مع عرض تفاصيل المستجيب."
+            : "The Inquiries section allows employees to submit formal questions, responded to by planning officers or the manager, with full responder details shown."}
         </p>
         <StepList steps={ar ? [
           "الموظف يرفع استفساراً بعنوان وتفاصيل.",
           "الأخصائي أو المدير يرى الاستفسارات ويكتب رداً.",
           "تتغير حالة الاستفسار: مفتوح ← قيد المعالجة ← مجاب ← محلول.",
-          "الموظف يرى رده ويضع علامة 'محلول'.",
+          "الموظف يرى الرد مع اسم المستجيب ومسماه الوظيفي وقسمه.",
+          "الموظف يضع علامة 'محلول' عند اكتمال المعالجة.",
         ] : [
           "Employee submits an inquiry with subject and details.",
           "Officer or manager views inquiries and writes a response.",
           "Inquiry status changes: Open ← Processing ← Answered ← Resolved.",
-          "Employee views the response and marks as 'Resolved'.",
+          "Employee sees the response with the responder's name, designation, and department.",
+          "Employee marks as 'Resolved' when satisfied.",
         ]} />
+        <div className="flex gap-2.5 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-700">
+          <UserCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-500" />
+          <span>{ar ? "بطاقة المستجيب: مرّر المؤشر على اسم الأخصائي أو المدير الذي رد على الاستفسار لترى مسماه الوظيفي وقسمه." : "Responder card: hover over the officer or manager name on a response to see their job title and department."}</span>
+        </div>
       </div>
     ),
 
@@ -287,20 +399,26 @@ export default function ManualPage() {
       <div className="space-y-4">
         <p className="text-sm text-foreground/75 leading-relaxed">
           {ar
-            ? "صندوق المقترحات يتيح للجميع تقديم أفكار ومقترحات تحسينية ومتابعة حالتها."
-            : "The Suggestions box allows everyone to submit ideas and improvement proposals and track their status."}
+            ? "صندوق المقترحات يتيح للجميع تقديم أفكار ومقترحات تحسينية ومتابعة حالتها، مع عرض بيانات مقدّم المقترح."
+            : "The Suggestions box allows everyone to submit ideas and improvement proposals, track their status, and view submitter details."}
         </p>
         <StepList steps={ar ? [
           "رفع مقترح بتصنيف وتفاصيل.",
           "الأخصائي / المدير يراجع المقترح ويغير حالته.",
           "دورة الحياة: جديد ← قيد الدراسة ← مقبول / مرفوض ← منفّذ.",
           "إمكانية إضافة ملاحظة أو رد على المقترح.",
+          "اسم مقدّم المقترح يظهر في البطاقة ولوحة التفاصيل.",
         ] : [
           "Submit a suggestion with category and details.",
           "Officer / manager reviews and changes status.",
           "Lifecycle: New ← Under Review ← Accepted / Rejected ← Implemented.",
           "Option to add a note or response to the suggestion.",
+          "Submitter's name appears on the suggestion card and detail panel.",
         ]} />
+        <div className="flex gap-2.5 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-700">
+          <UserCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-500" />
+          <span>{ar ? "بطاقة مقدّم المقترح: مرّر المؤشر على اسم الموظف في البطاقة أو لوحة التفاصيل لترى مسماه الوظيفي وقسمه." : "Submitter card: hover over the employee name on the card or detail panel to see their job title and department."}</span>
+        </div>
       </div>
     ),
 

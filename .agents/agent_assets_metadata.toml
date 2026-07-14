@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "QFzARjmg6qb6RUw1M33aI"
+uri = "file://.local/outputs/HEMA-CPA-Planning-Platform.pdf"
+type = "pdf"
+title = "HEMA — CPA Planning Platform (PDF)"
