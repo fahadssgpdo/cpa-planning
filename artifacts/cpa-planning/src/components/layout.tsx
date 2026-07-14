@@ -39,7 +39,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <aside className="w-full md:w-64 bg-sidebar border-l border-sidebar-border flex-shrink-0 flex-col hidden md:flex">
         <div className="px-5 py-4 border-b border-sidebar-border bg-sidebar relative overflow-hidden flex items-center justify-center">
           <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-secondary to-accent"></div>
-          <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-16 w-auto object-contain brightness-0 invert" />
+          <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-20 w-auto object-contain brightness-0 invert" />
         </div>
         <nav className="flex-1 py-4 px-3 flex flex-col gap-0.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
@@ -74,10 +74,10 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b bg-card px-4 md:px-6 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+        <header className="h-20 border-b bg-card px-4 md:px-6 flex items-center justify-between sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-3">
-            <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-16 w-auto object-contain md:hidden" />
-            <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-16 w-auto object-contain hidden md:block" />
+            <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-20 w-auto object-contain md:hidden" />
+            <img src={`${BASE}/logo.png`} alt={t.orgName} className="h-20 w-auto object-contain hidden md:block" />
           </div>
 
           <div className="flex items-center gap-2">
