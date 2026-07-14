@@ -907,7 +907,7 @@ components:
           type: string
         category:
           type: string
-          enum: [manuals, guidelines, kpi, policies, templates, other]
+          enum: [manuals, guidelines, kpi, policies, templates, annual-plans, reports, other]
         description:
           type: string
         date:
@@ -923,7 +923,7 @@ components:
           type: string
         category:
           type: string
-          enum: [manuals, guidelines, kpi, policies, templates, other]
+          enum: [manuals, guidelines, kpi, policies, templates, annual-plans, reports, other]
         description:
           type: string
         fileUrl:

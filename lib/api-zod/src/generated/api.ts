@@ -396,7 +396,7 @@ export const ListDocumentsQueryParams = zod.object({
 export const ListDocumentsResponseItem = zod.object({
   "id": zod.number(),
   "name": zod.string(),
-  "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'other']),
+  "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'annual-plans', 'reports', 'other']),
   "description": zod.string(),
   "date": zod.string(),
   "fileUrl": zod.string().nullish()
@@ -409,7 +409,7 @@ export const ListDocumentsResponse = zod.array(ListDocumentsResponseItem)
  */
 export const CreateDocumentBody = zod.object({
   "name": zod.string(),
-  "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'other']),
+  "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'annual-plans', 'reports', 'other']),
   "description": zod.string(),
   "fileUrl": zod.string().nullish()
 })
@@ -417,7 +417,7 @@ export const CreateDocumentBody = zod.object({
 export const CreateDocumentResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
-  "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'other']),
+  "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'annual-plans', 'reports', 'other']),
   "description": zod.string(),
   "date": zod.string(),
   "fileUrl": zod.string().nullish()

@@ -15,5 +15,7 @@ export const DocumentCategory = {
   kpi: 'kpi',
   policies: 'policies',
   templates: 'templates',
+  'annual-plans': 'annual-plans',
+  reports: 'reports',
   other: 'other',
 } as const;
