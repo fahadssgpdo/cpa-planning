@@ -26,6 +26,8 @@ router.get("/discussions", async (_req, res): Promise<void> => {
       status: discussionsTable.status,
       authorId: discussionsTable.authorId,
       authorName: usersTable.nameAr,
+      authorDesignation: usersTable.designation,
+      authorDepartment: usersTable.department,
       createdAt: discussionsTable.createdAt,
     })
     .from(discussionsTable)
@@ -52,6 +54,8 @@ router.get("/discussions", async (_req, res): Promise<void> => {
         date: r.createdAt.toISOString().slice(0, 10),
         authorId: r.authorId,
         authorName: r.authorName ?? "",
+        authorDesignation: r.authorDesignation ?? null,
+        authorDepartment: r.authorDepartment ?? null,
         commentCount: countMap.get(r.id) ?? 0,
       }))
     )
@@ -105,6 +109,8 @@ router.get("/discussions/:id", async (req, res): Promise<void> => {
       status: discussionsTable.status,
       authorId: discussionsTable.authorId,
       authorName: usersTable.nameAr,
+      authorDesignation: usersTable.designation,
+      authorDepartment: usersTable.department,
       createdAt: discussionsTable.createdAt,
     })
     .from(discussionsTable)
@@ -140,6 +146,8 @@ router.get("/discussions/:id", async (req, res): Promise<void> => {
       date: disc.createdAt.toISOString().slice(0, 10),
       authorId: disc.authorId,
       authorName: disc.authorName ?? "",
+      authorDesignation: disc.authorDesignation ?? null,
+      authorDepartment: disc.authorDepartment ?? null,
       comments: commentRows.map((c) => ({
         id: c.id,
         discussionId: c.discussionId,
@@ -181,7 +189,7 @@ router.patch("/discussions/:id", async (req, res): Promise<void> => {
     return;
   }
   const row = rows[0];
-  const [author] = await db.select({ nameAr: usersTable.nameAr }).from(usersTable).where(eq(usersTable.id, row.authorId));
+  const [author] = await db.select({ nameAr: usersTable.nameAr, designation: usersTable.designation, department: usersTable.department }).from(usersTable).where(eq(usersTable.id, row.authorId));
   const [{ count }] = await db
     .select({ count: sql<number>`cast(count(*) as int)` })
     .from(commentsTable)
@@ -196,6 +204,8 @@ router.patch("/discussions/:id", async (req, res): Promise<void> => {
       date: row.createdAt.toISOString().slice(0, 10),
       authorId: row.authorId,
       authorName: author?.nameAr ?? "",
+      authorDesignation: author?.designation ?? null,
+      authorDepartment: author?.department ?? null,
       commentCount: count ?? 0,
     })
   );

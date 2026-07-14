@@ -206,6 +206,8 @@ export const ListDiscussionsResponseItem = zod.object({
   "date": zod.string(),
   "authorId": zod.number(),
   "authorName": zod.string(),
+  "authorDesignation": zod.string().nullish(),
+  "authorDepartment": zod.string().nullish(),
   "commentCount": zod.number()
 })
 export const ListDiscussionsResponse = zod.array(ListDiscussionsResponseItem)
@@ -228,6 +230,8 @@ export const CreateDiscussionResponse = zod.object({
   "date": zod.string(),
   "authorId": zod.number(),
   "authorName": zod.string(),
+  "authorDesignation": zod.string().nullish(),
+  "authorDepartment": zod.string().nullish(),
   "commentCount": zod.number()
 })
 
@@ -247,6 +251,8 @@ export const GetDiscussionResponse = zod.object({
   "date": zod.string(),
   "authorId": zod.number(),
   "authorName": zod.string(),
+  "authorDesignation": zod.string().nullish(),
+  "authorDepartment": zod.string().nullish(),
   "comments": zod.array(zod.object({
   "id": zod.number(),
   "discussionId": zod.number(),
@@ -280,6 +286,8 @@ export const UpdateDiscussionResponse = zod.object({
   "date": zod.string(),
   "authorId": zod.number(),
   "authorName": zod.string(),
+  "authorDesignation": zod.string().nullish(),
+  "authorDepartment": zod.string().nullish(),
   "commentCount": zod.number()
 })
 
@@ -319,6 +327,7 @@ export const ListInquiriesResponseItem = zod.object({
   "userId": zod.number(),
   "userName": zod.string(),
   "userDesignation": zod.string().nullish(),
+  "userDepartment": zod.string().nullish(),
   "subject": zod.string(),
   "details": zod.string(),
   "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional(),
@@ -346,6 +355,7 @@ export const CreateInquiryResponse = zod.object({
   "userId": zod.number(),
   "userName": zod.string(),
   "userDesignation": zod.string().nullish(),
+  "userDepartment": zod.string().nullish(),
   "subject": zod.string(),
   "details": zod.string(),
   "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional(),
@@ -375,6 +385,7 @@ export const UpdateInquiryResponse = zod.object({
   "userId": zod.number(),
   "userName": zod.string(),
   "userDesignation": zod.string().nullish(),
+  "userDepartment": zod.string().nullish(),
   "subject": zod.string(),
   "details": zod.string(),
   "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional(),

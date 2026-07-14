@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AuthorHoverCard } from "@/components/author-hover-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -279,8 +280,15 @@ export default function Discussions() {
               </CardContent>
 
               <CardFooter className="pt-2 border-t flex justify-between items-center text-sm">
-                <div className="text-muted-foreground">
-                  {d.by}: <span className="font-medium text-foreground">{disc.authorName}</span>
+                <div className="text-muted-foreground flex items-center gap-1">
+                  {d.by}:{" "}
+                  <AuthorHoverCard
+                    name={disc.authorName}
+                    designation={disc.authorDesignation}
+                    department={disc.authorDepartment}
+                    labelDesignation={t.register.designation}
+                    labelDepartment={t.register.department}
+                  />
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
                   <MessageCircle className="w-4 h-4" />
@@ -397,12 +405,14 @@ export default function Discussions() {
                 </div>
                 <h2 className="text-lg font-bold leading-snug mb-2">{viewDiscussion.title}</h2>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Avatar className="w-6 h-6">
-                    <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-                      {viewDiscussion.authorName.substring(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-foreground">{viewDiscussion.authorName}</span>
+                  <AuthorHoverCard
+                    name={viewDiscussion.authorName}
+                    designation={viewDiscussion.authorDesignation}
+                    department={viewDiscussion.authorDepartment}
+                    labelDesignation={t.register.designation}
+                    labelDepartment={t.register.department}
+                    showAvatar
+                  />
                 </div>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed whitespace-pre-wrap">
                   {viewDiscussion.description}

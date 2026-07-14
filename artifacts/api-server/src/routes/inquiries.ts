@@ -15,7 +15,7 @@ const router: IRouter = Router();
 
 const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
   const [user] = await db
-    .select({ nameAr: usersTable.nameAr, designation: usersTable.designation })
+    .select({ nameAr: usersTable.nameAr, designation: usersTable.designation, department: usersTable.department })
     .from(usersTable)
     .where(eq(usersTable.id, row.userId));
   let responderName: string | null = null;
@@ -28,6 +28,7 @@ const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
     userId: row.userId,
     userName: user?.nameAr ?? "",
     userDesignation: user?.designation ?? null,
+    userDepartment: user?.department ?? null,
     subject: row.subject,
     details: row.details,
     category: row.category ?? "other",

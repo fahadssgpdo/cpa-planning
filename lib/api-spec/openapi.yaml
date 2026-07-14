@@ -762,6 +762,10 @@ components:
           type: integer
         authorName:
           type: string
+        authorDesignation:
+          type: ["string", "null"]
+        authorDepartment:
+          type: ["string", "null"]
         commentCount:
           type: integer
 
@@ -784,6 +788,10 @@ components:
           type: integer
         authorName:
           type: string
+        authorDesignation:
+          type: ["string", "null"]
+        authorDepartment:
+          type: ["string", "null"]
         comments:
           type: array
           items:
@@ -854,6 +862,8 @@ components:
         userName:
           type: string
         userDesignation:
+          type: ["string", "null"]
+        userDepartment:
           type: ["string", "null"]
         subject:
           type: string

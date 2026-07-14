@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
+import { AuthorHoverCard } from "@/components/author-hover-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -356,10 +357,14 @@ export default function Inquiries() {
                   <p className="text-sm text-foreground/80 mb-4 whitespace-pre-wrap leading-relaxed">{inq.details}</p>
                   <div className="flex items-center justify-between text-xs text-muted-foreground font-medium gap-2">
                     <div>
-                      <span className="font-semibold text-foreground">{inq.userName}</span>
-                      {inq.userDesignation && (
-                        <span className="block text-muted-foreground mt-0.5">{inq.userDesignation}</span>
-                      )}
+                      <AuthorHoverCard
+                        name={inq.userName}
+                        designation={inq.userDesignation}
+                        department={inq.userDepartment}
+                        labelDesignation={t.register.designation}
+                        labelDepartment={t.register.department}
+                        className="font-semibold text-foreground cursor-pointer"
+                      />
                     </div>
                     <span className="shrink-0">
                       {format(new Date(inq.date), "dd MMM yyyy", { locale: dateFnsLocale })}
@@ -498,8 +503,14 @@ export default function Inquiries() {
                     </div>
                     <h2 className="text-lg font-bold leading-snug text-primary mb-1">{inq.subject}</h2>
                     <div className="text-sm text-muted-foreground">
-                      <span className="font-semibold text-foreground">{inq.userName}</span>
-                      {inq.userDesignation && <span className="ms-2">· {inq.userDesignation}</span>}
+                      <AuthorHoverCard
+                        name={inq.userName}
+                        designation={inq.userDesignation}
+                        department={inq.userDepartment}
+                        labelDesignation={t.register.designation}
+                        labelDepartment={t.register.department}
+                        className="font-semibold text-foreground cursor-pointer"
+                      />
                     </div>
                   </div>
 

@@ -14,6 +14,8 @@ export interface Inquiry {
   userName: string;
   /** @nullable */
   userDesignation?: string | null;
+  /** @nullable */
+  userDepartment?: string | null;
   subject: string;
   details: string;
   category?: InquiryCategory;

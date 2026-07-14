@@ -170,6 +170,10 @@ export interface Discussion {
   date: string;
   authorId: number;
   authorName: string;
+  /** @nullable */
+  authorDesignation?: string | null;
+  /** @nullable */
+  authorDepartment?: string | null;
   commentCount: number;
 }
 
@@ -199,6 +203,10 @@ export interface DiscussionDetail {
   date: string;
   authorId: number;
   authorName: string;
+  /** @nullable */
+  authorDesignation?: string | null;
+  /** @nullable */
+  authorDepartment?: string | null;
   comments: Comment[];
 }
 
@@ -257,6 +265,8 @@ export interface Inquiry {
   userName: string;
   /** @nullable */
   userDesignation?: string | null;
+  /** @nullable */
+  userDepartment?: string | null;
   subject: string;
   details: string;
   category?: InquiryCategory;

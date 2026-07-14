@@ -15,5 +15,9 @@ export interface Discussion {
   date: string;
   authorId: number;
   authorName: string;
+  /** @nullable */
+  authorDesignation?: string | null;
+  /** @nullable */
+  authorDepartment?: string | null;
   commentCount: number;
 }
