@@ -1,0 +1,1 @@
+- [Anthropic AI integration setup](anthropic-setup.md) — provisioned via setupReplitAIIntegrations; lib copied to lib/integrations-anthropic-ai; tsconfig refs added; client imported from @workspace/integrations-anthropic-ai

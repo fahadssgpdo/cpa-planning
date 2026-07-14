@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import { Megaphone, MessagesSquare, HelpCircle, BookOpen, Users, Lightbulb } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardAnalyticsPanel } from "@/components/dashboard-analytics";
 
 export default function Dashboard() {
   const { user, canManage, isAdmin } = useUser();
@@ -122,6 +123,8 @@ export default function Dashboard() {
           )}
         </div>
       ) : null}
+
+      <DashboardAnalyticsPanel />
     </div>
   );
 }

@@ -642,3 +642,170 @@ export const GetDashboardStatsResponse = zod.object({
 })
 
 
+/**
+ * @summary Get rich analytics data for charts and reports
+ */
+export const GetDashboardAnalyticsResponse = zod.object({
+  "suggestionsByStatus": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "suggestionsByCategory": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "inquiriesByStatus": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "inquiriesByCategory": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "weeklyActivity": zod.array(zod.object({
+  "week": zod.string(),
+  "suggestions": zod.number(),
+  "inquiries": zod.number(),
+  "discussions": zod.number()
+})),
+  "topContributors": zod.array(zod.object({
+  "userId": zod.number(),
+  "name": zod.string(),
+  "count": zod.number()
+})),
+  "resolutionRate": zod.number()
+})
+
+
+/**
+ * @summary Generate AI-powered insights from dashboard analytics
+ */
+export const GetDashboardAiInsightsBody = zod.object({
+  "suggestionsByStatus": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "suggestionsByCategory": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "inquiriesByStatus": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "inquiriesByCategory": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number()
+})),
+  "weeklyActivity": zod.array(zod.object({
+  "week": zod.string(),
+  "suggestions": zod.number(),
+  "inquiries": zod.number(),
+  "discussions": zod.number()
+})),
+  "topContributors": zod.array(zod.object({
+  "userId": zod.number(),
+  "name": zod.string(),
+  "count": zod.number()
+})),
+  "resolutionRate": zod.number()
+})
+
+export const GetDashboardAiInsightsResponse = zod.object({
+  "insights": zod.array(zod.object({
+  "titleAr": zod.string(),
+  "titleEn": zod.string(),
+  "descAr": zod.string(),
+  "descEn": zod.string(),
+  "type": zod.enum(['positive', 'warning', 'neutral', 'action'])
+}))
+})
+
+
+/**
+ * @summary List all conversations
+ */
+export const ListAnthropicConversationsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListAnthropicConversationsResponse = zod.array(ListAnthropicConversationsResponseItem)
+
+
+/**
+ * @summary Create a new conversation
+ */
+export const CreateAnthropicConversationBody = zod.object({
+  "title": zod.string()
+})
+
+export const CreateAnthropicConversationResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get conversation with messages
+ */
+export const GetAnthropicConversationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetAnthropicConversationResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "messages": zod.array(zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "role": zod.string(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Delete a conversation
+ */
+export const DeleteAnthropicConversationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteAnthropicConversationResponse = zod.void()
+
+
+/**
+ * @summary List messages in a conversation
+ */
+export const ListAnthropicMessagesParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListAnthropicMessagesResponseItem = zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "role": zod.string(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListAnthropicMessagesResponse = zod.array(ListAnthropicMessagesResponseItem)
+
+
+/**
+ * @summary Send a message and receive an AI response (SSE stream)
+ */
+export const SendAnthropicMessageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const SendAnthropicMessageBody = zod.object({
+  "content": zod.string()
+})
+
+export const SendAnthropicMessageResponse = zod.unknown()
+
+

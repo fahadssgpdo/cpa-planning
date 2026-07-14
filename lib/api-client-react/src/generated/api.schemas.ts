@@ -456,6 +456,89 @@ export interface DashboardStats {
   totalUsers: number;
 }
 
+export interface ChartDataPoint {
+  key: string;
+  count: number;
+}
+
+export interface WeeklyActivityPoint {
+  week: string;
+  suggestions: number;
+  inquiries: number;
+  discussions: number;
+}
+
+export interface ContributorStat {
+  userId: number;
+  name: string;
+  count: number;
+}
+
+export interface DashboardAnalytics {
+  suggestionsByStatus: ChartDataPoint[];
+  suggestionsByCategory: ChartDataPoint[];
+  inquiriesByStatus: ChartDataPoint[];
+  inquiriesByCategory: ChartDataPoint[];
+  weeklyActivity: WeeklyActivityPoint[];
+  topContributors: ContributorStat[];
+  resolutionRate: number;
+}
+
+export type DashboardInsightType = typeof DashboardInsightType[keyof typeof DashboardInsightType];
+
+
+export const DashboardInsightType = {
+  positive: 'positive',
+  warning: 'warning',
+  neutral: 'neutral',
+  action: 'action',
+} as const;
+
+export interface DashboardInsight {
+  titleAr: string;
+  titleEn: string;
+  descAr: string;
+  descEn: string;
+  type: DashboardInsightType;
+}
+
+export interface DashboardInsightsResponse {
+  insights: DashboardInsight[];
+}
+
+export interface AnthropicConversation {
+  id: number;
+  title: string;
+  createdAt: string;
+}
+
+export interface AnthropicMessage {
+  id: number;
+  conversationId: number;
+  role: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface AnthropicConversationInput {
+  title: string;
+}
+
+export interface AnthropicMessageInput {
+  content: string;
+}
+
+export interface AnthropicConversationWithMessages {
+  id: number;
+  title: string;
+  createdAt: string;
+  messages: AnthropicMessage[];
+}
+
+export interface AnthropicError {
+  error: string;
+}
+
 export type ListAnnouncementsParams = {
 archived?: boolean;
 };

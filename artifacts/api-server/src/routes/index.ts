@@ -8,6 +8,7 @@ import documentsRouter from "./documents";
 import faqsRouter from "./faqs";
 import suggestionsRouter from "./suggestions";
 import dashboardRouter from "./dashboard";
+import analyticsRouter from "./analytics";
 import auditLogsRouter from "./audit-logs";
 import authRouter from "./auth";
 import bootstrapRouter from "./bootstrap";
@@ -27,6 +28,7 @@ router.use(faqsRouter);
 router.use(suggestionsRouter);
 router.use(glossaryRouter);
 router.use(dashboardRouter);
+router.use(analyticsRouter);
 router.use(auditLogsRouter);
 
 export default router;
