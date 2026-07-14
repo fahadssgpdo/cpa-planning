@@ -258,6 +258,8 @@ export const GetDiscussionResponse = zod.object({
   "discussionId": zod.number(),
   "userId": zod.number(),
   "userName": zod.string(),
+  "userDesignation": zod.string().nullish(),
+  "userDepartment": zod.string().nullish(),
   "isStaff": zod.boolean(),
   "text": zod.string(),
   "date": zod.string()
@@ -309,6 +311,8 @@ export const CreateCommentResponse = zod.object({
   "discussionId": zod.number(),
   "userId": zod.number(),
   "userName": zod.string(),
+  "userDesignation": zod.string().nullish(),
+  "userDepartment": zod.string().nullish(),
   "isStaff": zod.boolean(),
   "text": zod.string(),
   "date": zod.string()
@@ -335,7 +339,9 @@ export const ListInquiriesResponseItem = zod.object({
   "date": zod.string(),
   "response": zod.string().nullish(),
   "responderId": zod.number().nullish(),
-  "responderName": zod.string().nullish()
+  "responderName": zod.string().nullish(),
+  "responderDesignation": zod.string().nullish(),
+  "responderDepartment": zod.string().nullish()
 })
 export const ListInquiriesResponse = zod.array(ListInquiriesResponseItem)
 
@@ -363,7 +369,9 @@ export const CreateInquiryResponse = zod.object({
   "date": zod.string(),
   "response": zod.string().nullish(),
   "responderId": zod.number().nullish(),
-  "responderName": zod.string().nullish()
+  "responderName": zod.string().nullish(),
+  "responderDesignation": zod.string().nullish(),
+  "responderDepartment": zod.string().nullish()
 })
 
 
@@ -393,7 +401,9 @@ export const UpdateInquiryResponse = zod.object({
   "date": zod.string(),
   "response": zod.string().nullish(),
   "responderId": zod.number().nullish(),
-  "responderName": zod.string().nullish()
+  "responderName": zod.string().nullish(),
+  "responderDesignation": zod.string().nullish(),
+  "responderDepartment": zod.string().nullish()
 })
 
 

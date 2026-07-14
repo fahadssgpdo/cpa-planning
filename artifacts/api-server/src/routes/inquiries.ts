@@ -19,9 +19,16 @@ const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
     .from(usersTable)
     .where(eq(usersTable.id, row.userId));
   let responderName: string | null = null;
+  let responderDesignation: string | null = null;
+  let responderDepartment: string | null = null;
   if (row.responderId) {
-    const [r] = await db.select({ nameAr: usersTable.nameAr }).from(usersTable).where(eq(usersTable.id, row.responderId));
+    const [r] = await db
+      .select({ nameAr: usersTable.nameAr, designation: usersTable.designation, department: usersTable.department })
+      .from(usersTable)
+      .where(eq(usersTable.id, row.responderId));
     responderName = r?.nameAr ?? null;
+    responderDesignation = r?.designation ?? null;
+    responderDepartment = r?.department ?? null;
   }
   return {
     id: row.id,
@@ -37,6 +44,8 @@ const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
     response: row.response ?? null,
     responderId: row.responderId ?? null,
     responderName,
+    responderDesignation,
+    responderDepartment,
   };
 };
 

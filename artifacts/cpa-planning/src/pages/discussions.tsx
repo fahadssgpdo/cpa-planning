@@ -446,7 +446,14 @@ export default function Discussions() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold">{comment.userName}</span>
+                            <AuthorHoverCard
+                              name={comment.userName}
+                              designation={comment.userDesignation}
+                              department={comment.userDepartment}
+                              labelDesignation={t.register.designation}
+                              labelDepartment={t.register.department}
+                              className="text-sm font-semibold text-foreground"
+                            />
                             {comment.isStaff && (
                               <Badge
                                 variant="outline"

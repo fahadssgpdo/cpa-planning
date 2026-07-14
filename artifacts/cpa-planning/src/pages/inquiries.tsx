@@ -427,7 +427,19 @@ export default function Inquiries() {
                       )}
 
                       <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
-                        <span>{locale === "ar" ? `رد بواسطة: ${inq.responderName}` : `Replied by: ${inq.responderName}`}</span>
+                        <span className="flex items-center gap-1">
+                          {locale === "ar" ? "رد بواسطة:" : "Replied by:"}
+                          {inq.responderName ? (
+                            <AuthorHoverCard
+                              name={inq.responderName}
+                              designation={inq.responderDesignation}
+                              department={inq.responderDepartment}
+                              labelDesignation={t.register.designation}
+                              labelDepartment={t.register.department}
+                              className="font-medium text-foreground"
+                            />
+                          ) : "—"}
+                        </span>
                         <div className="flex gap-1">
                           {canManage && (
                             <Button
@@ -533,8 +545,16 @@ export default function Inquiries() {
                           <div className="bg-secondary/5 border border-secondary/20 rounded-lg p-4">
                             <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{inq.response}</p>
                             {inq.responderName && (
-                              <p className="text-xs text-muted-foreground mt-3 pt-2 border-t">
-                                {locale === "ar" ? `رد بواسطة: ${inq.responderName}` : `Replied by: ${inq.responderName}`}
+                              <p className="text-xs text-muted-foreground mt-3 pt-2 border-t flex items-center gap-1">
+                                {locale === "ar" ? "رد بواسطة:" : "Replied by:"}
+                                <AuthorHoverCard
+                                  name={inq.responderName}
+                                  designation={inq.responderDesignation}
+                                  department={inq.responderDepartment}
+                                  labelDesignation={t.register.designation}
+                                  labelDepartment={t.register.department}
+                                  className="font-medium text-foreground"
+                                />
                               </p>
                             )}
                           </div>

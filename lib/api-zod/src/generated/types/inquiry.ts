@@ -27,4 +27,8 @@ export interface Inquiry {
   responderId?: number | null;
   /** @nullable */
   responderName?: string | null;
+  /** @nullable */
+  responderDesignation?: string | null;
+  /** @nullable */
+  responderDepartment?: string | null;
 }

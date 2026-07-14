@@ -11,6 +11,10 @@ export interface Comment {
   discussionId: number;
   userId: number;
   userName: string;
+  /** @nullable */
+  userDesignation?: string | null;
+  /** @nullable */
+  userDepartment?: string | null;
   isStaff: boolean;
   text: string;
   date: string;

@@ -190,6 +190,10 @@ export interface Comment {
   discussionId: number;
   userId: number;
   userName: string;
+  /** @nullable */
+  userDesignation?: string | null;
+  /** @nullable */
+  userDepartment?: string | null;
   isStaff: boolean;
   text: string;
   date: string;
@@ -278,6 +282,10 @@ export interface Inquiry {
   responderId?: number | null;
   /** @nullable */
   responderName?: string | null;
+  /** @nullable */
+  responderDesignation?: string | null;
+  /** @nullable */
+  responderDepartment?: string | null;
 }
 
 export interface InquiryInput {
