@@ -137,6 +137,7 @@ export default function Suggestions() {
   const [tab, setTab] = useState(canManage ? "all" : "mine");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [feedbackDialogId, setFeedbackDialogId] = useState<number | null>(null);
+  const [feedbackForm, setFeedbackForm] = useState<{ status: SuggestionStatus; feedback: string }>({ status: "new", feedback: "" });
   const [viewId, setViewId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<SuggestionCategory>("projects_initiatives");
   const [attachmentName, setAttachmentName] = useState<string>("");
@@ -189,14 +190,19 @@ export default function Suggestions() {
     });
   };
 
-  const handleFeedback = (e: React.FormEvent<HTMLFormElement>, id: number) => {
+  const openFeedbackDialog = (suggestion: { id: number; status: SuggestionStatus; feedback?: string | null }) => {
+    setFeedbackForm({ status: suggestion.status, feedback: suggestion.feedback ?? "" });
+    setFeedbackDialogId(suggestion.id);
+  };
+
+  const handleFeedback = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    if (feedbackDialogId === null) return;
     updateMutation.mutate({
-      id,
+      id: feedbackDialogId,
       data: {
-        status: formData.get("status") as SuggestionStatus,
-        feedback: formData.get("feedback") as string,
+        status: feedbackForm.status,
+        feedback: feedbackForm.feedback,
       }
     });
   };
@@ -415,46 +421,9 @@ export default function Suggestions() {
                     <span>{format(new Date(suggestion.date), 'dd MMM yyyy', { locale: dateFnsLocale })}</span>
 
                     {canManage && (
-                      <Dialog open={feedbackDialogId === suggestion.id} onOpenChange={(open) => setFeedbackDialogId(open ? suggestion.id : null)}>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-primary hover:bg-primary/10" onClick={(e) => e.stopPropagation()}>
-                            {t.suggestions.updateStatus}
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>{t.suggestions.updateStatusTitle}</DialogTitle>
-                          </DialogHeader>
-                          <form onSubmit={(e) => handleFeedback(e, suggestion.id)} className="space-y-4 mt-4">
-                            <div className="space-y-2">
-                              <Label>{t.suggestions.statusLabel}</Label>
-                              <Select name="status" required defaultValue={suggestion.status}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="new">{t.suggestions.statuses.new}</SelectItem>
-                                  <SelectItem value="under_review">{t.suggestions.statuses.under_review}</SelectItem>
-                                  <SelectItem value="needs_info">{t.suggestions.statuses.needs_info}</SelectItem>
-                                  <SelectItem value="accepted">{t.suggestions.statuses.accepted}</SelectItem>
-                                  <SelectItem value="rejected">{t.suggestions.statuses.rejected}</SelectItem>
-                                  <SelectItem value="in_progress">{t.suggestions.statuses.in_progress}</SelectItem>
-                                  <SelectItem value="implemented">{t.suggestions.statuses.implemented}</SelectItem>
-                                  <SelectItem value="completed">{t.suggestions.statuses.completed}</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label>{t.suggestions.feedbackLabel}</Label>
-                              <Textarea name="feedback" rows={4} defaultValue={suggestion.feedback || ""} placeholder={t.suggestions.feedbackPlaceholder} />
-                            </div>
-                            <div className="pt-4 flex justify-end gap-2">
-                              <Button type="button" variant="outline" onClick={() => setFeedbackDialogId(null)}>{t.suggestions.cancel}</Button>
-                              <Button type="submit" disabled={updateMutation.isPending}>
-                                {updateMutation.isPending ? t.suggestions.saving : t.suggestions.saveUpdate}
-                              </Button>
-                            </div>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-primary hover:bg-primary/10" onClick={(e) => { e.stopPropagation(); openFeedbackDialog(suggestion); }}>
+                        {t.suggestions.updateStatus}
+                      </Button>
                     )}
                   </div>
                 </CardFooter>
@@ -527,7 +496,7 @@ export default function Suggestions() {
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => { setViewId(null); setFeedbackDialogId(sg.id); }}
+                    onClick={() => { setViewId(null); openFeedbackDialog(sg); }}
                   >
                     <Settings className="w-4 h-4 me-2" />
                     {t.suggestions.updateStatus}
@@ -538,6 +507,51 @@ export default function Suggestions() {
           </Dialog>
         );
       })()}
+
+      {/* ── Update Status / Feedback Dialog (shared, controlled) ── */}
+      <Dialog open={feedbackDialogId !== null} onOpenChange={(open) => !open && setFeedbackDialogId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.suggestions.updateStatusTitle}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleFeedback} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>{t.suggestions.statusLabel}</Label>
+              <Select
+                value={feedbackForm.status}
+                onValueChange={(v) => setFeedbackForm(f => ({ ...f, status: v as SuggestionStatus }))}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">{t.suggestions.statuses.new}</SelectItem>
+                  <SelectItem value="under_review">{t.suggestions.statuses.under_review}</SelectItem>
+                  <SelectItem value="needs_info">{t.suggestions.statuses.needs_info}</SelectItem>
+                  <SelectItem value="accepted">{t.suggestions.statuses.accepted}</SelectItem>
+                  <SelectItem value="rejected">{t.suggestions.statuses.rejected}</SelectItem>
+                  <SelectItem value="in_progress">{t.suggestions.statuses.in_progress}</SelectItem>
+                  <SelectItem value="implemented">{t.suggestions.statuses.implemented}</SelectItem>
+                  <SelectItem value="completed">{t.suggestions.statuses.completed}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t.suggestions.feedbackLabel}</Label>
+              <Textarea
+                rows={4}
+                value={feedbackForm.feedback}
+                onChange={(e) => setFeedbackForm(f => ({ ...f, feedback: e.target.value }))}
+                placeholder={t.suggestions.feedbackPlaceholder}
+              />
+            </div>
+            <div className="pt-4 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setFeedbackDialogId(null)}>{t.suggestions.cancel}</Button>
+              <Button type="submit" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? t.suggestions.saving : t.suggestions.saveUpdate}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
