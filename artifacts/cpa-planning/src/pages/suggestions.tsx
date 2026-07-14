@@ -31,10 +31,11 @@ type FieldDef = {
   name: string;
   labelAr: string;
   labelEn: string;
-  type: "text" | "textarea";
+  type: "text" | "textarea" | "select";
   required?: boolean;
   placeholderAr?: string;
   placeholderEn?: string;
+  options?: string[];
 };
 
 const TYPE_FIELDS: Record<SuggestionCategory, FieldDef[]> = {
@@ -65,7 +66,22 @@ const TYPE_FIELDS: Record<SuggestionCategory, FieldDef[]> = {
     { name: "problem",             labelAr: "المشكلة أو الفرصة",          labelEn: "Problem / Opportunity",        type: "textarea", required: true,  placeholderAr: "ما المشكلة التي يعالجها أو الفرصة التي يستغلها؟", placeholderEn: "What problem does it solve or opportunity exploit?" },
     { name: "impacts",             labelAr: "الأثر المتوقع",              labelEn: "Expected Impact",              type: "textarea", required: false, placeholderAr: "الأثر على الدائرة والجهات المستفيدة...",    placeholderEn: "Impact on the department and beneficiaries..." },
     { name: "beneficiary",         labelAr: "الفئة المستفيدة",            labelEn: "Beneficiaries",                type: "text",     required: false, placeholderAr: "من سيستفيد من هذا المشروع؟",               placeholderEn: "Who will benefit from this project?" },
-    { name: "strategic_alignment", labelAr: "الارتباط بالأهداف الاستراتيجية", labelEn: "Strategic Alignment",    type: "textarea", required: false, placeholderAr: "كيف يدعم هذا المشروع أهداف الهيئة؟",       placeholderEn: "How does this project support HEMA's strategic goals?" },
+    { name: "strategic_alignment", labelAr: "الارتباط بالأهداف الاستراتيجية", labelEn: "Strategic Alignment",    type: "select",   required: false, placeholderAr: "اختر هدفاً استراتيجياً...",               placeholderEn: "Select a strategic objective...", options: [
+      "رفع نسبة التغطية التفتيشية على المنشئات التجارية",
+      "خفض نسبة المخالفات المتكررة",
+      "خفض نسبة المخالفات المتعلقة بارتفاع الأسعار",
+      "خفض نسبة المخالفات المتعلقة بالغش التجاري",
+      "خفض نسبة المخالفات المتعلقة بالاعلانات المظللة",
+      "رفع نسبة الشكاوى التي تم حلها من اجمالي الشكاوى",
+      "رفع نسبة الشكاوى التي تم التعامل معها خلال 5 أيام عمل",
+      "رفع نسبة الشكاوى التي تم حلها خلال 20 أيام عمل",
+      "رفع نسبة البلاغات التي تم التعامل معها خلال 2 أيام عمل",
+      "رفع نسبة البلاغات التي تم حلها خلال 5 أيام عمل",
+      "رفع نسبة الخدمات والاجراءات المرقمنة المقدمة للمستفيد من اجمالي الخدمات",
+      "رفع نسبة رضا المستفيدين عن الخدمات الحكومية المقدمة من الهيئة",
+      "عدد التعاميم والقرارات والتشريعات الصادرة والمحدثة الخاصة بحماية المستهلك",
+      "عدد الحملات التوعوية لزيادة وعي المستهلك",
+    ] },
     { name: "estimated_cost",      labelAr: "التكلفة التقديرية",          labelEn: "Estimated Cost",               type: "text",     required: false, placeholderAr: "مثال: 50,000 ريال",                          placeholderEn: "e.g. OMR 50,000" },
     { name: "duration",            labelAr: "المدة الزمنية",              labelEn: "Duration",                     type: "text",     required: false, placeholderAr: "مثال: 6 أشهر",                               placeholderEn: "e.g. 6 months" },
     { name: "implementing_entity", labelAr: "الجهة المنفذة",              labelEn: "Implementing Entity",          type: "text",     required: false, placeholderAr: "الإدارة أو الوحدة المسؤولة عن التنفيذ",    placeholderEn: "Department or unit responsible for implementation" },
@@ -110,7 +126,20 @@ function TypedFields({ category, isEn }: { category: SuggestionCategory; isEn: b
             {isEn ? f.labelEn : f.labelAr}
             {f.required && <span className="text-destructive ms-1">*</span>}
           </Label>
-          {f.type === "textarea" ? (
+          {f.type === "select" ? (
+            <select
+              id={f.name}
+              name={f.name}
+              required={f.required}
+              defaultValue=""
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="" disabled>{isEn ? f.placeholderEn : f.placeholderAr}</option>
+              {f.options?.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          ) : f.type === "textarea" ? (
             <Textarea
               id={f.name}
               name={f.name}
@@ -227,8 +256,6 @@ export default function Suggestions() {
     { value: "service_dev",          label: t.suggestions.types.service_dev },
     { value: "process_improvement",  label: t.suggestions.types.process_improvement },
     { value: "improvement",          label: t.suggestions.types.improvement },
-    { value: "initiative",           label: t.suggestions.types.initiative },
-    { value: "process",              label: t.suggestions.types.process },
     { value: "feedback",             label: t.suggestions.types.feedback },
   ];
 
