@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   BookMarked, LayoutDashboard, Megaphone, MessagesSquare,
   HelpCircle, BookOpen, MessageCircleQuestion, Lightbulb,
-  ShieldCheck, Users, Globe, CheckCircle2, Info
+  ShieldCheck, Users, Globe, CheckCircle2, Info, BarChart2, BrainCircuit, UserCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
