@@ -1,6 +1,6 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, Briefcase } from "lucide-react";
+import { Building2, Briefcase, User } from "lucide-react";
 
 interface AuthorHoverCardProps {
   name: string;
@@ -21,34 +21,35 @@ export function AuthorHoverCard({
   className = "font-medium text-foreground cursor-default",
   showAvatar = false,
 }: AuthorHoverCardProps) {
-  const hasInfo = !!(designation || department);
-
-  const trigger = (
-    <span className={`${className} ${hasInfo ? "hover:underline decoration-dotted underline-offset-2 cursor-pointer" : ""}`}>
-      {showAvatar ? (
-        <span className="flex items-center gap-2">
-          <Avatar className="w-6 h-6">
-            <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-              {name.substring(0, 2)}
-            </AvatarFallback>
-          </Avatar>
-          {name}
-        </span>
-      ) : name}
-    </span>
-  );
-
-  if (!hasInfo) return trigger;
+  const initials = name.trim().substring(0, 2);
 
   return (
-    <HoverCard openDelay={150} closeDelay={100}>
+    <HoverCard openDelay={0} closeDelay={0}>
       <HoverCardTrigger asChild>
-        {trigger}
+        <span className={`${className} underline decoration-dotted underline-offset-2 cursor-pointer`}>
+          {showAvatar ? (
+            <span className="flex items-center gap-2">
+              <Avatar className="w-6 h-6">
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              {name}
+            </span>
+          ) : name}
+        </span>
       </HoverCardTrigger>
       <HoverCardContent className="w-56 p-3" side="top" align="start">
         <div className="space-y-2">
-          <p className="font-semibold text-sm text-foreground leading-tight">{name}</p>
-          {designation && (
+          <div className="flex items-center gap-2">
+            <Avatar className="w-8 h-8">
+              <AvatarFallback className="text-xs bg-primary/10 text-primary font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <p className="font-semibold text-sm text-foreground leading-tight">{name}</p>
+          </div>
+          {designation ? (
             <div className="flex items-start gap-2 text-xs text-muted-foreground">
               <Briefcase className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary/60" />
               <div>
@@ -58,8 +59,8 @@ export function AuthorHoverCard({
                 {designation}
               </div>
             </div>
-          )}
-          {department && (
+          ) : null}
+          {department ? (
             <div className="flex items-start gap-2 text-xs text-muted-foreground">
               <Building2 className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary/60" />
               <div>
@@ -68,6 +69,12 @@ export function AuthorHoverCard({
                 </span>
                 {department}
               </div>
+            </div>
+          ) : null}
+          {!designation && !department && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <User className="w-3.5 h-3.5 shrink-0 text-primary/60" />
+              <span>{name}</span>
             </div>
           )}
         </div>
