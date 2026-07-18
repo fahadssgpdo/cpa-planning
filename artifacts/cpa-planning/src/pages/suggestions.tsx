@@ -20,6 +20,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -32,7 +42,7 @@ type FieldDef = {
   name: string;
   labelAr: string;
   labelEn: string;
-  type: "text" | "textarea" | "select";
+  type: "text" | "textarea" | "select" | "multiselect";
   required?: boolean;
   placeholderAr?: string;
   placeholderEn?: string;
@@ -67,7 +77,7 @@ const TYPE_FIELDS: Record<SuggestionCategory, FieldDef[]> = {
     { name: "problem",             labelAr: "المشكلة أو الفرصة",          labelEn: "Problem / Opportunity",        type: "textarea", required: true,  placeholderAr: "ما المشكلة التي يعالجها أو الفرصة التي يستغلها؟", placeholderEn: "What problem does it solve or opportunity exploit?" },
     { name: "impacts",             labelAr: "الأثر المتوقع",              labelEn: "Expected Impact",              type: "textarea", required: false, placeholderAr: "الأثر على الدائرة والجهات المستفيدة...",    placeholderEn: "Impact on the department and beneficiaries..." },
     { name: "beneficiary",         labelAr: "الفئة المستفيدة",            labelEn: "Beneficiaries",                type: "text",     required: false, placeholderAr: "من سيستفيد من هذا المشروع؟",               placeholderEn: "Who will benefit from this project?" },
-    { name: "strategic_alignment", labelAr: "الارتباط بالأهداف الاستراتيجية", labelEn: "Strategic Alignment",    type: "select",   required: false, placeholderAr: "اختر هدفاً استراتيجياً...",               placeholderEn: "Select a strategic objective...", options: [
+    { name: "strategic_alignment", labelAr: "الارتباط بالأهداف الاستراتيجية", labelEn: "Strategic Alignment",    type: "multiselect",   required: false, options: [
       "رفع نسبة التغطية التفتيشية على المنشئات التجارية",
       "خفض نسبة المخالفات المتكررة",
       "خفض نسبة المخالفات المتعلقة بارتفاع الأسعار",
@@ -109,11 +119,18 @@ const TYPE_FIELDS: Record<SuggestionCategory, FieldDef[]> = {
   ],
 };
 
-function buildTextFromFields(category: SuggestionCategory, values: Record<string, string>, isEn: boolean): string {
+function buildTextFromFields(category: SuggestionCategory, values: Record<string, string | string[]>, isEn: boolean): string {
   const fields = TYPE_FIELDS[category];
   return fields
-    .filter(f => values[f.name]?.trim())
-    .map(f => `${isEn ? f.labelEn : f.labelAr}:\n${values[f.name].trim()}`)
+    .filter(f => {
+      const v = values[f.name];
+      return Array.isArray(v) ? v.length > 0 : v?.trim();
+    })
+    .map(f => {
+      const v = values[f.name];
+      const val = Array.isArray(v) ? v.join("\n• ") : (v as string).trim();
+      return `${isEn ? f.labelEn : f.labelAr}:\n${Array.isArray(v) && v.length > 0 ? "• " : ""}${val}`;
+    })
     .join("\n\n");
 }
 
@@ -127,7 +144,21 @@ function TypedFields({ category, isEn }: { category: SuggestionCategory; isEn: b
             {isEn ? f.labelEn : f.labelAr}
             {f.required && <span className="text-destructive ms-1">*</span>}
           </Label>
-          {f.type === "select" ? (
+          {f.type === "multiselect" ? (
+            <div className="max-h-48 overflow-y-auto rounded-md border border-input bg-background p-2 space-y-1 shadow-sm">
+              {f.options?.map(opt => (
+                <label key={opt} className="flex items-start gap-2.5 px-2 py-1.5 rounded hover:bg-muted/50 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    name={f.name}
+                    value={opt}
+                    className="mt-0.5 accent-primary flex-shrink-0"
+                  />
+                  <span className="leading-snug">{opt}</span>
+                </label>
+              ))}
+            </div>
+          ) : f.type === "select" ? (
             <select
               id={f.name}
               name={f.name}
@@ -172,6 +203,10 @@ export default function Suggestions() {
   const [selectedCategory, setSelectedCategory] = useState<SuggestionCategory>("projects_initiatives");
   const [attachmentName, setAttachmentName] = useState<string>("");
 
+  const [showCreateConfirm, setShowCreateConfirm] = useState(false);
+  const [showFeedbackConfirm, setShowFeedbackConfirm] = useState(false);
+  const [pendingCreate, setPendingCreate] = useState<{ category: SuggestionCategory; text: string; attachment?: string } | null>(null);
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -205,19 +240,33 @@ export default function Suggestions() {
   const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const values: Record<string, string> = {};
-    for (const [k, v] of formData.entries()) {
-      if (typeof v === "string") values[k] = v;
+    const values: Record<string, string | string[]> = {};
+    const multiselectNames = new Set(
+      Object.values(TYPE_FIELDS).flat().filter(f => f.type === "multiselect").map(f => f.name)
+    );
+    const seenKeys = new Set<string>();
+    for (const [k] of formData.entries()) {
+      if (multiselectNames.has(k)) {
+        if (!seenKeys.has(k)) {
+          values[k] = formData.getAll(k).filter(v => typeof v === "string") as string[];
+          seenKeys.add(k);
+        }
+      } else {
+        const v = formData.get(k);
+        if (typeof v === "string") values[k] = v;
+      }
     }
     const text = buildTextFromFields(selectedCategory, values, isEn);
+    setPendingCreate({ category: selectedCategory, text, attachment: attachmentName || undefined });
+    setShowCreateConfirm(true);
+  };
+
+  const confirmCreate = () => {
+    if (!pendingCreate) return;
     createMutation.mutate({
-      data: {
-        category: selectedCategory,
-        text,
-        userId: user.id,
-        attachment: attachmentName || undefined,
-      }
+      data: { ...pendingCreate, userId: user.id }
     });
+    setShowCreateConfirm(false);
   };
 
   const openFeedbackDialog = (suggestion: { id: number; status: SuggestionStatus; feedback?: string | null }) => {
@@ -228,13 +277,16 @@ export default function Suggestions() {
   const handleFeedback = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (feedbackDialogId === null) return;
+    setShowFeedbackConfirm(true);
+  };
+
+  const confirmFeedback = () => {
+    if (feedbackDialogId === null) return;
     updateMutation.mutate({
       id: feedbackDialogId,
-      data: {
-        status: feedbackForm.status,
-        feedback: feedbackForm.feedback,
-      }
+      data: { status: feedbackForm.status, feedback: feedbackForm.feedback }
     });
+    setShowFeedbackConfirm(false);
   };
 
   const getStatusInfo = (status: string) => {
@@ -594,6 +646,54 @@ export default function Suggestions() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* ── Confirm: Submit Suggestion ── */}
+      <AlertDialog open={showCreateConfirm} onOpenChange={setShowCreateConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isEn ? "Confirm Submission" : "تأكيد الإرسال"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isEn
+                ? "Are you sure you want to submit this suggestion? You will not be able to edit it after submission."
+                : "هل أنت متأكد من إرسال هذا المقترح؟ لن تتمكن من تعديله بعد الإرسال."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCreateConfirm(false)}>
+              {t.suggestions.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending ? t.suggestions.sending : (isEn ? "Yes, Submit" : "نعم، إرسال")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ── Confirm: Save Reply / Status Update ── */}
+      <AlertDialog open={showFeedbackConfirm} onOpenChange={setShowFeedbackConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isEn ? "Confirm Update" : "تأكيد الحفظ"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isEn
+                ? "Are you sure you want to save this status update and reply? The submitter will see your response."
+                : "هل أنت متأكد من حفظ تحديث الحالة والرد؟ سيظهر ردك لمقدّم المقترح."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowFeedbackConfirm(false)}>
+              {t.suggestions.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmFeedback} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? t.suggestions.saving : (isEn ? "Yes, Save" : "نعم، حفظ")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
