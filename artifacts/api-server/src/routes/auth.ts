@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db, usersTable } from "@workspace/db";
 
@@ -106,6 +106,11 @@ router.post("/auth/login", async (req, res): Promise<void> => {
 
   if (!user.active) {
     res.status(403).json({ error: "account_inactive" });
+    return;
+  }
+
+  if (!user.passwordHash) {
+    res.status(401).json({ error: "invalid_credentials" });
     return;
   }
 
