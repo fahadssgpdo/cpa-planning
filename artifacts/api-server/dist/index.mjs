@@ -64419,7 +64419,7 @@ var staticDir = process.env["STATIC_DIR"];
 if (staticDir && existsSync(staticDir)) {
   logger.info({ staticDir }, "Serving static frontend files");
   app.use(import_express16.default.static(staticDir));
-  app.get("*", (_req, res) => {
+  app.get("/{*path}", (_req, res) => {
     res.sendFile(path2.join(staticDir, "index.html"));
   });
 } else if (staticDir) {
