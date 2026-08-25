@@ -1,2 +1,3 @@
 - [Anthropic AI integration setup](anthropic-setup.md) — provisioned via setupReplitAIIntegrations; lib copied to lib/integrations-anthropic-ai; tsconfig refs added; client imported from @workspace/integrations-anthropic-ai
 - [OpenAPI multipart codegen](openapi-multipart-codegen.md) — binary file formats generate browser-only File/Blob types in shared API libraries without DOM typings.
+- [API upload test isolation](api-test-isolation.md) — file-upload integration tests must isolate storage and clean up records and generated assets.
