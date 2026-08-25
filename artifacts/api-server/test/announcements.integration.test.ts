@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, rm, unlink } from "node:fs/promises";
+import { mkdtemp, readdir, rm, unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { Server } from "node:http";
@@ -263,6 +263,65 @@ test("rejects unauthenticated, unauthorized, and fake-image flyer requests", asy
   assert.deepEqual(await responseBody<{ error: string }>(fakeImageResponse), {
     error: "Uploaded file is not a supported image.",
   });
+});
+
+test("rejects flyer uploads larger than 10 MB before saving anything", async () => {
+  const oversizedFlyerTitle = `Oversized flyer ${randomUUID()}`;
+  const oversizedFlyer = new Uint8Array(10 * 1024 * 1024 + 1);
+  const filesBefore = await readdir(uploadDirectory);
+
+  const response = await request(
+    "/api/announcements",
+    {
+      method: "POST",
+      body: flyerForm(
+        { title: oversizedFlyerTitle, body: "Should not save", category: "announcement" },
+        { name: "oversized.png", mimeType: "image/png", contents: oversizedFlyer },
+      ),
+    },
+    planningCookie,
+  );
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(await responseBody<{ error: string }>(response), {
+    error: "Flyer image must not exceed 10 MB.",
+  });
+  assert.deepEqual(await readdir(uploadDirectory), filesBefore);
+
+  const announcements = await db
+    .select({ title: announcementsTable.title })
+    .from(announcementsTable);
+  assert.ok(!announcements.some((announcement) => announcement.title === oversizedFlyerTitle));
+});
+
+test("rejects cross-site management requests before changing announcements or files", async () => {
+  const crossSiteTitle = `Cross-site flyer ${randomUUID()}`;
+  const filesBefore = await readdir(uploadDirectory);
+  const validFlyer = await image("png", { r: 90, g: 160, b: 30 });
+
+  const response = await request(
+    "/api/announcements",
+    {
+      method: "POST",
+      headers: { origin: "https://malicious.example" },
+      body: flyerForm(
+        { title: crossSiteTitle, body: "Should not save", category: "announcement" },
+        { name: "cross-site.png", mimeType: "image/png", contents: validFlyer },
+      ),
+    },
+    planningCookie,
+  );
+
+  assert.equal(response.status, 403);
+  assert.deepEqual(await responseBody<{ error: string }>(response), {
+    error: "Cross-site requests are not allowed.",
+  });
+  assert.deepEqual(await readdir(uploadDirectory), filesBefore);
+
+  const announcements = await db
+    .select({ title: announcementsTable.title })
+    .from(announcementsTable);
+  assert.ok(!announcements.some((announcement) => announcement.title === crossSiteTitle));
 });
 
 test("active announcement filtering includes newly created announcements", async () => {
