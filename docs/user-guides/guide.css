@@ -1,0 +1,284 @@
+@page {
+  size: A4;
+  margin: 17mm 16mm 19mm;
+  @bottom-center {
+    content: "منصة دائرة التخطيط  |  هيئة حماية المستهلك  |  صفحة " counter(page);
+    color: #667085;
+    font-size: 8.5pt;
+  }
+}
+
+@page cover {
+  margin: 0;
+  @bottom-center { content: none; }
+}
+
+* { box-sizing: border-box; }
+
+html {
+  direction: rtl;
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  color: #17223b;
+  font-size: 10.2pt;
+  line-height: 1.65;
+}
+
+body { margin: 0; }
+
+.cover {
+  page: cover;
+  min-height: 297mm;
+  padding: 25mm 22mm 20mm;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(28, 160, 152, .24), transparent 24%),
+    radial-gradient(circle at 90% 85%, rgba(74, 93, 166, .28), transparent 30%),
+    linear-gradient(145deg, #102a56 0%, #193c71 58%, #0f766e 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cover-logo {
+  width: 100%;
+  max-width: 170mm;
+  background: rgba(255,255,255,.96);
+  padding: 8mm 10mm;
+  border-radius: 5mm;
+}
+
+.cover-kicker {
+  display: inline-block;
+  border: 1px solid rgba(255,255,255,.45);
+  background: rgba(255,255,255,.10);
+  border-radius: 99px;
+  padding: 2mm 5mm;
+  font-size: 10pt;
+  font-weight: bold;
+  margin-bottom: 8mm;
+}
+
+.cover h1 {
+  margin: 0;
+  font-size: 30pt;
+  line-height: 1.35;
+  letter-spacing: -.3px;
+  color: #ffffff;
+}
+
+.cover h2 {
+  margin: 4mm 0 0;
+  font-size: 16pt;
+  font-weight: normal;
+  color: #dce9ff;
+}
+
+.cover-meta {
+  border-top: 1px solid rgba(255,255,255,.3);
+  padding-top: 6mm;
+  font-size: 9.5pt;
+  color: #dbe7f8;
+}
+
+h1, h2, h3, h4 { color: #173568; }
+h1 { font-size: 22pt; margin: 0 0 6mm; }
+h2 {
+  font-size: 16pt;
+  margin: 0 0 4mm;
+  padding-bottom: 2.5mm;
+  border-bottom: 2px solid #1b8f88;
+}
+h3 { font-size: 12.5pt; margin: 5mm 0 2mm; }
+h4 { font-size: 10.5pt; margin: 4mm 0 1.5mm; }
+p { margin: 0 0 3mm; }
+
+.page-break { page-break-before: always; }
+.avoid-break { break-inside: avoid; }
+
+.lead {
+  color: #475467;
+  font-size: 11pt;
+  line-height: 1.8;
+}
+
+.toc {
+  background: #f7f9fc;
+  border: 1px solid #d9e1ec;
+  border-radius: 4mm;
+  padding: 6mm 8mm;
+}
+
+.toc ol {
+  margin: 0;
+  padding-right: 7mm;
+  columns: 2;
+  column-gap: 15mm;
+}
+
+.toc li { margin: 0 0 2.5mm; break-inside: avoid; }
+
+.callout {
+  border-right: 4px solid #1b8f88;
+  background: #edf9f7;
+  border-radius: 2mm;
+  padding: 3.5mm 4mm;
+  margin: 4mm 0;
+  break-inside: avoid;
+}
+
+.callout.warning {
+  border-right-color: #d88a13;
+  background: #fff8e8;
+}
+
+.callout.danger {
+  border-right-color: #c73d4d;
+  background: #fff0f1;
+}
+
+.callout strong { color: #173568; }
+
+.steps {
+  margin: 3mm 0 5mm;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 0 12mm 4mm 0;
+  min-height: 8mm;
+  break-inside: avoid;
+}
+
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 7mm;
+  height: 7mm;
+  border-radius: 50%;
+  background: #173568;
+  color: white;
+  font-weight: bold;
+  font-size: 9pt;
+  text-align: center;
+  line-height: 7mm;
+}
+
+ul.check {
+  list-style: none;
+  margin: 2mm 0 4mm;
+  padding: 0;
+}
+
+ul.check li {
+  position: relative;
+  padding-right: 7mm;
+  margin: 0 0 2mm;
+}
+
+ul.check li::before {
+  content: "✓";
+  position: absolute;
+  right: 0;
+  color: #138079;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4mm 0 6mm;
+  font-size: 9pt;
+  break-inside: auto;
+}
+
+th {
+  background: #173568;
+  color: white;
+  padding: 2.5mm 3mm;
+  text-align: right;
+}
+
+td {
+  border: 1px solid #d8e0ea;
+  padding: 2.5mm 3mm;
+  vertical-align: top;
+}
+
+tr:nth-child(even) td { background: #f7f9fc; }
+tr { break-inside: avoid; }
+
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  margin: 4mm 0 5mm;
+  break-inside: avoid;
+}
+
+.flow span {
+  flex: 1;
+  text-align: center;
+  background: #eef3f9;
+  border: 1px solid #cad5e3;
+  border-radius: 2.5mm;
+  padding: 2.5mm 1.5mm;
+  font-weight: bold;
+  color: #173568;
+  font-size: 8.5pt;
+}
+
+.flow b { color: #1b8f88; font-size: 14pt; }
+
+.kbd {
+  display: inline-block;
+  background: #eef2f6;
+  border: 1px solid #cfd8e3;
+  border-bottom-width: 2px;
+  border-radius: 1.5mm;
+  padding: .2mm 2mm;
+  font-size: 8.5pt;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4mm;
+  margin: 4mm 0;
+}
+
+.card {
+  border: 1px solid #d8e0ea;
+  border-radius: 3mm;
+  padding: 4mm;
+  background: #fff;
+  break-inside: avoid;
+}
+
+.card h3 { margin-top: 0; }
+
+.mini {
+  color: #667085;
+  font-size: 8.5pt;
+}
+
+.quick-ref td:first-child {
+  width: 34%;
+  font-weight: bold;
+  color: #173568;
+}
+
+.footer-note {
+  margin-top: 8mm;
+  padding-top: 4mm;
+  border-top: 1px solid #d8e0ea;
+  color: #667085;
+  font-size: 8.5pt;
+}

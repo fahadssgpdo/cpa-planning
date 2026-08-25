@@ -6,3 +6,17 @@ id = "QFzARjmg6qb6RUw1M33aI"
 uri = "file://.local/outputs/HEMA-CPA-Planning-Platform.pdf"
 type = "pdf"
 title = "HEMA — CPA Planning Platform (PDF)"
+
+[[outputs]]
+id = "zznIBJ5r2aUf1K8T5Ly4-"
+uri = "file://docs/user-guides/planning-staff-guide-ar.pdf"
+type = "pdf"
+title = "دليل مستخدم موظفي التخطيط"
+description = "دليل عربي من 10 صفحات للأخصائيين والمديرين ومسؤولي النظام، يشمل الصلاحيات وإدارة المحتوى والاستفسارات والمقترحات والمستخدمين."
+
+[[outputs]]
+id = "f4WjwmgL9o3fyjBHkqY3G"
+uri = "file://docs/user-guides/general-employees-guide-ar.pdf"
+type = "pdf"
+title = "دليل المستخدم للموظفين"
+description = "دليل عربي من 10 صفحات للموظفين العامين، يشمل الدخول والإعلانات والنقاشات والاستفسارات وقاعدة المعرفة والمقترحات."
