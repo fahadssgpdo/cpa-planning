@@ -151,9 +151,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/AnnouncementInput"
+              $ref: "#/components/schemas/AnnouncementMultipartInput"
       responses:
         "201":
           description: Created
@@ -176,9 +176,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/AnnouncementUpdate"
+              $ref: "#/components/schemas/AnnouncementMultipartUpdate"
       responses:
         "200":
           description: Updated
@@ -846,7 +846,7 @@ components:
 
     Announcement:
       type: object
-      required: [id, title, body, category, date, authorId, authorName, archived]
+      required: [id, title, body, category, date, authorId, authorName, archived, flyerPath, flyerName, flyerMimeType, flyerSize]
       properties:
         id:
           type: integer
@@ -865,6 +865,15 @@ components:
           type: string
         archived:
           type: boolean
+        flyerPath:
+          type: ["string", "null"]
+        flyerName:
+          type: ["string", "null"]
+        flyerMimeType:
+          type: ["string", "null"]
+          enum: [image/jpeg, image/png, image/webp, image/gif, null]
+        flyerSize:
+          type: ["integer", "null"]
 
     AnnouncementInput:
       type: object
@@ -879,6 +888,28 @@ components:
           enum: [announcement, update, circular, deadline]
         authorId:
           type: integer
+
+    AnnouncementMultipartInput:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: string
+          description: JSON encoded announcement fields (title, body, category, and optional flyerPath). The author is taken from the authenticated session.
+        flyer:
+          type: string
+          description: Optional multipart flyer image. Supported formats are JPEG, PNG, WebP, and GIF.
+
+    AnnouncementMultipartUpdate:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: string
+          description: JSON encoded fields to update, including optional removeFlyer boolean.
+        flyer:
+          type: string
+          description: Optional multipart replacement flyer image.
 
     AnnouncementUpdate:
       type: object

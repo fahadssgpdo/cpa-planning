@@ -49,6 +49,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    void fetch(`${import.meta.env.BASE_URL.replace(/\/$/, "")}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
     localStorage.removeItem(STORAGE_KEY);
     setUserState(null);
   }

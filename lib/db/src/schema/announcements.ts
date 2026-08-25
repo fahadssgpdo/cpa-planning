@@ -10,6 +10,10 @@ export const announcementsTable = pgTable("announcements", {
   category: text("category").notNull().default("announcement"),
   authorId: integer("author_id").notNull().references(() => usersTable.id),
   archived: boolean("archived").notNull().default(false),
+  flyerPath: text("flyer_path"),
+  flyerName: text("flyer_name"),
+  flyerMimeType: text("flyer_mime_type"),
+  flyerSize: integer("flyer_size"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

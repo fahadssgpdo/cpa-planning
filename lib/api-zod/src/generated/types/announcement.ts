@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { AnnouncementCategory } from './announcementCategory';
+import type { AnnouncementFlyerMimeType } from './announcementFlyerMimeType';
 
 export interface Announcement {
   id: number;
@@ -16,4 +17,12 @@ export interface Announcement {
   authorId: number;
   authorName: string;
   archived: boolean;
+  /** @nullable */
+  flyerPath: string | null;
+  /** @nullable */
+  flyerName: string | null;
+  /** @nullable */
+  flyerMimeType: AnnouncementFlyerMimeType;
+  /** @nullable */
+  flyerSize: number | null;
 }

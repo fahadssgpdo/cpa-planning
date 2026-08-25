@@ -8,8 +8,11 @@
 
 export * from './announcement';
 export * from './announcementCategory';
+export * from './announcementFlyerMimeType';
 export * from './announcementInput';
 export * from './announcementInputCategory';
+export * from './announcementMultipartInput';
+export * from './announcementMultipartUpdate';
 export * from './announcementUpdate';
 export * from './announcementUpdateCategory';
 export * from './anthropicConversation';

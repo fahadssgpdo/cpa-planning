@@ -132,7 +132,11 @@ export const ListAnnouncementsResponseItem = zod.object({
   "date": zod.string(),
   "authorId": zod.number(),
   "authorName": zod.string(),
-  "archived": zod.boolean()
+  "archived": zod.boolean(),
+  "flyerPath": zod.string().nullable(),
+  "flyerName": zod.string().nullable(),
+  "flyerMimeType": zod.union([zod.literal('image/jpeg'),zod.literal('image/png'),zod.literal('image/webp'),zod.literal('image/gif'),zod.literal(null)]).nullable(),
+  "flyerSize": zod.number().nullable()
 })
 export const ListAnnouncementsResponse = zod.array(ListAnnouncementsResponseItem)
 
@@ -141,10 +145,8 @@ export const ListAnnouncementsResponse = zod.array(ListAnnouncementsResponseItem
  * @summary Create an announcement
  */
 export const CreateAnnouncementBody = zod.object({
-  "title": zod.string(),
-  "body": zod.string(),
-  "category": zod.enum(['announcement', 'update', 'circular', 'deadline']),
-  "authorId": zod.number()
+  "data": zod.string().describe('JSON encoded announcement fields (title, body, category, and optional flyerPath). The author is taken from the authenticated session.'),
+  "flyer": zod.string().optional().describe('Optional multipart flyer image. Supported formats are JPEG, PNG, WebP, and GIF.')
 })
 
 export const CreateAnnouncementResponse = zod.object({
@@ -155,7 +157,11 @@ export const CreateAnnouncementResponse = zod.object({
   "date": zod.string(),
   "authorId": zod.number(),
   "authorName": zod.string(),
-  "archived": zod.boolean()
+  "archived": zod.boolean(),
+  "flyerPath": zod.string().nullable(),
+  "flyerName": zod.string().nullable(),
+  "flyerMimeType": zod.union([zod.literal('image/jpeg'),zod.literal('image/png'),zod.literal('image/webp'),zod.literal('image/gif'),zod.literal(null)]).nullable(),
+  "flyerSize": zod.number().nullable()
 })
 
 
@@ -167,10 +173,8 @@ export const UpdateAnnouncementParams = zod.object({
 })
 
 export const UpdateAnnouncementBody = zod.object({
-  "title": zod.string().optional(),
-  "body": zod.string().optional(),
-  "category": zod.enum(['announcement', 'update', 'circular', 'deadline']).optional(),
-  "archived": zod.boolean().optional()
+  "data": zod.string().describe('JSON encoded fields to update, including optional removeFlyer boolean.'),
+  "flyer": zod.string().optional().describe('Optional multipart replacement flyer image.')
 })
 
 export const UpdateAnnouncementResponse = zod.object({
@@ -181,7 +185,11 @@ export const UpdateAnnouncementResponse = zod.object({
   "date": zod.string(),
   "authorId": zod.number(),
   "authorName": zod.string(),
-  "archived": zod.boolean()
+  "archived": zod.boolean(),
+  "flyerPath": zod.string().nullable(),
+  "flyerName": zod.string().nullable(),
+  "flyerMimeType": zod.union([zod.literal('image/jpeg'),zod.literal('image/png'),zod.literal('image/webp'),zod.literal('image/gif'),zod.literal(null)]).nullable(),
+  "flyerSize": zod.number().nullable()
 })
 
 

@@ -23,6 +23,10 @@ CREATE TABLE IF NOT EXISTS "announcements" (
   "category" text NOT NULL DEFAULT 'announcement',
   "author_id" integer NOT NULL REFERENCES "users"("id"),
   "archived" boolean NOT NULL DEFAULT false,
+  "flyer_path" text,
+  "flyer_name" text,
+  "flyer_mime_type" text,
+  "flyer_size" integer,
   "created_at" timestamp DEFAULT now() NOT NULL
 );
 
@@ -101,3 +105,9 @@ CREATE TABLE IF NOT EXISTS "glossary" (
   "examples" text,
   "created_at" timestamp DEFAULT now() NOT NULL
 );
+
+-- Flyer support for existing installations.
+ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_path" text;
+ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_name" text;
+ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_mime_type" text;
+ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_size" integer;

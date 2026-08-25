@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import {
-  useListAnnouncements, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement,
+  useListAnnouncements, useDeleteAnnouncement,
   getListAnnouncementsQueryKey, AnnouncementCategory
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,10 +29,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Megaphone, Plus, Archive, ArchiveRestore, MoreVertical,
-  Pencil, Copy, Trash2, RotateCcw, RefreshCw
+  Pencil, Copy, Trash2, RotateCcw, RefreshCw, ImagePlus, X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const MAX_FLYER_SIZE = 10 * 1024 * 1024;
+const ACCEPTED_FLYER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 type Announcement = {
   id: number;
@@ -43,9 +47,17 @@ type Announcement = {
   authorId: number;
   authorName: string;
   archived: boolean;
+  flyerPath: string | null;
+  flyerName: string | null;
+  flyerMimeType: string | null;
+  flyerSize: number | null;
 };
 
 type DialogMode = "create" | "edit" | "copy" | "reuse" | null;
+
+function flyerUrl(flyerPath: string) {
+  return flyerPath.startsWith("http") ? flyerPath : `${BASE}${flyerPath}`;
+}
 
 export default function Announcements() {
   const { user, canManage } = useUser();
@@ -59,6 +71,14 @@ export default function Announcements() {
   const [formTitle, setFormTitle] = useState("");
   const [formBody, setFormBody] = useState("");
   const [formCategory, setFormCategory] = useState<string>("announcement");
+  const [formFlyer, setFormFlyer] = useState<File | null>(null);
+  const [existingFlyerPath, setExistingFlyerPath] = useState<string | null>(null);
+  const [removeFlyer, setRemoveFlyer] = useState(false);
+  const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
+  const [flyerError, setFlyerError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isStatusUpdating, setIsStatusUpdating] = useState(false);
+  const flyerInputRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -72,18 +92,6 @@ export default function Announcements() {
     queryClient.invalidateQueries({ queryKey: getListAnnouncementsQueryKey({ archived: false }) });
   };
 
-  const createMutation = useCreateAnnouncement({
-    mutation: {
-      onSuccess: () => { invalidate(); closeDialog(); toast({ title: lang === "ar" ? "تم نشر الإعلان" : "Announcement published" }); }
-    }
-  });
-
-  const updateMutation = useUpdateAnnouncement({
-    mutation: {
-      onSuccess: () => { invalidate(); closeDialog(); toast({ title: lang === "ar" ? "تم تحديث الإعلان" : "Announcement updated" }); }
-    }
-  });
-
   const deleteMutation = useDeleteAnnouncement({
     mutation: {
       onSuccess: () => { invalidate(); setDeleteTarget(null); toast({ title: lang === "ar" ? "تم حذف الإعلان" : "Announcement deleted", variant: "destructive" }); }
@@ -93,37 +101,147 @@ export default function Announcements() {
   const openDialog = (mode: DialogMode, item?: Announcement) => {
     setDialogMode(mode);
     setSelectedItem(item || null);
+    setFormFlyer(null);
+    setFlyerError(null);
+    setRemoveFlyer(false);
     if (item && (mode === "edit" || mode === "copy" || mode === "reuse")) {
       setFormTitle(mode === "edit" ? item.title : `${item.title}${mode === "copy" ? (lang === "ar" ? " — نسخة" : " — Copy") : ""}`);
       setFormBody(item.body);
       setFormCategory(item.category);
+      setExistingFlyerPath(item.flyerPath);
     } else {
       setFormTitle("");
       setFormBody("");
       setFormCategory("announcement");
+      setExistingFlyerPath(null);
     }
   };
 
-  const closeDialog = () => { setDialogMode(null); setSelectedItem(null); };
+  const closeDialog = () => {
+    setDialogMode(null);
+    setSelectedItem(null);
+    setFormFlyer(null);
+    setExistingFlyerPath(null);
+    setRemoveFlyer(false);
+    setFlyerError(null);
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!formFlyer) {
+      setFlyerPreview(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(formFlyer);
+    setFlyerPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [formFlyer]);
+
+  const handleFlyerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!ACCEPTED_FLYER_TYPES.includes(file.type)) {
+      setFlyerError(lang === "ar" ? "يُسمح برفع صور JPEG أو PNG أو WebP أو GIF فقط." : "Only JPEG, PNG, WebP, and GIF images are allowed.");
+      return;
+    }
+    if (file.size > MAX_FLYER_SIZE) {
+      setFlyerError(lang === "ar" ? "يجب ألا يتجاوز حجم الفلاير 10 ميجابايت." : "Flyer image must not exceed 10 MB.");
+      return;
+    }
+
+    setFlyerError(null);
+    setFormFlyer(file);
+    setExistingFlyerPath(null);
+    setRemoveFlyer(false);
+  };
+
+  const clearFlyer = () => {
+    setFormFlyer(null);
+    setFlyerError(null);
+    if (existingFlyerPath) {
+      setExistingFlyerPath(null);
+      setRemoveFlyer(true);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (dialogMode === "edit" && selectedItem) {
-      updateMutation.mutate({ id: selectedItem.id, data: { title: formTitle, body: formBody, category: formCategory as AnnouncementCategory } });
-    } else {
-      createMutation.mutate({ data: { title: formTitle, body: formBody, category: formCategory as AnnouncementCategory, authorId: user.id } });
+    if (!dialogMode) return;
+
+    setIsSaving(true);
+    setFlyerError(null);
+    try {
+      const isEdit = dialogMode === "edit" && selectedItem;
+      const data: Record<string, unknown> = {
+        title: formTitle,
+        body: formBody,
+        category: formCategory as AnnouncementCategory,
+      };
+
+      if (isEdit) {
+        if (removeFlyer) data.removeFlyer = true;
+      } else {
+        if (existingFlyerPath && !removeFlyer) data.flyerPath = existingFlyerPath;
+      }
+
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      if (formFlyer) formData.append("flyer", formFlyer);
+
+      const response = await fetch(
+        `${BASE}/api/announcements${isEdit ? `/${selectedItem.id}` : ""}`,
+        { method: isEdit ? "PATCH" : "POST", body: formData, credentials: "include" },
+      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null) as { error?: string } | null;
+        throw new Error(errorData?.error || (lang === "ar" ? "تعذر حفظ الإعلان." : "Unable to save announcement."));
+      }
+
+      invalidate();
+      closeDialog();
+      toast({ title: lang === "ar" ? (isEdit ? "تم تحديث الإعلان" : "تم نشر الإعلان") : (isEdit ? "Announcement updated" : "Announcement published") });
+    } catch (error) {
+      setFlyerError(error instanceof Error ? error.message : (lang === "ar" ? "تعذر حفظ الإعلان." : "Unable to save announcement."));
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleArchive = (item: Announcement) => {
-    updateMutation.mutate({ id: item.id, data: { archived: true } });
-    setArchiveTarget(null);
+    void updateAnnouncementStatus(item, true);
   };
 
   const handleReactivate = (item: Announcement) => {
-    updateMutation.mutate({ id: item.id, data: { archived: false } }, {
-      onSuccess: () => { invalidate(); toast({ title: lang === "ar" ? "تم إعادة تفعيل الإعلان" : "Announcement reactivated" }); }
-    });
+    void updateAnnouncementStatus(item, false);
+  };
+
+  const updateAnnouncementStatus = async (item: Announcement, archived: boolean) => {
+    setIsStatusUpdating(true);
+    try {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify({ archived }));
+      const response = await fetch(`${BASE}/api/announcements/${item.id}`, {
+        method: "PATCH",
+        body: formData,
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null) as { error?: string } | null;
+        throw new Error(errorData?.error || (lang === "ar" ? "تعذر تحديث الإعلان." : "Unable to update announcement."));
+      }
+      invalidate();
+      setArchiveTarget(null);
+      toast({ title: lang === "ar" ? (archived ? "تم أرشفة الإعلان" : "تم إعادة تفعيل الإعلان") : (archived ? "Announcement archived" : "Announcement reactivated") });
+    } catch (error) {
+      toast({
+        title: error instanceof Error ? error.message : (lang === "ar" ? "تعذر تحديث الإعلان." : "Unable to update announcement."),
+        variant: "destructive",
+      });
+    } finally {
+      setIsStatusUpdating(false);
+    }
   };
 
   const getCategoryVariant = (category: string) => {
@@ -261,6 +379,22 @@ export default function Announcements() {
 
                 <h3 className="text-base font-bold text-primary mb-2 leading-snug">{ann.title}</h3>
                 <p className="text-sm text-foreground/80 leading-relaxed">{ann.body}</p>
+                {ann.flyerPath && (
+                  <a
+                    href={flyerUrl(ann.flyerPath)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mt-4 rounded-xl overflow-hidden border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-ring"
+                    title={lang === "ar" ? "فتح الفلاير بحجم أكبر" : "Open flyer in full size"}
+                  >
+                    <img
+                      src={flyerUrl(ann.flyerPath)}
+                      alt={ann.flyerName || `${ann.title} flyer`}
+                      className="w-full max-h-[480px] object-contain bg-background"
+                      loading="lazy"
+                    />
+                  </a>
+                )}
 
                 <div className="mt-4 pt-3 border-t flex justify-between items-center text-xs text-muted-foreground">
                   <span>{t.common.author}: <span className="font-medium text-foreground">{ann.authorName}</span></span>
@@ -318,10 +452,56 @@ export default function Announcements() {
                 onChange={(e) => setFormBody(e.target.value)}
               />
             </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="ann-flyer">{lang === "ar" ? "فلاير الإعلان (اختياري)" : "Announcement Flyer (optional)"}</Label>
+                <span className="text-[11px] text-muted-foreground">
+                  {lang === "ar" ? "JPEG، PNG، WebP أو GIF — حتى 10 MB" : "JPEG, PNG, WebP, or GIF — up to 10 MB"}
+                </span>
+              </div>
+              <input
+                ref={flyerInputRef}
+                id="ann-flyer"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="sr-only"
+                onChange={handleFlyerChange}
+              />
+              {flyerPreview || (!removeFlyer && existingFlyerPath) ? (
+                <div className="relative overflow-hidden rounded-lg border bg-muted/20">
+                  <img
+                    src={flyerPreview || flyerUrl(existingFlyerPath!)}
+                    alt={formFlyer?.name || selectedItem?.flyerName || (lang === "ar" ? "معاينة الفلاير" : "Flyer preview")}
+                    className="h-44 w-full object-contain bg-background"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon"
+                    className="absolute top-2 end-2 h-8 w-8 shadow-sm"
+                    onClick={clearFlyer}
+                    title={lang === "ar" ? "إزالة الفلاير" : "Remove flyer"}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-20 border-dashed gap-2 text-muted-foreground hover:text-primary"
+                  onClick={() => flyerInputRef.current?.click()}
+                >
+                  <ImagePlus className="w-5 h-5" />
+                  {lang === "ar" ? "اختر صورة فلاير" : "Choose flyer image"}
+                </Button>
+              )}
+              {flyerError && <p className="text-xs text-destructive">{flyerError}</p>}
+            </div>
             <DialogFooter className="gap-2 pt-2">
               <Button type="button" variant="outline" onClick={closeDialog}>{t.common.cancel}</Button>
-              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                {(createMutation.isPending || updateMutation.isPending) ? t.common.loading : submitLabel}
+              <Button type="submit" disabled={isSaving || isStatusUpdating}>
+                {(isSaving || isStatusUpdating) ? t.common.loading : submitLabel}
               </Button>
             </DialogFooter>
           </form>

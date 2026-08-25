@@ -21,8 +21,8 @@ import type {
 
 import type {
   Announcement,
-  AnnouncementInput,
-  AnnouncementUpdate,
+  AnnouncementMultipartInput,
+  AnnouncementMultipartUpdate,
   AnthropicConversation,
   AnthropicConversationInput,
   AnthropicConversationWithMessages,
@@ -551,14 +551,19 @@ export const getCreateAnnouncementUrl = () => {
 /**
  * @summary Create an announcement
  */
-export const createAnnouncement = async (announcementInput: AnnouncementInput, options?: RequestInit): Promise<Announcement> => {
+export const createAnnouncement = async (announcementMultipartInput: AnnouncementMultipartInput, options?: RequestInit): Promise<Announcement> => {
+    const formData = new FormData();
+formData.append(`data`, announcementMultipartInput.data);
+if(announcementMultipartInput.flyer !== undefined) {
+ formData.append(`flyer`, announcementMultipartInput.flyer);
+ }
 
   return customFetch<Announcement>(getCreateAnnouncementUrl(),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(announcementInput)
+    method: 'POST'
+    ,
+    body: formData
   }
 );}
 
@@ -566,8 +571,8 @@ export const createAnnouncement = async (announcementInput: AnnouncementInput, o
 
 
 export const getCreateAnnouncementMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAnnouncement>>, TError,{data: BodyType<AnnouncementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createAnnouncement>>, TError,{data: BodyType<AnnouncementInput>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAnnouncement>>, TError,{data: BodyType<AnnouncementMultipartInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAnnouncement>>, TError,{data: BodyType<AnnouncementMultipartInput>}, TContext> => {
 
 const mutationKey = ['createAnnouncement'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -579,7 +584,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAnnouncement>>, {data: BodyType<AnnouncementInput>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAnnouncement>>, {data: BodyType<AnnouncementMultipartInput>}> = (props) => {
           const {data} = props ?? {};
 
           return  createAnnouncement(data,requestOptions)
@@ -593,18 +598,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateAnnouncementMutationResult = NonNullable<Awaited<ReturnType<typeof createAnnouncement>>>
-    export type CreateAnnouncementMutationBody = BodyType<AnnouncementInput>
+    export type CreateAnnouncementMutationBody = BodyType<AnnouncementMultipartInput>
     export type CreateAnnouncementMutationError = ErrorType<unknown>
 
     /**
  * @summary Create an announcement
  */
 export const useCreateAnnouncement = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAnnouncement>>, TError,{data: BodyType<AnnouncementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAnnouncement>>, TError,{data: BodyType<AnnouncementMultipartInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createAnnouncement>>,
         TError,
-        {data: BodyType<AnnouncementInput>},
+        {data: BodyType<AnnouncementMultipartInput>},
         TContext
       > => {
       return useMutation(getCreateAnnouncementMutationOptions(options));
@@ -622,14 +627,19 @@ export const getUpdateAnnouncementUrl = (id: number,) => {
  * @summary Update an announcement (archive/restore)
  */
 export const updateAnnouncement = async (id: number,
-    announcementUpdate: AnnouncementUpdate, options?: RequestInit): Promise<Announcement> => {
+    announcementMultipartUpdate: AnnouncementMultipartUpdate, options?: RequestInit): Promise<Announcement> => {
+    const formData = new FormData();
+formData.append(`data`, announcementMultipartUpdate.data);
+if(announcementMultipartUpdate.flyer !== undefined) {
+ formData.append(`flyer`, announcementMultipartUpdate.flyer);
+ }
 
   return customFetch<Announcement>(getUpdateAnnouncementUrl(id),
   {
     ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(announcementUpdate)
+    method: 'PATCH'
+    ,
+    body: formData
   }
 );}
 
@@ -637,8 +647,8 @@ export const updateAnnouncement = async (id: number,
 
 
 export const getUpdateAnnouncementMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAnnouncement>>, TError,{id: number;data: BodyType<AnnouncementUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateAnnouncement>>, TError,{id: number;data: BodyType<AnnouncementUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAnnouncement>>, TError,{id: number;data: BodyType<AnnouncementMultipartUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAnnouncement>>, TError,{id: number;data: BodyType<AnnouncementMultipartUpdate>}, TContext> => {
 
 const mutationKey = ['updateAnnouncement'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -650,7 +660,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAnnouncement>>, {id: number;data: BodyType<AnnouncementUpdate>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAnnouncement>>, {id: number;data: BodyType<AnnouncementMultipartUpdate>}> = (props) => {
           const {id,data} = props ?? {};
 
           return  updateAnnouncement(id,data,requestOptions)
@@ -664,18 +674,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateAnnouncementMutationResult = NonNullable<Awaited<ReturnType<typeof updateAnnouncement>>>
-    export type UpdateAnnouncementMutationBody = BodyType<AnnouncementUpdate>
+    export type UpdateAnnouncementMutationBody = BodyType<AnnouncementMultipartUpdate>
     export type UpdateAnnouncementMutationError = ErrorType<unknown>
 
     /**
  * @summary Update an announcement (archive/restore)
  */
 export const useUpdateAnnouncement = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAnnouncement>>, TError,{id: number;data: BodyType<AnnouncementUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAnnouncement>>, TError,{id: number;data: BodyType<AnnouncementMultipartUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateAnnouncement>>,
         TError,
-        {id: number;data: BodyType<AnnouncementUpdate>},
+        {id: number;data: BodyType<AnnouncementMultipartUpdate>},
         TContext
       > => {
       return useMutation(getUpdateAnnouncementMutationOptions(options));

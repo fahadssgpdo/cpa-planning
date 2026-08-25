@@ -109,6 +109,19 @@ export const AnnouncementCategory = {
   deadline: 'deadline',
 } as const;
 
+/**
+ * @nullable
+ */
+export type AnnouncementFlyerMimeType = typeof AnnouncementFlyerMimeType[keyof typeof AnnouncementFlyerMimeType] | null;
+
+
+export const AnnouncementFlyerMimeType = {
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+  'image/webp': 'image/webp',
+  'image/gif': 'image/gif',
+} as const;
+
 export interface Announcement {
   id: number;
   title: string;
@@ -118,6 +131,14 @@ export interface Announcement {
   authorId: number;
   authorName: string;
   archived: boolean;
+  /** @nullable */
+  flyerPath: string | null;
+  /** @nullable */
+  flyerName: string | null;
+  /** @nullable */
+  flyerMimeType: AnnouncementFlyerMimeType;
+  /** @nullable */
+  flyerSize: number | null;
 }
 
 export type AnnouncementInputCategory = typeof AnnouncementInputCategory[keyof typeof AnnouncementInputCategory];
@@ -135,6 +156,20 @@ export interface AnnouncementInput {
   body: string;
   category: AnnouncementInputCategory;
   authorId: number;
+}
+
+export interface AnnouncementMultipartInput {
+  /** JSON encoded announcement fields (title, body, category, and optional flyerPath). The author is taken from the authenticated session. */
+  data: string;
+  /** Optional multipart flyer image. Supported formats are JPEG, PNG, WebP, and GIF. */
+  flyer?: string;
+}
+
+export interface AnnouncementMultipartUpdate {
+  /** JSON encoded fields to update, including optional removeFlyer boolean. */
+  data: string;
+  /** Optional multipart replacement flyer image. */
+  flyer?: string;
 }
 
 export type AnnouncementUpdateCategory = typeof AnnouncementUpdateCategory[keyof typeof AnnouncementUpdateCategory];

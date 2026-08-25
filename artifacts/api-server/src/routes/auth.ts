@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { sql, eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db, usersTable } from "@workspace/db";
+import { clearSession, issueSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -120,6 +121,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
+  issueSession(res, user.id);
   res.json({
     id: user.id,
     nameAr: user.nameAr,
@@ -130,6 +132,11 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     directorate: user.directorate,
     section: user.section,
   });
+});
+
+router.post("/auth/logout", (_req, res): void => {
+  clearSession(res);
+  res.sendStatus(204);
 });
 
 export default router;
