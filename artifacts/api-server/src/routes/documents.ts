@@ -8,6 +8,7 @@ import {
   ListDocumentsResponse,
   CreateDocumentResponse,
 } from "@workspace/api-zod";
+import { requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -35,7 +36,7 @@ router.get("/documents", async (req, res): Promise<void> => {
   );
 });
 
-router.post("/documents", async (req, res): Promise<void> => {
+router.post("/documents", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const parsed = CreateDocumentBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -63,7 +64,7 @@ router.post("/documents", async (req, res): Promise<void> => {
   );
 });
 
-router.delete("/documents/:id", async (req, res): Promise<void> => {
+router.delete("/documents/:id", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = DeleteDocumentParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {

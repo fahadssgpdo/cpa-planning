@@ -10,6 +10,7 @@ import {
   CreateSuggestionResponse,
   UpdateSuggestionResponse,
 } from "@workspace/api-zod";
+import { getSessionUser, requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -47,8 +48,8 @@ router.get("/suggestions", async (req, res): Promise<void> => {
   res.json(ListSuggestionsResponse.parse(formatted));
 });
 
-router.post("/suggestions", async (req, res): Promise<void> => {
-  const parsed = CreateSuggestionBody.safeParse(req.body);
+router.post("/suggestions", requireSession, async (req, res): Promise<void> => {
+  const parsed = CreateSuggestionBody.safeParse({ ...req.body, userId: getSessionUser(res).id });
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
@@ -56,7 +57,7 @@ router.post("/suggestions", async (req, res): Promise<void> => {
   const [row] = await db
     .insert(suggestionsTable)
     .values({
-      userId: parsed.data.userId,
+      userId: getSessionUser(res).id,
       category: parsed.data.category,
       text: parsed.data.text,
       attachment: parsed.data.attachment ?? null,
@@ -68,7 +69,7 @@ router.post("/suggestions", async (req, res): Promise<void> => {
   res.status(201).json(CreateSuggestionResponse.parse(formatted));
 });
 
-router.patch("/suggestions/:id", async (req, res): Promise<void> => {
+router.patch("/suggestions/:id", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = UpdateSuggestionParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {
@@ -83,6 +84,10 @@ router.patch("/suggestions/:id", async (req, res): Promise<void> => {
   const updateData: Record<string, unknown> = {};
   if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
   if (parsed.data.feedback !== undefined) updateData.feedback = parsed.data.feedback;
+  if (Object.keys(updateData).length === 0) {
+    res.status(400).json({ error: "At least one field is required." });
+    return;
+  }
 
   const rows = await db
     .update(suggestionsTable)

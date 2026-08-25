@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useUser, USERS } from "@/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import {
   useListUsers, useUpdateUser, useCreateUser,
@@ -39,7 +39,7 @@ type AuditLog = {
 };
 
 async function fetchAuditLogs() {
-  const res = await fetch(`${BASE}/api/audit-logs?limit=500`);
+  const res = await fetch(`${BASE}/api/audit-logs?limit=500`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch");
   return res.json() as Promise<AuditLog[]>;
 }
@@ -49,6 +49,7 @@ async function postAuditLog(body: object) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    credentials: "include",
   });
 }
 
@@ -128,7 +129,7 @@ export default function AdminPage() {
     mutation: {
       onSuccess: (_, vars) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
-        postAuditLog({ userId: user.id, userName: user.name, action: "update_user", entityType: "user", entityId: vars.id, details: JSON.stringify(vars.data) });
+        postAuditLog({ action: "update_user", entityType: "user", entityId: vars.id, details: JSON.stringify(vars.data) });
         toast({ title: lang === "ar" ? "تم تحديث المستخدم" : "User updated" });
       }
     }
@@ -138,7 +139,7 @@ export default function AdminPage() {
     mutation: {
       onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
-        postAuditLog({ userId: user.id, userName: user.name, action: "create_user", entityType: "user", entityId: data.id, details: `${data.nameAr} — ${data.role}` });
+        postAuditLog({ action: "create_user", entityType: "user", entityId: data.id, details: `${data.nameAr} — ${data.role}` });
         setCreateDialog(false);
         setCreateForm(emptyEdit());
         toast({ title: lang === "ar" ? "تم إضافة المستخدم" : "User created" });
@@ -149,7 +150,7 @@ export default function AdminPage() {
   const resetPwdMutation = useResetUserPassword({
     mutation: {
       onSuccess: (_, vars) => {
-        postAuditLog({ userId: user.id, userName: user.name, action: "reset_password", entityType: "user", entityId: vars.id, details: "Password reset by admin" });
+        postAuditLog({ action: "reset_password", entityType: "user", entityId: vars.id, details: "Password reset by admin" });
         setResetPwdDialog(null);
         setNewPassword("");
         setConfirmPassword("");

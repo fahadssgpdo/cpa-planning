@@ -68,10 +68,12 @@ export function DashboardAnalyticsPanel() {
     if (!data) return;
     setInsightsLoading(true);
     try {
-      const res = await fetch("/api/dashboard/ai-insights", {
+      const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+      const res = await fetch(`${base}/api/dashboard/ai-insights`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        credentials: "include",
       });
       const json = await res.json();
       setInsights(json.insights ?? []);

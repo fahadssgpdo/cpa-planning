@@ -7,6 +7,7 @@ import {
   CreateGlossaryEntryResponse,
   DeleteGlossaryEntryParams,
 } from "@workspace/api-zod";
+import { requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -24,7 +25,7 @@ router.get("/glossary", async (_req, res): Promise<void> => {
   res.json(ListGlossaryResponse.parse(rows.map(formatEntry)));
 });
 
-router.post("/glossary", async (req, res): Promise<void> => {
+router.post("/glossary", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const parsed = CreateGlossaryEntryBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -43,7 +44,7 @@ router.post("/glossary", async (req, res): Promise<void> => {
   res.status(201).json(CreateGlossaryEntryResponse.parse(formatEntry(row)));
 });
 
-router.delete("/glossary/:id", async (req, res): Promise<void> => {
+router.delete("/glossary/:id", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = DeleteGlossaryEntryParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {

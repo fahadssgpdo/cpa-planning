@@ -3,10 +3,11 @@ import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { GetDashboardAnalyticsResponse, GetDashboardAiInsightsBody } from "@workspace/api-zod";
+import { requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
-router.get("/dashboard/analytics", async (_req, res): Promise<void> => {
+router.get("/dashboard/analytics", requireSession, async (_req, res): Promise<void> => {
   const sugByStatus = await db.execute(sql`
     SELECT status AS key, count(*)::int AS count FROM suggestions GROUP BY status
   `);
@@ -98,7 +99,7 @@ router.get("/dashboard/analytics", async (_req, res): Promise<void> => {
   );
 });
 
-router.post("/dashboard/ai-insights", async (req, res): Promise<void> => {
+router.post("/dashboard/ai-insights", requireSession, async (req, res): Promise<void> => {
   const data = GetDashboardAiInsightsBody.safeParse(req.body);
   if (!data.success) {
     res.status(400).json({ error: "Invalid analytics data" });

@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { sql, eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db, usersTable } from "@workspace/db";
-import { clearSession, issueSession } from "../middlewares/announcement-auth";
+import { clearSession, getSessionUser, issueSession, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -72,7 +72,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       department: typeof department === "string" && department ? department : null,
       section: typeof section === "string" && section ? section : null,
       role: "employee",
-      active: true,
+      active: false,
     })
     .returning();
 
@@ -83,6 +83,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     role: user.role,
     designation: user.designation,
     createdAt: user.createdAt.toISOString(),
+    pendingApproval: true,
   });
 });
 
@@ -132,6 +133,11 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     directorate: user.directorate,
     section: user.section,
   });
+});
+
+router.get("/auth/me", requireSession, (_req, res): void => {
+  const user = getSessionUser(res);
+  res.json(user);
 });
 
 router.post("/auth/logout", (_req, res): void => {

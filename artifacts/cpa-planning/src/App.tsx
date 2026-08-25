@@ -34,6 +34,7 @@ const queryClient = new QueryClient({
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const ctx = useContext(UserContext)!;
+  if (ctx.isLoading) return <div className="min-h-screen bg-background" aria-busy="true" />;
   if (!ctx.user) return <Redirect to="/login" />;
   return <>{children}</>;
 }

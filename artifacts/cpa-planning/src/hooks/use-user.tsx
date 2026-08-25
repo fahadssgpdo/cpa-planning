@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 export type UserRole = 'employee' | 'officer' | 'manager' | 'admin';
 
@@ -10,14 +10,7 @@ export interface AppUser {
   designation: string;
 }
 
-export const USERS: AppUser[] = [
-  { id: 1, name: 'سالم الحارثي',   role: 'employee', designation: 'موظف إداري' },
-  { id: 2, name: 'مريم البلوشية', role: 'officer',   designation: 'أخصائي تخطيط' },
-  { id: 3, name: 'خالد الريامي',  role: 'manager',   designation: 'مدير دائرة التخطيط' },
-  { id: 4, name: 'مسؤول النظام',  role: 'admin',     designation: 'مسؤول النظام' },
-];
-
-const STORAGE_KEY = "hema_session";
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 interface UserContextType {
   user: AppUser | null;
@@ -27,6 +20,7 @@ interface UserContextType {
   canManage: boolean;
   isAdmin: boolean;
   canCloseInquiry: boolean;
+  isLoading: boolean;
 }
 
 type AuthenticatedContext = Omit<UserContextType, "user"> & { user: AppUser };
@@ -34,17 +28,43 @@ type AuthenticatedContext = Omit<UserContextType, "user"> & { user: AppUser };
 export const UserContext = createContext<UserContextType | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState] = useState<AppUser | null>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as AppUser) : null;
-    } catch {
-      return null;
+  const [user, setUserState] = useState<AppUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSession() {
+      try {
+        const response = await fetch(`${BASE}/api/auth/me`, { credentials: "include" });
+        if (!response.ok) return;
+
+        const data = await response.json() as {
+          id: number;
+          nameAr: string;
+          username: string | null;
+          designation: string | null;
+          role: UserRole;
+        };
+        if (!cancelled) {
+          setUserState({
+            id: data.id,
+            name: data.nameAr,
+            username: data.username ?? undefined,
+            role: data.role,
+            designation: data.designation ?? "",
+          });
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
     }
-  });
+
+    void loadSession();
+    return () => { cancelled = true; };
+  }, []);
 
   function login(u: AppUser) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
     setUserState(u);
   }
 
@@ -53,7 +73,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       method: "POST",
       credentials: "include",
     });
-    localStorage.removeItem(STORAGE_KEY);
     setUserState(null);
   }
 
@@ -74,6 +93,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       canManage: !!canManage,
       isAdmin: !!isAdmin,
       canCloseInquiry: !!canCloseInquiry,
+      isLoading,
     }}>
       {children}
     </UserContext.Provider>

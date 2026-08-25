@@ -8,7 +8,7 @@ import { mkdir, unlink, stat } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { z } from "zod/v4";
 import { db, announcementsTable, usersTable } from "@workspace/db";
-import { requireAnnouncementManager } from "../middlewares/announcement-auth";
+import { getSessionUser, requireManagerOrAdmin, requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
 import {
   UpdateAnnouncementParams,
   DeleteAnnouncementParams,
@@ -230,7 +230,7 @@ router.get("/announcements", async (req, res): Promise<void> => {
   );
 });
 
-router.post("/announcements", requireAnnouncementManager, parseFlyerUpload, async (req, res): Promise<void> => {
+router.post("/announcements", requireSession, requirePlanningStaff, parseFlyerUpload, async (req, res): Promise<void> => {
   let rawData: unknown;
   try {
     rawData = parseRequestData(req.body);
@@ -271,7 +271,7 @@ router.post("/announcements", requireAnnouncementManager, parseFlyerUpload, asyn
         title: parsed.data.title,
         body: parsed.data.body,
         category: parsed.data.category,
-        authorId: res.locals.announcementUserId as number,
+        authorId: getSessionUser(res).id,
         archived: false,
         ...(uploadedFlyer ?? { flyerPath: existingFlyerPath }),
       })
@@ -284,7 +284,7 @@ router.post("/announcements", requireAnnouncementManager, parseFlyerUpload, asyn
   }
 });
 
-router.patch("/announcements/:id", requireAnnouncementManager, parseFlyerUpload, async (req, res): Promise<void> => {
+router.patch("/announcements/:id", requireSession, requirePlanningStaff, parseFlyerUpload, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = UpdateAnnouncementParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {
@@ -303,6 +303,9 @@ router.patch("/announcements/:id", requireAnnouncementManager, parseFlyerUpload,
   const parsed = updateAnnouncementData.safeParse(rawData);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  if (parsed.data.archived !== undefined && !requireManagerOrAdmin(req, res)) {
     return;
   }
 
@@ -356,7 +359,7 @@ router.patch("/announcements/:id", requireAnnouncementManager, parseFlyerUpload,
   }
 });
 
-router.delete("/announcements/:id", requireAnnouncementManager, async (req, res): Promise<void> => {
+router.delete("/announcements/:id", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = DeleteAnnouncementParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {

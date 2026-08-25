@@ -10,6 +10,7 @@ import {
   CreateInquiryResponse,
   UpdateInquiryResponse,
 } from "@workspace/api-zod";
+import { getSessionUser, requireManagerOrAdmin, requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -68,8 +69,13 @@ router.get("/inquiries", async (req, res): Promise<void> => {
   res.json(ListInquiriesResponse.parse(formatted));
 });
 
-router.post("/inquiries", async (req, res): Promise<void> => {
-  const parsed = CreateInquiryBody.safeParse(req.body);
+router.post("/inquiries", requireSession, async (req, res): Promise<void> => {
+  const user = getSessionUser(res);
+  if (user.role !== "employee" && user.role !== "admin") {
+    res.status(403).json({ error: "Only employees may submit inquiries." });
+    return;
+  }
+  const parsed = CreateInquiryBody.safeParse({ ...req.body, userId: getSessionUser(res).id });
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
@@ -77,7 +83,7 @@ router.post("/inquiries", async (req, res): Promise<void> => {
   const [row] = await db
     .insert(inquiriesTable)
     .values({
-      userId: parsed.data.userId,
+      userId: getSessionUser(res).id,
       subject: parsed.data.subject,
       details: parsed.data.details,
       category: parsed.data.category ?? "other",
@@ -89,7 +95,7 @@ router.post("/inquiries", async (req, res): Promise<void> => {
   res.status(201).json(CreateInquiryResponse.parse(formatted));
 });
 
-router.patch("/inquiries/:id", async (req, res): Promise<void> => {
+router.patch("/inquiries/:id", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = UpdateInquiryParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {
@@ -101,10 +107,19 @@ router.patch("/inquiries/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  if (parsed.data.status === "resolved" && !requireManagerOrAdmin(req, res)) {
+    return;
+  }
   const updateData: Record<string, unknown> = {};
   if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
   if (parsed.data.response !== undefined) updateData.response = parsed.data.response;
-  if (parsed.data.responderId !== undefined) updateData.responderId = parsed.data.responderId;
+  if (parsed.data.response !== undefined || parsed.data.status === "answered") {
+    updateData.responderId = getSessionUser(res).id;
+  }
+  if (Object.keys(updateData).length === 0) {
+    res.status(400).json({ error: "At least one field is required." });
+    return;
+  }
 
   const rows = await db
     .update(inquiriesTable)

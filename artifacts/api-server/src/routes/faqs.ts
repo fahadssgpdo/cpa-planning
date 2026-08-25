@@ -10,6 +10,7 @@ import {
   CreateFaqResponse,
   UpdateFaqResponse,
 } from "@workspace/api-zod";
+import { requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -22,7 +23,7 @@ router.get("/faqs", async (_req, res): Promise<void> => {
   );
 });
 
-router.post("/faqs", async (req, res): Promise<void> => {
+router.post("/faqs", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const parsed = CreateFaqBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -32,7 +33,7 @@ router.post("/faqs", async (req, res): Promise<void> => {
   res.status(201).json(CreateFaqResponse.parse({ id: row.id, question: row.question, answer: row.answer }));
 });
 
-router.patch("/faqs/:id", async (req, res): Promise<void> => {
+router.patch("/faqs/:id", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = UpdateFaqParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {
@@ -56,7 +57,7 @@ router.patch("/faqs/:id", async (req, res): Promise<void> => {
   res.json(UpdateFaqResponse.parse({ id: rows[0].id, question: rows[0].question, answer: rows[0].answer }));
 });
 
-router.delete("/faqs/:id", async (req, res): Promise<void> => {
+router.delete("/faqs/:id", requireSession, requirePlanningStaff, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = DeleteFaqParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {

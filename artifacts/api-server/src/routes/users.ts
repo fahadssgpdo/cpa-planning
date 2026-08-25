@@ -10,6 +10,7 @@ import {
   CreateUserResponse,
   UpdateUserResponse,
 } from "@workspace/api-zod";
+import { requireRoles, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -27,12 +28,12 @@ const mapUser = (u: typeof usersTable.$inferSelect) => ({
   createdAt: u.createdAt.toISOString().slice(0, 10),
 });
 
-router.get("/users", async (_req, res): Promise<void> => {
+router.get("/users", requireSession, requireRoles("admin"), async (_req, res): Promise<void> => {
   const users = await db.select().from(usersTable).orderBy(usersTable.id);
   res.json(ListUsersResponse.parse(users.map(mapUser)));
 });
 
-router.post("/users", async (req, res): Promise<void> => {
+router.post("/users", requireSession, requireRoles("admin"), async (req, res): Promise<void> => {
   const parsed = CreateUserBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -55,7 +56,7 @@ router.post("/users", async (req, res): Promise<void> => {
   res.status(201).json(CreateUserResponse.parse(mapUser(user)));
 });
 
-router.patch("/users/:id", async (req, res): Promise<void> => {
+router.patch("/users/:id", requireSession, requireRoles("admin"), async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = UpdateUserParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {
@@ -90,7 +91,7 @@ router.patch("/users/:id", async (req, res): Promise<void> => {
   res.json(UpdateUserResponse.parse(mapUser(user)));
 });
 
-router.post("/users/:id/reset-password", async (req, res): Promise<void> => {
+router.post("/users/:id/reset-password", requireSession, requireRoles("admin"), async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(rawId, 10);
   if (isNaN(id)) {

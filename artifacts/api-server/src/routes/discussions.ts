@@ -14,6 +14,7 @@ import {
   UpdateDiscussionResponse,
   CreateCommentResponse,
 } from "@workspace/api-zod";
+import { getSessionUser, isPlanningStaff, requireManagerOrAdmin, requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -62,8 +63,8 @@ router.get("/discussions", async (_req, res): Promise<void> => {
   );
 });
 
-router.post("/discussions", async (req, res): Promise<void> => {
-  const parsed = CreateDiscussionBody.safeParse(req.body);
+router.post("/discussions", requireSession, async (req, res): Promise<void> => {
+  const parsed = CreateDiscussionBody.safeParse({ ...req.body, authorId: getSessionUser(res).id });
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
@@ -73,7 +74,7 @@ router.post("/discussions", async (req, res): Promise<void> => {
     .values({
       title: parsed.data.title,
       description: parsed.data.description,
-      authorId: parsed.data.authorId,
+      authorId: getSessionUser(res).id,
       status: "open",
     })
     .returning();
@@ -165,7 +166,7 @@ router.get("/discussions/:id", async (req, res): Promise<void> => {
   );
 });
 
-router.patch("/discussions/:id", async (req, res): Promise<void> => {
+router.patch("/discussions/:id", requireSession, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = UpdateDiscussionParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {
@@ -177,10 +178,33 @@ router.patch("/discussions/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  const [existing] = await db
+    .select({ authorId: discussionsTable.authorId })
+    .from(discussionsTable)
+    .where(eq(discussionsTable.id, params.data.id));
+  if (!existing) {
+    res.status(404).json({ error: "Discussion not found" });
+    return;
+  }
+
+  const user = getSessionUser(res);
+  const changesContent = parsed.data.title !== undefined || parsed.data.description !== undefined;
+  if (changesContent && existing.authorId !== user.id && !isPlanningStaff(user)) {
+    res.status(403).json({ error: "You can only edit your own discussions." });
+    return;
+  }
+  if (parsed.data.status !== undefined && !requireManagerOrAdmin(req, res)) {
+    return;
+  }
+
   const updateData: Record<string, unknown> = {};
   if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
   if (parsed.data.description !== undefined) updateData.description = parsed.data.description;
+  if (Object.keys(updateData).length === 0) {
+    res.status(400).json({ error: "At least one field is required." });
+    return;
+  }
 
   const rows = await db
     .update(discussionsTable)
@@ -215,14 +239,14 @@ router.patch("/discussions/:id", async (req, res): Promise<void> => {
   );
 });
 
-router.post("/discussions/:id/comments", async (req, res): Promise<void> => {
+router.post("/discussions/:id/comments", requireSession, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = CreateCommentParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
     return;
   }
-  const parsed = CreateCommentBody.safeParse(req.body);
+  const parsed = CreateCommentBody.safeParse({ ...req.body, userId: getSessionUser(res).id });
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
@@ -238,7 +262,7 @@ router.post("/discussions/:id/comments", async (req, res): Promise<void> => {
     .insert(commentsTable)
     .values({
       discussionId: params.data.id,
-      userId: parsed.data.userId,
+      userId: getSessionUser(res).id,
       text: parsed.data.text,
     })
     .returning();

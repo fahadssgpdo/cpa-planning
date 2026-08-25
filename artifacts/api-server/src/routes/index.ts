@@ -11,13 +11,11 @@ import dashboardRouter from "./dashboard";
 import analyticsRouter from "./analytics";
 import auditLogsRouter from "./audit-logs";
 import authRouter from "./auth";
-import bootstrapRouter from "./bootstrap";
 import glossaryRouter from "./glossary";
 
 const router: IRouter = Router();
 
 router.use(authRouter);
-router.use(bootstrapRouter);
 router.use(healthRouter);
 router.use(usersRouter);
 router.use(announcementsRouter);
