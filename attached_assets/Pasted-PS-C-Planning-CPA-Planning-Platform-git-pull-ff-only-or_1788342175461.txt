@@ -1,0 +1,53 @@
+PS C:\Planning\CPA-Planning-Platform> git pull --ff-only origin main
+remote: Enumerating objects: 305, done.
+remote: Counting objects: 100% (305/305), done.
+remote: Compressing objects: 100% (110/110), done.
+remote: Total 243 (delta 134), reused 229 (delta 120), pack-reused 0 (from 0)
+Receiving objects: 100% (243/243), 3.39 MiB | 5.94 MiB/s, done.
+Resolving deltas: 100% (134/134), completed with 44 local objects.
+From https://github.com/fahadssgpdo/cpa-planning
+ * branch            main       -> FETCH_HEAD
+   fef9459..f5995af  main       -> origin/main
+Updating fef9459..f5995af
+error: Your local changes to the following files would be overwritten by merge:
+        .agents/agent_assets_metadata.toml
+        .agents/memory/MEMORY.md
+        artifacts/api-server/.replit-artifact/artifact.toml
+        artifacts/api-server/package.json
+        artifacts/api-server/src/app.ts
+        artifacts/api-server/src/routes/analytics.ts
+        artifacts/api-server/src/routes/announcements.ts
+        artifacts/api-server/src/routes/audit-logs.ts
+        artifacts/api-server/src/routes/auth.ts
+        artifacts/api-server/src/routes/discussions.ts
+        artifacts/api-server/src/routes/documents.ts
+        artifacts/api-server/src/routes/faqs.ts
+        artifacts/api-server/src/routes/glossary.ts
+        artifacts/api-server/src/routes/index.ts
+        artifacts/api-server/src/routes/inquiries.ts
+        artifacts/api-server/src/routes/suggestions.ts
+        artifacts/api-server/src/routes/users.ts
+        artifacts/cpa-planning/src/App.tsx
+        artifacts/cpa-planning/src/components/dashboard-analytics.tsx
+        artifacts/cpa-planning/src/hooks/use-user.tsx
+        artifacts/cpa-planning/src/i18n/index.ts
+        artifacts/cpa-planning/src/pages/admin.tsx
+        artifacts/cpa-planning/src/pages/announcements.tsx
+        artifacts/cpa-planning/src/pages/login.tsx
+        artifacts/cpa-planning/src/pages/register.tsx
+        artifacts/cpa-planning/vite.config.ts
+        lib/api-client-react/src/generated/api.schemas.ts
+        lib/api-client-react/src/generated/api.ts
+        lib/api-spec/openapi.yaml
+        lib/api-zod/src/generated/api.ts
+        lib/api-zod/src/generated/types/announcement.ts
+        lib/api-zod/src/generated/types/index.ts
+        lib/db/drizzle.config.ts
+        lib/db/src/schema/announcements.ts
+        pnpm-lock.yaml
+        pnpm-workspace.yaml
+Please commit your changes or stash them before you merge.
+error: The following untracked working tree files would be removed by merge:
+        artifacts/api-server/src/routes/bootstrap.ts
+Please move or remove them before you merge.
+Aborting
