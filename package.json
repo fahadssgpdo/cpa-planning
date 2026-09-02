@@ -4,7 +4,9 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "node scripts/preinstall.mjs",
-    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build && pnpm run verify:frontend-build",
+    "test:frontend-build": "node --test scripts/test/verify-frontend-build.test.mjs",
+    "verify:frontend-build": "node scripts/verify-frontend-build.mjs",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
