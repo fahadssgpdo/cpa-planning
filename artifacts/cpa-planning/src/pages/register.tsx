@@ -32,7 +32,6 @@ type FormState = {
 export default function RegisterPage() {
   const { t, lang, setLang, dir } = useLocale();
   const r = t.register;
-  const administrativeOptions = getAdministrativeOptions(lang);
 
   const [form, setForm] = useState<FormState>({
     nameAr: "",
@@ -45,6 +44,10 @@ export default function RegisterPage() {
     department: "",
     section: "",
   });
+  const administrativeOptions = getAdministrativeOptions(lang, {
+    directorate: form.directorate,
+    department: form.department,
+  });
 
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -54,8 +57,18 @@ export default function RegisterPage() {
 
   function set(field: keyof FormState) {
     return (v: string) => {
-      setForm((prev) => ({ ...prev, [field]: v }));
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+      setForm((prev) => ({
+        ...prev,
+        [field]: v,
+        ...(field === "directorate" ? { department: "", section: "" } : {}),
+        ...(field === "department" ? { section: "" } : {}),
+      }));
+      setErrors((prev) => ({
+        ...prev,
+        [field]: undefined,
+        ...(field === "directorate" ? { department: undefined, section: undefined } : {}),
+        ...(field === "department" ? { section: undefined } : {}),
+      }));
     };
   }
 
@@ -309,7 +322,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>{r.department} <span className="text-destructive">*</span></Label>
-                  <Select value={form.department} onValueChange={set("department")}>
+                  <Select disabled={!form.directorate} value={form.department} onValueChange={set("department")}>
                     <SelectTrigger className={errors.department ? "border-destructive" : ""}>
                       <SelectValue placeholder={r.departmentPlaceholder} />
                     </SelectTrigger>
@@ -326,7 +339,7 @@ export default function RegisterPage() {
 
                 <div className="space-y-1.5">
                   <Label>{r.section} <span className="text-destructive">*</span></Label>
-                  <Select value={form.section} onValueChange={set("section")}>
+                  <Select disabled={!form.department} value={form.section} onValueChange={set("section")}>
                     <SelectTrigger className={errors.section ? "border-destructive" : ""}>
                       <SelectValue placeholder={r.sectionPlaceholder} />
                     </SelectTrigger>

@@ -105,6 +105,7 @@ function AdministrativeSelect({
   options,
   placeholder,
   currentLabel,
+  disabled = false,
 }: {
   id?: string;
   value: string;
@@ -112,10 +113,11 @@ function AdministrativeSelect({
   options: { key: string; label: string }[];
   placeholder: string;
   currentLabel: string;
+  disabled?: boolean;
 }) {
   const hasCurrentValue = options.some(option => option.label === value);
   return (
-    <Select value={value} onValueChange={onValueChange}>
+    <Select disabled={disabled} value={value} onValueChange={onValueChange}>
       <SelectTrigger id={id} className="h-9">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
@@ -142,8 +144,6 @@ export default function AdminPage() {
 
   const u = t.admin.users;
   const a = t.admin.audit;
-  const administrativeOptions = getAdministrativeOptions(lang);
-
   const [createDialog, setCreateDialog] = useState(false);
   const [createForm, setCreateForm] = useState(emptyEdit());
   const [editDialog, setEditDialog] = useState<EditState | null>(null);
@@ -156,6 +156,14 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
+  const createAdministrativeOptions = getAdministrativeOptions(lang, {
+    directorate: createForm.directorate,
+    department: createForm.department,
+  });
+  const editAdministrativeOptions = getAdministrativeOptions(lang, {
+    directorate: editDialog?.directorate,
+    department: editDialog?.department,
+  });
 
   const { data: users, isLoading: usersLoading } = useListUsers();
   const { data: auditLogs, isLoading: logsLoading, refetch: refetchLogs } = useQuery({
@@ -887,9 +895,10 @@ export default function AdminPage() {
                     id="c-section"
                     value={createForm.section}
                     onValueChange={value => setCreateForm(f => ({ ...f, section: value }))}
-                    options={administrativeOptions.sections}
+                    options={createAdministrativeOptions.sections}
                     placeholder={lang === "ar" ? "اختر القسم أو الوحدة" : "Select section or unit"}
                     currentLabel={lang === "ar" ? "حالي" : "current"}
+                    disabled={!createForm.department}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -897,8 +906,8 @@ export default function AdminPage() {
                   <AdministrativeSelect
                     id="c-directorate"
                     value={createForm.directorate}
-                    onValueChange={value => setCreateForm(f => ({ ...f, directorate: value }))}
-                    options={administrativeOptions.directorates}
+                    onValueChange={value => setCreateForm(f => ({ ...f, directorate: value, department: "", section: "" }))}
+                    options={createAdministrativeOptions.directorates}
                     placeholder={lang === "ar" ? "اختر مركز العمل" : "Select work center"}
                     currentLabel={lang === "ar" ? "حالي" : "current"}
                   />
@@ -908,10 +917,11 @@ export default function AdminPage() {
                   <AdministrativeSelect
                     id="c-department"
                     value={createForm.department}
-                    onValueChange={value => setCreateForm(f => ({ ...f, department: value }))}
-                    options={administrativeOptions.departments}
+                    onValueChange={value => setCreateForm(f => ({ ...f, department: value, section: "" }))}
+                    options={createAdministrativeOptions.departments}
                     placeholder={lang === "ar" ? "اختر الدائرة أو الوحدة" : "Select department or unit"}
                     currentLabel={lang === "ar" ? "حالي" : "current"}
+                    disabled={!createForm.directorate}
                   />
                 </div>
               </div>
@@ -996,17 +1006,18 @@ export default function AdminPage() {
                   <AdministrativeSelect
                     value={editDialog?.section || ""}
                     onValueChange={value => setEditDialog(d => d ? { ...d, section: value } : null)}
-                    options={administrativeOptions.sections}
+                    options={editAdministrativeOptions.sections}
                     placeholder={lang === "ar" ? "اختر القسم أو الوحدة" : "Select section or unit"}
                     currentLabel={lang === "ar" ? "حالي" : "current"}
+                    disabled={!editDialog?.department && !editDialog?.section}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">{u.directorate} <span className="text-muted-foreground">{u.optional}</span></Label>
                   <AdministrativeSelect
                     value={editDialog?.directorate || ""}
-                    onValueChange={value => setEditDialog(d => d ? { ...d, directorate: value } : null)}
-                    options={administrativeOptions.directorates}
+                    onValueChange={value => setEditDialog(d => d ? { ...d, directorate: value, department: "", section: "" } : null)}
+                    options={editAdministrativeOptions.directorates}
                     placeholder={lang === "ar" ? "اختر مركز العمل" : "Select work center"}
                     currentLabel={lang === "ar" ? "حالي" : "current"}
                   />
@@ -1015,10 +1026,11 @@ export default function AdminPage() {
                   <Label className="text-xs">{lang === "ar" ? "الدائرة" : "Department"} <span className="text-muted-foreground">{u.optional}</span></Label>
                   <AdministrativeSelect
                     value={editDialog?.department || ""}
-                    onValueChange={value => setEditDialog(d => d ? { ...d, department: value } : null)}
-                    options={administrativeOptions.departments}
+                    onValueChange={value => setEditDialog(d => d ? { ...d, department: value, section: "" } : null)}
+                    options={editAdministrativeOptions.departments}
                     placeholder={lang === "ar" ? "اختر الدائرة أو الوحدة" : "Select department or unit"}
                     currentLabel={lang === "ar" ? "حالي" : "current"}
+                    disabled={!editDialog?.directorate && !editDialog?.department}
                   />
                 </div>
               </div>

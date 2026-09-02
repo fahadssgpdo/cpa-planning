@@ -187,12 +187,161 @@ const REGIONAL_SECTION_OPTIONS = REGIONAL_LOCATIONS.flatMap(([location, arSuffix
 
 export const SECTION_OPTIONS: AdministrativeOption[] = [
   ...CENTRAL_SECTIONS,
-  ...REGIONAL_SECTION_NAMES,
   ...REGIONAL_SECTION_OPTIONS,
   option("directOffice", "مكتب أو وحدة لا تتبع قسماً", "Office or unit without a section"),
 ];
 
-export function getAdministrativeOptions(lang: "ar" | "en") {
+const DIRECTORATE_DEPARTMENT_KEYS: Record<string, string[]> = {
+  chairmanOffice: [
+    "chairmanOffice",
+    "visionOffice",
+    "securityOffice",
+    "legal",
+    "councilsInternational",
+    "documents",
+    "communications",
+    "quality",
+    "consultantsExperts",
+    "internalAudit",
+    "planningFollowUp",
+  ],
+  consumerServices: [
+    "directUnit",
+    "vicePresidentConsumer",
+    "antiCommercialFraud",
+    "marketRegulation",
+    "recallsWarnings",
+    "customerServices",
+    "complaints",
+    "counterfeitGoodsExhibition",
+    "consumerCallCenter",
+  ],
+  studiesDevelopment: ["fieldAssessment", "marketStudies", "economicData"],
+  administrativeFinancial: [
+    "directUnit",
+    "vicePresidentAdmin",
+    "innovationDigital",
+    "humanResources",
+    "trainingQualification",
+    "informationTechnology",
+    "administrativeAffairs",
+    "publicRelations",
+    "financialAffairs",
+  ],
+  northBatinah: ["directUnit", "regionalConsumerServicesSohar", "regionalStudiesSohar", "regionalAdminSohar", "suwayqOffice"],
+  dhofar: [
+    "directUnit",
+    "regionalConsumerServicesSalalah",
+    "regionalStudiesSalalah",
+    "regionalAdminSalalah",
+    "thumraitOffice",
+    "mirbatOffice",
+    "mazyounaDepartment",
+  ],
+  dakhliyah: ["directUnit"],
+  northSharqiyah: ["directUnit", "sinawOffice"],
+  southSharqiyah: ["directUnit", "alKamilAlWafiOffice", "masirahOffice"],
+  southBatinahBarka: ["directUnit"],
+  southBatinahRustaq: ["directUnit"],
+  dhahirah: ["directUnit"],
+  buraimi: ["directUnit", "rawdahOffice"],
+  musandamKhasab: ["directUnit"],
+  musandamDibba: ["directUnit"],
+  alWusta: ["directUnit"],
+};
+
+const DEPARTMENT_SECTION_KEYS: Record<string, string[]> = {
+  directUnit: ["directOffice"],
+  chairmanOffice: ["coordination", "followUp", "translation"],
+  visionOffice: ["coordination", "followUp", "planning", "planFollowUp"],
+  securityOffice: ["coordination", "informationSecurity"],
+  legal: ["casesJudgments", "legalStudies", "researchInvestigation", "contractsAgreements"],
+  fieldAssessment: ["fieldInspection", "fieldAssessment"],
+  councilsInternational: ["internationalCooperation", "councilsCommittees"],
+  documents: ["documentOrganization", "mail", "archiving"],
+  customerServices: ["requestReception"],
+  communications: ["coordinationFollowUp", "media", "digitalCommunication", "creativeContent", "strategicCommunication"],
+  quality: ["performanceQuality", "goodsServicesQuality"],
+  consultantsExperts: ["expertsTechnicians"],
+  internalAudit: ["revenueAudit", "administrativeAudit", "expenseAudit", "riskManagement"],
+  planningFollowUp: ["planning", "planFollowUp"],
+  vicePresidentConsumer: ["coordinationFollowUp"],
+  antiCommercialFraud: ["fraudCounterfeit", "misleadingAds", "onlineShopping"],
+  marketRegulation: ["marketMonitoring"],
+  recallsWarnings: ["recalls", "warningsResearch"],
+  vicePresidentAdmin: ["coordinationFollowUp"],
+  innovationDigital: ["innovationDevelopment", "digitalTransformation"],
+  humanResources: ["appointmentsService", "leaves", "personnelData", "jobClassification"],
+  trainingQualification: ["qualification", "training"],
+  informationTechnology: ["operationsSupport", "networks", "systemsDatabases"],
+  administrativeAffairs: ["warehouses", "maintenance", "transport", "employeeActivities", "receptionHospitality"],
+  publicRelations: ["receptionHospitality"],
+  financialAffairs: ["salaries", "purchases", "expenses", "treasury", "budgetProjects", "financialRevenue"],
+  complaints: ["vehicleComplaints", "serviceOfficeComplaints", "generalGoodsComplaints", "electronicsComplaints"],
+  marketStudies: ["nationalDataGovernance", "publicOpinionSurveys", "marketStudiesResearch", "marketForecasting", "priceEvaluation"],
+  economicData: ["economicData", "dataReview", "statisticalSurveys"],
+  counterfeitGoodsExhibition: ["directOffice"],
+  consumerCallCenter: ["directOffice"],
+  regionalConsumerServicesSohar: ["regionalCoordinationFollowUp-sohar", "regionalMarketRegulation-sohar", "regionalComplaints-sohar"],
+  regionalStudiesSohar: ["regionalCoordinationFollowUp-sohar", "regionalStudiesDevelopment-sohar", "regionalMarketStudies-sohar", "regionalEconomicData-sohar", "regionalTraining-sohar"],
+  regionalAdminSohar: ["regionalCoordinationFollowUp-sohar", "regionalLegal-sohar", "regionalMailDocuments-sohar", "regionalCommunicationMedia-sohar", "regionalInformationTechnology-sohar", "regionalAdminFinancial-sohar", "regionalAdministrative-sohar", "regionalFinancial-sohar"],
+  regionalConsumerServicesSalalah: ["regionalCoordinationFollowUp-salalah", "regionalMarketRegulation-salalah", "regionalComplaints-salalah"],
+  regionalStudiesSalalah: ["regionalCoordinationFollowUp-salalah", "regionalStudiesDevelopment-salalah", "regionalMarketStudies-salalah", "regionalEconomicData-salalah", "regionalTraining-salalah"],
+  regionalAdminSalalah: ["regionalCoordinationFollowUp-salalah", "regionalLegal-salalah", "regionalMailDocuments-salalah", "regionalCommunicationMedia-salalah", "regionalInformationTechnology-salalah", "regionalAdminFinancial-salalah", "regionalAdministrative-salalah", "regionalFinancial-salalah"],
+  suwayqOffice: ["directOffice"],
+  sinawOffice: ["directOffice"],
+  alKamilAlWafiOffice: ["directOffice"],
+  masirahOffice: ["directOffice"],
+  thumraitOffice: ["directOffice"],
+  mirbatOffice: ["directOffice"],
+  rawdahOffice: ["directOffice"],
+};
+
+const DIRECT_UNIT_SECTION_LOCATIONS: Record<string, string> = {
+  dakhliyah: "nizwa",
+  northSharqiyah: "ibra",
+  southSharqiyah: "sur",
+  southBatinahBarka: "barka",
+  southBatinahRustaq: "rustaq",
+  dhahirah: "ibri",
+  buraimi: "buraimi",
+  musandamKhasab: "khasab",
+  musandamDibba: "dibba",
+  alWusta: "haima",
+};
+
+type AdministrativeFilters = {
+  directorate?: string;
+  department?: string;
+};
+
+function findOptionKey(value: string | undefined, options: AdministrativeOption[]) {
+  if (!value) return undefined;
+  return options.find(option => option.key === value || option.ar === value || option.en === value)?.key;
+}
+
+function getDepartmentKeysForDirectorate(value: string | undefined) {
+  const key = findOptionKey(value, DIRECTORATE_OPTIONS);
+  return key ? DIRECTORATE_DEPARTMENT_KEYS[key] : undefined;
+}
+
+function regionalSectionKeys(location: string) {
+  return REGIONAL_SECTION_NAMES.map(section => `${section.key}-${location}`);
+}
+
+function getSectionKeysForDepartment(value: string | undefined, directorate: string | undefined) {
+  const key = findOptionKey(value, DEPARTMENT_OPTIONS);
+  if (!key) return undefined;
+  if (key === "directUnit") {
+    const directorateKey = findOptionKey(directorate, DIRECTORATE_OPTIONS);
+    const location = directorateKey ? DIRECT_UNIT_SECTION_LOCATIONS[directorateKey] : undefined;
+    return location ? regionalSectionKeys(location) : DEPARTMENT_SECTION_KEYS.directUnit;
+  }
+  if (key === "mazyounaDepartment") return regionalSectionKeys("mazyouna");
+  return DEPARTMENT_SECTION_KEYS[key];
+}
+
+export function getAdministrativeOptions(lang: "ar" | "en", filters: AdministrativeFilters = {}) {
   const label = (item: AdministrativeOption) => (lang === "ar" ? item.ar : item.en);
   const localizeUnique = (items: AdministrativeOption[]) => {
     const labels = new Set<string>();
@@ -204,9 +353,18 @@ export function getAdministrativeOptions(lang: "ar" | "en") {
         return true;
       });
   };
+  const departmentKeys = getDepartmentKeysForDirectorate(filters.directorate);
+  const sectionKeys = getSectionKeysForDepartment(filters.department, filters.directorate);
+  const departments = departmentKeys
+    ? DEPARTMENT_OPTIONS.filter(item => departmentKeys.includes(item.key))
+    : DEPARTMENT_OPTIONS;
+  const sections = sectionKeys
+    ? SECTION_OPTIONS.filter(item => sectionKeys.includes(item.key))
+    : SECTION_OPTIONS;
+
   return {
     directorates: localizeUnique(DIRECTORATE_OPTIONS),
-    departments: localizeUnique(DEPARTMENT_OPTIONS),
-    sections: localizeUnique(SECTION_OPTIONS),
+    departments: localizeUnique(departments),
+    sections: localizeUnique(sections),
   };
 }
