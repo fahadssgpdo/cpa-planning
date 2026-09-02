@@ -1,0 +1,811 @@
+PS C:\Planning\CPA-Planning-Platform> pnpm install --frozen-lockfile
+Scope: all 11 workspace projects
+Lockfile is up to date, resolution step is skipped
+Packages: +200 -145
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------------------------------
+
+   ╭──────────────────────────────────────────╮
+   │                                          │
+   │   Update available! 10.33.4 → 11.25.0.   │
+   │   Changelog: https://pnpm.io/v/11.25.0   │
+   │     To update, run: pnpm self-update     │
+   │                                          │
+   ╰──────────────────────────────────────────╯
+
+Downloading @img/sharp-win32-x64@0.35.3: 8.43 MB/8.43 MB, done
+Progress: resolved 200, reused 181, downloaded 19, added 169, done
+
+devDependencies:
+- prettier 3.9.6
++ prettier 3.8.4
+
+. preinstall$ node scripts/preinstall.mjs
+└─ Done in 631ms
+Done in 53.4s using pnpm v10.33.4
+PS C:\Planning\CPA-Planning-Platform> pnpm run build
+
+> workspace@0.0.0 build C:\Planning\CPA-Planning-Platform
+> pnpm run typecheck && pnpm -r --if-present run build
+
+
+> workspace@0.0.0 typecheck C:\Planning\CPA-Planning-Platform
+> pnpm run typecheck:libs && pnpm -r --filter "./artifacts/**" --filter "./scripts" --if-present run typecheck
+
+
+> workspace@0.0.0 typecheck:libs C:\Planning\CPA-Planning-Platform
+> tsc --build
+
+Scope: 5 of 11 workspace projects
+artifacts/api-server typecheck$ tsc -p tsconfig.json --noEmit && pnpm run typecheck:test
+│ > @workspace/api-server@0.0.0 typecheck:test C:\Planning\CPA-Planning-Platform\artifacts\api-server
+│ > tsc -p tsconfig.test.json --noEmit
+└─ Done in 31.2s
+artifacts/cpa-planning typecheck$ tsc -p tsconfig.json --noEmit
+└─ Done in 40.3s
+artifacts/cpa-slides typecheck$ tsc -p tsconfig.json --noEmit
+└─ Done in 9.9s
+artifacts/mockup-sandbox typecheck$ tsc -p tsconfig.json --noEmit
+└─ Done in 16.9s
+scripts typecheck$ tsc -p tsconfig.json --noEmit
+└─ Done in 3.6s
+Scope: 10 of 11 workspace projects
+artifacts/cpa-slides build$ vite build --config vite.config.ts
+│ C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js:121
+│       at requithrow new Error(
+│       at requi      ^
+│ Error: Cannot find module @rollup/rollup-win32-x64-msvc. npm has a bug related to optional dependencies (https://gi…
+│     at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\ro…
+│     at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\d…
+│     at Module._compile (node:internal/modules/cjs/loader:1871:14)
+│     at Object..js (node:internal/modules/cjs/loader:2002:10)
+│     at Module.load (node:internal/modules/cjs/loader:1594:32)
+│     at Module._load (node:internal/modules/cjs/loader:1396:12)
+│     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+│     at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:372:15)
+│     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:244:9)
+│     at ModuleJob.run (node:internal/modules/esm/module_job:439:25) {
+│   [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
+│   Require stack:
+│   - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js
+│       at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)
+│       at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+│       at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+│       at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+│       at Module._load (node:internal/modules/cjs/loader:1294:5)
+│       at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+│       at Module.require (node:internal/modules/cjs/loader:1617:12)
+│       at require (node:internal/modules/helpers:153:16)
+│       at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\…
+│       at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup…
+│     code: 'MODULE_NOT_FOUND',
+│     requireStack: [
+│       'C:\\Planning\\CPA-Planning-Platform\\node_modules\\.pnpm\\rollup@4.62.2\\node_modules\\rollup\\dist\\native.…
+│     ]
+│   }
+│ }
+│ Node.js v24.18.1
+└─ Failed in 3.4s at C:\Planning\CPA-Planning-Platform\artifacts\cpa-slides
+artifacts/mockup-sandbox build$ vite build
+│ C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js:121
+│       at requithrow new Error(
+│       at requi      ^
+│ Error: Cannot find module @rollup/rollup-win32-x64-msvc. npm has a bug related to optional dependencies (https://gi…
+│     at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\ro…
+│     at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\d…
+│     at Module._compile (node:internal/modules/cjs/loader:1871:14)
+│     at Object..js (node:internal/modules/cjs/loader:2002:10)
+│     at Module.load (node:internal/modules/cjs/loader:1594:32)
+│     at Module._load (node:internal/modules/cjs/loader:1396:12)
+│     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+│     at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:372:15)
+│     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:244:9)
+│     at ModuleJob.run (node:internal/modules/esm/module_job:439:25) {
+│   [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
+│   Require stack:
+│   - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js
+│       at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)
+│       at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+│       at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+│       at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+│       at Module._load (node:internal/modules/cjs/loader:1294:5)
+│       at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+│       at Module.require (node:internal/modules/cjs/loader:1617:12)
+│       at require (node:internal/modules/helpers:153:16)
+│       at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\…
+│       at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup…
+│     code: 'MODULE_NOT_FOUND',
+│     requireStack: [
+│       'C:\\Planning\\CPA-Planning-Platform\\node_modules\\.pnpm\\rollup@4.62.2\\node_modules\\rollup\\dist\\native.…
+│     ]
+│   }
+│ }
+│ Node.js v24.18.1
+└─ Failed in 3.4s at C:\Planning\CPA-Planning-Platform\artifacts\mockup-sandbox
+C:\Planning\CPA-Planning-Platform\artifacts\cpa-slides:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/cpa-slides@0.0.0 build: `vite build --config vite.config.ts`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.
+PS C:\Planning\CPA-Planning-Platform> PS C:\Planning\CPA-Planning-Platform> pnpm install --frozen-lockfile
+Get-Process : A positional parameter cannot be found that accepts argument 'pnpm'.
+At line:1 char:1
++ PS C:\Planning\CPA-Planning-Platform> pnpm install --frozen-lockfile
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Get-Process], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.GetProcessCommand
+
+PS C:\Planning\CPA-Planning-Platform> Scope: all 11 workspace projects
+Scope: : The term 'Scope:' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Scope: all 11 workspace projects
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Scope::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> Lockfile is up to date, resolution step is skipped
+Lockfile : The term 'Lockfile' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Lockfile is up to date, resolution step is skipped
++ ~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Lockfile:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> Packages: +200 -145
+Packages: : The term 'Packages:' is not recognized as the name of a cmdlet, function, script file, or operable
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Packages: +200 -145
++ ~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Packages::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------------------------------
+>>
+At line:1 char:119
++ ... +++++++++++++++++++--------------------------------------------------
++                                                                          ~
+Missing expression after unary operator '--'.
+At line:1 char:3
++ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++- ...
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:5
++ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++- ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:7
++ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++- ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:9
++ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++- ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:11
++ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++- ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:13
++ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++- ...
++             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:15
++ ... ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:17
++ ... ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+At line:1 char:19
++ ... ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++------- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The '++' operator works only on variables or on properties.
+Not all parse errors were reported.  Correct the reported errors and try again.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingExpressionAfterOperator
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform>       Update available! 10.33.4  11.25.0.
+Update : The term 'Update' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:7
++       Update available! 10.33.4  11.25.0.
++       ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Update:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>       Changelog: https://pnpm.io/v/11.25.0
+Changelog: : The term 'Changelog:' is not recognized as the name of a cmdlet, function, script file, or operable
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:7
++       Changelog: https://pnpm.io/v/11.25.0
++       ~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Changelog::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>         To update, run: pnpm self-update
+To : The term 'To' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:9
++         To update, run: pnpm self-update
++         ~~
+    + CategoryInfo          : ObjectNotFound: (To:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform> Downloading @img/sharp-win32-x64@0.35.3: 8.43 MB/8.43 MB, done
+Downloading : The term 'Downloading' is not recognized as the name of a cmdlet, function, script file, or operable
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Downloading @img/sharp-win32-x64@0.35.3: 8.43 MB/8.43 MB, done
++ ~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Downloading:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> Progress: resolved 200, reused 181, downloaded 19, added 169, done
+Progress: : The term 'Progress:' is not recognized as the name of a cmdlet, function, script file, or operable
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Progress: resolved 200, reused 181, downloaded 19, added 169, done
++ ~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Progress::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform> devDependencies:
+devDependencies: : The term 'devDependencies:' is not recognized as the name of a cmdlet, function, script file, or
+operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try
+again.
+At line:1 char:1
++ devDependencies:
++ ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (devDependencies::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> - prettier 3.9.6
+At line:1 char:2
++ - prettier 3.9.6
++  ~
+Missing expression after unary operator '-'.
+At line:1 char:3
++ - prettier 3.9.6
++   ~~~~~~~~
+Unexpected token 'prettier' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingExpressionAfterOperator
+
+PS C:\Planning\CPA-Planning-Platform> + prettier 3.8.4
+At line:1 char:2
++ + prettier 3.8.4
++  ~
+Missing expression after unary operator '+'.
+At line:1 char:3
++ + prettier 3.8.4
++   ~~~~~~~~
+Unexpected token 'prettier' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingExpressionAfterOperator
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform> . preinstall$ node scripts/preinstall.mjs
+. : The term 'preinstall$' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:3
++ . preinstall$ node scripts/preinstall.mjs
++   ~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (preinstall$:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  Done in 631ms
+Done : The term 'Done' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Done in 631ms
++  ~~~~
+    + CategoryInfo          : ObjectNotFound: (Done:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> Done in 53.4s using pnpm v10.33.4
+Done : The term 'Done' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Done in 53.4s using pnpm v10.33.4
++ ~~~~
+    + CategoryInfo          : ObjectNotFound: (Done:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> PS C:\Planning\CPA-Planning-Platform> pnpm run build
+Get-Process : A positional parameter cannot be found that accepts argument 'pnpm'.
+At line:1 char:1
++ PS C:\Planning\CPA-Planning-Platform> pnpm run build
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Get-Process], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.GetProcessCommand
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform> > workspace@0.0.0 build C:\Planning\CPA-Planning-Platform
+> : The term '>' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ > workspace@0.0.0 build C:\Planning\CPA-Planning-Platform
++ ~
+    + CategoryInfo          : ObjectNotFound: (>:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> > pnpm run typecheck && pnpm -r --if-present run build
+At line:1 char:22
++ > pnpm run typecheck && pnpm -r --if-present run build
++                      ~~
+The token '&&' is not a valid statement separator in this version.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform> > workspace@0.0.0 typecheck C:\Planning\CPA-Planning-Platform
+> : The term '>' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ > workspace@0.0.0 typecheck C:\Planning\CPA-Planning-Platform
++ ~
+    + CategoryInfo          : ObjectNotFound: (>:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> > pnpm run typecheck:libs && pnpm -r --filter "./artifacts/**" --filter "./scripts" --if-present run typecheck
+At line:1 char:27
++ > pnpm run typecheck:libs && pnpm -r --filter "./artifacts/**" --filt ...
++                           ~~
+The token '&&' is not a valid statement separator in this version.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform> > workspace@0.0.0 typecheck:libs C:\Planning\CPA-Planning-Platform
+> : The term '>' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ > workspace@0.0.0 typecheck:libs C:\Planning\CPA-Planning-Platform
++ ~
+    + CategoryInfo          : ObjectNotFound: (>:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> > tsc --build
+> : The term '>' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ > tsc --build
++ ~
+    + CategoryInfo          : ObjectNotFound: (>:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>
+PS C:\Planning\CPA-Planning-Platform> Scope: 5 of 11 workspace projects
+Scope: : The term 'Scope:' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Scope: 5 of 11 workspace projects
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Scope::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> artifacts/api-server typecheck$ tsc -p tsconfig.json --noEmit && pnpm run typecheck:test
+At line:1 char:63
++ ... ifacts/api-server typecheck$ tsc -p tsconfig.json --noEmit && pnpm ru ...
++                                                                ~~
+The token '&&' is not a valid statement separator in this version.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+PS C:\Planning\CPA-Planning-Platform>  > @workspace/api-server@0.0.0 typecheck:test C:\Planning\CPA-Planning-Platform\artifacts\api-server
+> : The term '>' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  > @workspace/api-server@0.0.0 typecheck:test C:\Planning\CPA-Plannin ...
++  ~
+    + CategoryInfo          : ObjectNotFound: (>:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  > tsc -p tsconfig.test.json --noEmit
+> : The term '>' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  > tsc -p tsconfig.test.json --noEmit
++  ~
+    + CategoryInfo          : ObjectNotFound: (>:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  Done in 31.2s
+Done : The term 'Done' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Done in 31.2s
++  ~~~~
+    + CategoryInfo          : ObjectNotFound: (Done:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> artifacts/cpa-planning typecheck$ tsc -p tsconfig.json --noEmit
+artifacts/cpa-planning : The term 'artifacts/cpa-planning' is not recognized as the name of a cmdlet, function, script
+file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct
+and try again.
+At line:1 char:1
++ artifacts/cpa-planning typecheck$ tsc -p tsconfig.json --noEmit
++ ~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (artifacts/cpa-planning:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  Done in 40.3s
+Done : The term 'Done' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Done in 40.3s
++  ~~~~
+    + CategoryInfo          : ObjectNotFound: (Done:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> artifacts/cpa-slides typecheck$ tsc -p tsconfig.json --noEmit
+artifacts/cpa-slides : The term 'artifacts/cpa-slides' is not recognized as the name of a cmdlet, function, script
+file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct
+and try again.
+At line:1 char:1
++ artifacts/cpa-slides typecheck$ tsc -p tsconfig.json --noEmit
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (artifacts/cpa-slides:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  Done in 9.9s
+Done : The term 'Done' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Done in 9.9s
++  ~~~~
+    + CategoryInfo          : ObjectNotFound: (Done:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> artifacts/mockup-sandbox typecheck$ tsc -p tsconfig.json --noEmit
+artifacts/mockup-sandbox : The term 'artifacts/mockup-sandbox' is not recognized as the name of a cmdlet, function,
+script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is
+correct and try again.
+At line:1 char:1
++ artifacts/mockup-sandbox typecheck$ tsc -p tsconfig.json --noEmit
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (artifacts/mockup-sandbox:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  Done in 16.9s
+Done : The term 'Done' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Done in 16.9s
++  ~~~~
+    + CategoryInfo          : ObjectNotFound: (Done:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> scripts typecheck$ tsc -p tsconfig.json --noEmit
+scripts : The term 'scripts' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ scripts typecheck$ tsc -p tsconfig.json --noEmit
++ ~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (scripts:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  Done in 3.6s
+Done : The term 'Done' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Done in 3.6s
++  ~~~~
+    + CategoryInfo          : ObjectNotFound: (Done:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> Scope: 10 of 11 workspace projects
+Scope: : The term 'Scope:' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Scope: 10 of 11 workspace projects
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Scope::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> artifacts/cpa-slides build$ vite build --config vite.config.ts
+artifacts/cpa-slides : The term 'artifacts/cpa-slides' is not recognized as the name of a cmdlet, function, script
+file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct
+and try again.
+At line:1 char:1
++ artifacts/cpa-slides build$ vite build --config vite.config.ts
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (artifacts/cpa-slides:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js:121
+C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js:121 : The term
+'C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js:121' is not
+recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if
+a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\n ...
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Planning\CPA...t\native.js:121:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>        at requithrow new Error(
+>>        at requi      ^
+>>  Error: Cannot find module @rollup/rollup-win32-x64-msvc. npm has a bug related to optional dependencies (https://gi
+>>      at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\ro
+>>      at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\d
+>>      at Module._compile (node:internal/modules/cjs/loader:1871:14)
+At line:2 char:23
++        at requi      ^
++                       ~
+Missing closing ')' in expression.
+At line:3 char:117
++ ... -x64-msvc. npm has a bug related to optional dependencies (https://gi
++                                                                          ~
+Missing closing ')' in expression.
+At line:4 char:117
++ ... PA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\ro
++                                                                          ~
+Missing closing ')' in expression.
+At line:5 char:117
++ ... nning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\d
++                                                                          ~
+Missing closing ')' in expression.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingEndParenthesisInExpression
+
+PS C:\Planning\CPA-Planning-Platform>      at Object..js (node:internal/modules/cjs/loader:2002:10)
+node:internal/modules/cjs/loader:2002:10 : The term 'node:internal/modules/cjs/loader:2002:10' is not recognized as
+the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was
+included, verify that the path is correct and try again.
+At line:1 char:21
++      at Object..js (node:internal/modules/cjs/loader:2002:10)
++                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (node:internal/modules/cjs/loader:2002:10:String) [], CommandNotFoundExc
+   eption
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>      at Module.load (node:internal/modules/cjs/loader:1594:32)
+node:internal/modules/cjs/loader:1594:32 : The term 'node:internal/modules/cjs/loader:1594:32' is not recognized as
+the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was
+included, verify that the path is correct and try again.
+At line:1 char:22
++      at Module.load (node:internal/modules/cjs/loader:1594:32)
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (node:internal/modules/cjs/loader:1594:32:String) [], CommandNotFoundExc
+   eption
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>      at Module._load (node:internal/modules/cjs/loader:1396:12)
+node:internal/modules/cjs/loader:1396:12 : The term 'node:internal/modules/cjs/loader:1396:12' is not recognized as
+the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was
+included, verify that the path is correct and try again.
+At line:1 char:23
++      at Module._load (node:internal/modules/cjs/loader:1396:12)
++                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (node:internal/modules/cjs/loader:1396:12:String) [], CommandNotFoundExc
+   eption
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>      at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+node:internal/modules/cjs/loader:255:19 : The term 'node:internal/modules/cjs/loader:255:19' is not recognized as the
+name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was
+included, verify that the path is correct and try again.
+At line:1 char:25
++      at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (node:internal/modules/cjs/loader:255:19:String) [], CommandNotFoundExce
+   ption
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>      at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:372:15)
+node:internal/modules/esm/translators:372:15 : The term 'node:internal/modules/esm/translators:372:15' is not
+recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if
+a path was included, verify that the path is correct and try again.
+At line:1 char:38
++ ... JSModuleWithModuleLoad (node:internal/modules/esm/translators:372:15)
++                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (node:internal/m...nslators:372:15:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>      at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:244:9)
+node:internal/modules/esm/translators:244:9 : The term 'node:internal/modules/esm/translators:244:9' is not recognized
+as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was
+included, verify that the path is correct and try again.
+At line:1 char:33
++ ...  ModuleWrap.<anonymous> (node:internal/modules/esm/translators:244:9)
++                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (node:internal/m...anslators:244:9:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>      at ModuleJob.run (node:internal/modules/esm/module_job:439:25) {
+>>    [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
+>>    Require stack:
+>>    - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js
+>>        at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)
+>>        at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+>>        at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+>>        at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+>>        at Module._load (node:internal/modules/cjs/loader:1294:5)
+>>        at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+>>        at Module.require (node:internal/modules/cjs/loader:1617:12)
+>>        at require (node:internal/modules/helpers:153:16)
+>>        at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\
+>>        at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup
+>>      code: 'MODULE_NOT_FOUND',
+>>      requireStack: [
+>>        'C:\\Planning\\CPA-Planning-Platform\\node_modules\\.pnpm\\rollup@4.62.2\\node_modules\\rollup\\dist\\native.
+>>      ]
+>>    }
+>>  }
+>>  Node.js v24.18.1
+>>  Failed in 3.4s at C:\Planning\CPA-Planning-Platform\artifacts\cpa-slides
+>> artifacts/mockup-sandbox build$ vite build
+>>  C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js:121
+>>        at requithrow new Error(
+>>        at requi      ^
+>>  Error: Cannot find module @rollup/rollup-win32-x64-msvc. npm has a bug related to optional dependencies (https://gi
+>>      at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\ro
+>>      at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\d
+>>      at Module._compile (node:internal/modules/cjs/loader:1871:14)
+>>      at Object..js (node:internal/modules/cjs/loader:2002:10)
+>>      at Module.load (node:internal/modules/cjs/loader:1594:32)
+>>      at Module._load (node:internal/modules/cjs/loader:1396:12)
+>>      at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+>>      at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:372:15)
+>>      at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:244:9)
+>>      at ModuleJob.run (node:internal/modules/esm/module_job:439:25) {
+>>    [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
+>>    Require stack:
+>>    - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js
+>>        at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)
+>>        at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+>>        at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+>>        at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+>>        at Module._load (node:internal/modules/cjs/loader:1294:5)
+>>        at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+>>        at Module.require (node:internal/modules/cjs/loader:1617:12)
+>>        at require (node:internal/modules/helpers:153:16)
+>>        at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\
+>>        at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup
+>>      code: 'MODULE_NOT_FOUND',
+>>      requireStack: [
+>>        'C:\\Planning\\CPA-Planning-Platform\\node_modules\\.pnpm\\rollup@4.62.2\\node_modules\\rollup\\dist\\native.
+>>      ]
+>>    }
+At line:2 char:11
++    [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
++           ~
+Unexpected token ':' in expression or statement.
+At line:4 char:5
++    - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62 ...
++     ~
+Missing expression after unary operator '-'.
+At line:4 char:6
++    - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62 ...
++      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token
+'C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js' in expression
+or statement.
+At line:13 char:117
++ ... \CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\
++                                                                          ~
+Missing closing ')' in expression.
+At line:14 char:117
++ ... lanning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup
++                                                                          ~
+Missing closing ')' in expression.
+At line:38 char:40
++    [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
++                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token '@rollup/rollup-win32-x64-msvc'
+   Require stack:
+   - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js
+       at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)
+       at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+       at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+       at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+       at Module._load (node:internal/modules/cjs/loader:1294:5)
+       at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+       at Module.require (node:internal/modules/cjs/loader:1617:12)
+       at require (node:internal/modules/helpers:153:16)
+       at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\
+       at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup
+     code: 'MODULE_NOT_FOUND',
+     requireStack: [
+       'C:\\Planning\\CPA-Planning-Platform\\node_modules\\.pnpm\\rollup@4.62.2\\node_modules\\rollup\\dist\\native.'
+in expression or statement.
+At line:38 char:48
++    [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
++                                                ~
+You must provide a value expression following the '/' operator.
+At line:38 char:48
++    [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
++                                                ~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token 'rollup-win32-x64-msvc'
+   Require stack:
+   - C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup\dist\native.js
+       at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)
+       at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+       at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+       at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+       at Module._load (node:internal/modules/cjs/loader:1294:5)
+       at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+       at Module.require (node:internal/modules/cjs/loader:1617:12)
+       at require (node:internal/modules/helpers:153:16)
+       at requireWithFriendlyError (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\
+       at Object.<anonymous> (C:\Planning\CPA-Planning-Platform\node_modules\.pnpm\rollup@4.62.2\node_modules\rollup
+     code: 'MODULE_NOT_FOUND',
+     requireStack: [
+       'C:\\Planning\\CPA-Planning-Platform\\node_modules\\.pnpm\\rollup@4.62.2\\node_modules\\rollup\\dist\\native.'
+in expression or statement.
+At line:38 char:40
++    [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
++                                        ~~~~~~~
+The splatting operator '@' cannot be used to reference variables in an expression. '@rollup' can be used only as an
+argument to a command. To reference variables in an expression use '$rollup'.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+
+PS C:\Planning\CPA-Planning-Platform>  }
+At line:1 char:2
++  }
++  ~
+Unexpected token '}' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+
+PS C:\Planning\CPA-Planning-Platform>  Node.js v24.18.1
+Node.js : The term 'Node.js' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Node.js v24.18.1
++  ~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Node.js:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform>  Failed in 3.4s at C:\Planning\CPA-Planning-Platform\artifacts\mockup-sandbox
+Failed : The term 'Failed' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  Failed in 3.4s at C:\Planning\CPA-Planning-Platform\artifacts\mockup ...
++  ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Failed:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> C:\Planning\CPA-Planning-Platform\artifacts\cpa-slides:
+C:\Planning\CPA-Planning-Platform\artifacts\cpa-slides: : The term
+'C:\Planning\CPA-Planning-Platform\artifacts\cpa-slides:' is not recognized as the name of a cmdlet, function, script
+file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct
+and try again.
+At line:1 char:1
++ C:\Planning\CPA-Planning-Platform\artifacts\cpa-slides:
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Planning\CPA...cts\cpa-slides::String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL @workspace/cpa-slides@0.0.0 build: `vite build --config vite.config.ts`
+ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL : The term 'ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL' is not recognized as the name of a
+cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify
+that the path is correct and try again.
+At line:1 char:1
++ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL @workspace/cpa-slides@0.0.0 build:  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> Exit status 1
+status : The term 'status' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:6
++ Exit status 1
++      ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (status:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Planning\CPA-Planning-Platform> ELIFECYCLE Command failed with exit code 1.
