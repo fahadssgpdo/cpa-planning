@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import { DESIGNATION_KEYS } from "@/constants/designations";
+import { getAdministrativeOptions } from "@/constants/administrative-divisions";
 import {
   useListUsers, useUpdateUser, useCreateUser,
   useResetUserPassword,
@@ -97,6 +98,41 @@ function emptyEdit(): Omit<EditState, "id"> {
   return { nameAr: "", nameEn: "", username: "", designation: "", directorate: "", department: "", section: "", role: "employee" };
 }
 
+function AdministrativeSelect({
+  id,
+  value,
+  onValueChange,
+  options,
+  placeholder,
+  currentLabel,
+}: {
+  id?: string;
+  value: string;
+  onValueChange: (value: string) => void;
+  options: { key: string; label: string }[];
+  placeholder: string;
+  currentLabel: string;
+}) {
+  const hasCurrentValue = options.some(option => option.label === value);
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger id={id} className="h-9">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {value && !hasCurrentValue && (
+          <SelectItem value={value}>{value} ({currentLabel})</SelectItem>
+        )}
+        {options.map(option => (
+          <SelectItem key={option.key} value={option.label}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
 export default function AdminPage() {
   const { isAdmin, user, logout } = useUser();
   const { t, lang } = useLocale();
@@ -106,6 +142,7 @@ export default function AdminPage() {
 
   const u = t.admin.users;
   const a = t.admin.audit;
+  const administrativeOptions = getAdministrativeOptions(lang);
 
   const [createDialog, setCreateDialog] = useState(false);
   const [createForm, setCreateForm] = useState(emptyEdit());
@@ -846,21 +883,36 @@ export default function AdminPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="c-section" className="text-xs">{u.section} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input id="c-section" value={createForm.section}
-                    onChange={e => setCreateForm(f => ({ ...f, section: e.target.value }))}
-                    placeholder={lang === "ar" ? "القسم" : "Section"} />
+                  <AdministrativeSelect
+                    id="c-section"
+                    value={createForm.section}
+                    onValueChange={value => setCreateForm(f => ({ ...f, section: value }))}
+                    options={administrativeOptions.sections}
+                    placeholder={lang === "ar" ? "اختر القسم أو الوحدة" : "Select section or unit"}
+                    currentLabel={lang === "ar" ? "حالي" : "current"}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="c-directorate" className="text-xs">{u.directorate} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input id="c-directorate" value={createForm.directorate}
-                    onChange={e => setCreateForm(f => ({ ...f, directorate: e.target.value }))}
-                    placeholder={lang === "ar" ? "الإدارة العامة" : "Directorate"} />
+                  <AdministrativeSelect
+                    id="c-directorate"
+                    value={createForm.directorate}
+                    onValueChange={value => setCreateForm(f => ({ ...f, directorate: value }))}
+                    options={administrativeOptions.directorates}
+                    placeholder={lang === "ar" ? "اختر مركز العمل" : "Select work center"}
+                    currentLabel={lang === "ar" ? "حالي" : "current"}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="c-department" className="text-xs">{lang === "ar" ? "الدائرة" : "Department"} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input id="c-department" value={createForm.department}
-                    onChange={e => setCreateForm(f => ({ ...f, department: e.target.value }))}
-                    placeholder={lang === "ar" ? "الدائرة" : "Department"} />
+                  <AdministrativeSelect
+                    id="c-department"
+                    value={createForm.department}
+                    onValueChange={value => setCreateForm(f => ({ ...f, department: value }))}
+                    options={administrativeOptions.departments}
+                    placeholder={lang === "ar" ? "اختر الدائرة أو الوحدة" : "Select department or unit"}
+                    currentLabel={lang === "ar" ? "حالي" : "current"}
+                  />
                 </div>
               </div>
             </div>
@@ -941,21 +993,33 @@ export default function AdminPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">{u.section} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input value={editDialog?.section || ""}
-                    onChange={e => setEditDialog(d => d ? { ...d, section: e.target.value } : null)}
-                    placeholder={lang === "ar" ? "القسم" : "Section"} />
+                  <AdministrativeSelect
+                    value={editDialog?.section || ""}
+                    onValueChange={value => setEditDialog(d => d ? { ...d, section: value } : null)}
+                    options={administrativeOptions.sections}
+                    placeholder={lang === "ar" ? "اختر القسم أو الوحدة" : "Select section or unit"}
+                    currentLabel={lang === "ar" ? "حالي" : "current"}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">{u.directorate} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input value={editDialog?.directorate || ""}
-                    onChange={e => setEditDialog(d => d ? { ...d, directorate: e.target.value } : null)}
-                    placeholder={lang === "ar" ? "الإدارة العامة" : "Directorate"} />
+                  <AdministrativeSelect
+                    value={editDialog?.directorate || ""}
+                    onValueChange={value => setEditDialog(d => d ? { ...d, directorate: value } : null)}
+                    options={administrativeOptions.directorates}
+                    placeholder={lang === "ar" ? "اختر مركز العمل" : "Select work center"}
+                    currentLabel={lang === "ar" ? "حالي" : "current"}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">{lang === "ar" ? "الدائرة" : "Department"} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input value={editDialog?.department || ""}
-                    onChange={e => setEditDialog(d => d ? { ...d, department: e.target.value } : null)}
-                    placeholder={lang === "ar" ? "الدائرة" : "Department"} />
+                  <AdministrativeSelect
+                    value={editDialog?.department || ""}
+                    onValueChange={value => setEditDialog(d => d ? { ...d, department: value } : null)}
+                    options={administrativeOptions.departments}
+                    placeholder={lang === "ar" ? "اختر الدائرة أو الوحدة" : "Select department or unit"}
+                    currentLabel={lang === "ar" ? "حالي" : "current"}
+                  />
                 </div>
               </div>
             </div>

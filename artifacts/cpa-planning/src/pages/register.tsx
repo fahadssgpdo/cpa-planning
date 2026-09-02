@@ -13,53 +13,9 @@ import {
 } from "@/components/ui/select";
 import { Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
 import { DESIGNATION_KEYS } from "@/constants/designations";
+import { getAdministrativeOptions } from "@/constants/administrative-divisions";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-const DIRECTORATES = [
-  "planning",
-  "admin",
-  "legal",
-  "communications",
-  "it",
-  "quality",
-  "finance",
-  "consumer",
-  "inspection",
-] as const;
-
-const DEPARTMENTS = [
-  "strategicPlanning",
-  "performanceDev",
-  "riskGovernance",
-  "legalAffairs",
-  "contracts",
-  "hr",
-  "finance",
-  "media",
-  "itSystems",
-  "consumerServices",
-  "inspectionOps",
-] as const;
-
-const SECTIONS = [
-  "strategicPlanning",
-  "performanceMonitoring",
-  "riskManagement",
-  "reporting",
-  "hr",
-  "procurement",
-  "contracts",
-  "legalResearch",
-  "mediaRelations",
-  "awarenessPrograms",
-  "infrastructure",
-  "systemsDev",
-  "budgeting",
-  "accounting",
-  "consumerComplaints",
-  "fieldInspection",
-] as const;
 
 type FormState = {
   nameAr: string;
@@ -76,6 +32,7 @@ type FormState = {
 export default function RegisterPage() {
   const { t, lang, setLang, dir } = useLocale();
   const r = t.register;
+  const administrativeOptions = getAdministrativeOptions(lang);
 
   const [form, setForm] = useState<FormState>({
     nameAr: "",
@@ -339,9 +296,9 @@ export default function RegisterPage() {
                     <SelectValue placeholder={r.directoratePlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
-                    {DIRECTORATES.map((key) => (
-                      <SelectItem key={key} value={r.directorates[key]}>
-                        {r.directorates[key]}
+                    {administrativeOptions.directorates.map(({ key, label }) => (
+                      <SelectItem key={key} value={label}>
+                        {label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -357,9 +314,9 @@ export default function RegisterPage() {
                       <SelectValue placeholder={r.departmentPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {DEPARTMENTS.map((key) => (
-                        <SelectItem key={key} value={r.departments[key]}>
-                          {r.departments[key]}
+                      {administrativeOptions.departments.map(({ key, label }) => (
+                        <SelectItem key={key} value={label}>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -374,9 +331,9 @@ export default function RegisterPage() {
                       <SelectValue placeholder={r.sectionPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {SECTIONS.map((key) => (
-                        <SelectItem key={key} value={r.sections[key]}>
-                          {r.sections[key]}
+                      {administrativeOptions.sections.map(({ key, label }) => (
+                        <SelectItem key={key} value={label}>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectContent>
