@@ -12,23 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
+import { DESIGNATION_KEYS } from "@/constants/designations";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-const DESIGNATIONS = [
-  "employee",
-  "planningOfficer",
-  "seniorOfficer",
-  "analyst",
-  "legal",
-  "it",
-  "finance",
-  "quality",
-  "communications",
-  "manager",
-  "deputyDirector",
-  "director",
-] as const;
 
 const DIRECTORATES = [
   "planning",
@@ -336,7 +322,7 @@ export default function RegisterPage() {
                     <SelectValue placeholder={r.designationPlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
-                    {DESIGNATIONS.map((key) => (
+                    {DESIGNATION_KEYS.map((key) => (
                       <SelectItem key={key} value={r.designations[key]}>
                         {r.designations[key]}
                       </SelectItem>

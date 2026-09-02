@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
+import { DESIGNATION_KEYS } from "@/constants/designations";
 import {
   useListUsers, useUpdateUser, useCreateUser,
   useResetUserPassword,
@@ -830,9 +831,18 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="c-designation" className="text-xs">{u.designation} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input id="c-designation" value={createForm.designation}
-                    onChange={e => setCreateForm(f => ({ ...f, designation: e.target.value }))}
-                    placeholder={lang === "ar" ? "المسمى الوظيفي" : "Job title"} />
+                  <Select value={createForm.designation} onValueChange={value => setCreateForm(f => ({ ...f, designation: value }))}>
+                    <SelectTrigger id="c-designation" className="h-9">
+                      <SelectValue placeholder={lang === "ar" ? "اختر المسمى الوظيفي" : "Select job title"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DESIGNATION_KEYS.map(key => (
+                        <SelectItem key={key} value={t.register.designations[key]}>
+                          {t.register.designations[key]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="c-section" className="text-xs">{u.section} <span className="text-muted-foreground">{u.optional}</span></Label>
@@ -909,9 +919,25 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">{u.designation} <span className="text-muted-foreground">{u.optional}</span></Label>
-                  <Input value={editDialog?.designation || ""}
-                    onChange={e => setEditDialog(d => d ? { ...d, designation: e.target.value } : null)}
-                    placeholder={lang === "ar" ? "المسمى الوظيفي" : "Job title"} />
+                  <Select
+                    value={editDialog?.designation || ""}
+                    onValueChange={value => setEditDialog(d => d ? { ...d, designation: value } : null)}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder={lang === "ar" ? "اختر المسمى الوظيفي" : "Select job title"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {editDialog?.designation &&
+                        !Object.values(t.register.designations).some(designation => designation === editDialog.designation) && (
+                          <SelectItem value={editDialog.designation}>{editDialog.designation} ({lang === "ar" ? "حالي" : "current"})</SelectItem>
+                        )}
+                      {DESIGNATION_KEYS.map(key => (
+                        <SelectItem key={key} value={t.register.designations[key]}>
+                          {t.register.designations[key]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">{u.section} <span className="text-muted-foreground">{u.optional}</span></Label>
