@@ -40,6 +40,15 @@ packages:
   - lib/integrations/*
   - scripts
 
+# Keep platform-specific optional dependencies for both the Replit Linux
+# environment and the Windows Server deployment.
+supportedArchitectures:
+  os:
+    - linux
+    - win32
+  cpu:
+    - x64
+
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.21
   '@replit/vite-plugin-dev-banner': ^0.1.1

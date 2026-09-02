@@ -166,6 +166,10 @@ importers:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
+    optionalDependencies:
+      '@rollup/rollup-win32-x64-msvc':
+        specifier: 4.62.2
+        version: 4.62.2
 
   artifacts/api-server:
     dependencies:
@@ -1756,6 +1760,11 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [glibc]
+
+  '@rollup/rollup-win32-x64-msvc@4.62.2':
+    resolution: {integrity: sha512-BfzEnDJOt9T8M989/lA37EcJgat01wLRnoi5dQf3QzOH7jzpqTAzdDbVfRljVr5r+jzKqpbHeyOfAaXxAd0PAA==}
+    cpu: [x64]
+    os: [win32]
 
   '@scalar/helpers@0.8.2':
     resolution: {integrity: sha512-qNbqUjSB3S4Gr4A0oANcm5G1Ip+EqBxICYKhe9YzmnaBpbmW6shxqpiivApTvvuDf+uIhR3uMwWyVQbYcGLsxA==}
@@ -4589,6 +4598,9 @@ snapshots:
   '@rolldown/pluginutils@1.0.0-rc.3': {}
 
   '@rollup/rollup-linux-x64-gnu@4.62.2':
+    optional: true
+
+  '@rollup/rollup-win32-x64-msvc@4.62.2':
     optional: true
 
   '@scalar/helpers@0.8.2': {}
