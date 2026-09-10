@@ -8,6 +8,15 @@ has passed. The following GitHub Actions checks are required before merging:
 - `Build / Build on Ubuntu`
 - `Build / Build on Windows`
 
+The protection rule was applied to `main` and verified through the GitHub API
+on 2026-09-10. Its enforced settings are:
+
+- required status checks are strict (the pull request branch must be current);
+- both exact checks above are required;
+- pull requests are required;
+- administrators cannot bypass the rule;
+- force pushes and branch deletion are disabled.
+
 Both checks run dependency installation with
 `pnpm install --frozen-lockfile`, the complete build, and the frontend output
 verification tests. A failure in dependency installation, compilation, build
