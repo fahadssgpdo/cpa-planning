@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     env:
       PORT: 3000
@@ -17,9 +17,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
+        include:
+          - name: Build on Ubuntu
+            os: ubuntu-latest
+          - name: Build on Windows
+            os: windows-latest
 
     steps:
       - name: Check out repository
