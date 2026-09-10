@@ -1,7 +1,6 @@
 import { Router, type IRouter } from "express";
 import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { GetDashboardAnalyticsResponse, GetDashboardAiInsightsBody } from "@workspace/api-zod";
 import { requireSession } from "../middlewares/announcement-auth";
 
@@ -100,6 +99,14 @@ router.get("/dashboard/analytics", requireSession, async (_req, res): Promise<vo
 });
 
 router.post("/dashboard/ai-insights", requireSession, async (req, res): Promise<void> => {
+  if (
+    !process.env["AI_INTEGRATIONS_ANTHROPIC_BASE_URL"] ||
+    !process.env["AI_INTEGRATIONS_ANTHROPIC_API_KEY"]
+  ) {
+    res.status(503).json({ error: "AI service is not configured in this environment" });
+    return;
+  }
+
   const data = GetDashboardAiInsightsBody.safeParse(req.body);
   if (!data.success) {
     res.status(400).json({ error: "Invalid analytics data" });
@@ -130,6 +137,7 @@ Rules: "positive" = strengths & good metrics, "warning" = concerns or gaps needi
 Respond ONLY with a valid JSON array of exactly 5 objects. No markdown fences, no explanation text, nothing else — just the JSON array starting with [ and ending with ].`;
 
   try {
+    const { anthropic } = await import("@workspace/integrations-anthropic-ai");
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 8192,
