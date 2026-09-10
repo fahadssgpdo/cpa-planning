@@ -5,8 +5,8 @@
 The `main` branch must not receive a change until the cross-platform build
 has passed. The following GitHub Actions checks are required before merging:
 
-- `Build / Build on Ubuntu`
-- `Build / Build on Windows`
+- `Build on Ubuntu`
+- `Build on Windows`
 
 The protection rule was applied to `main` and verified through the GitHub API
 on 2026-09-10. Its enforced settings are:
