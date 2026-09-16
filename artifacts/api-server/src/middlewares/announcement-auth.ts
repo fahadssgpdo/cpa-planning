@@ -7,6 +7,13 @@ const COOKIE_NAME = "cpa_session";
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const planningRoles = new Set<PlatformRole>(["officer", "manager", "admin"]);
 
+function useSecureCookies() {
+  const configured = process.env["COOKIE_SECURE"]?.trim().toLowerCase();
+  if (configured === "true") return true;
+  if (configured === "false") return false;
+  return process.env["NODE_ENV"] === "production";
+}
+
 type SessionPayload = { userId: number; expiresAt: number };
 export type PlatformRole = "employee" | "officer" | "manager" | "admin";
 export type SessionUser = {
@@ -63,7 +70,7 @@ export function issueSession(response: Response, userId: number) {
   const payload = Buffer.from(JSON.stringify({ userId, expiresAt: Date.now() + SESSION_TTL_MS })).toString("base64url");
   response.cookie(COOKIE_NAME, `${payload}.${sign(payload)}`, {
     httpOnly: true,
-    secure: process.env["NODE_ENV"] === "production",
+    secure: useSecureCookies(),
     sameSite: "lax",
     maxAge: SESSION_TTL_MS,
     path: "/",
@@ -71,7 +78,7 @@ export function issueSession(response: Response, userId: number) {
 }
 
 export function clearSession(response: Response) {
-  response.clearCookie(COOKIE_NAME, { httpOnly: true, secure: process.env["NODE_ENV"] === "production", sameSite: "lax", path: "/" });
+  response.clearCookie(COOKIE_NAME, { httpOnly: true, secure: useSecureCookies(), sameSite: "lax", path: "/" });
 }
 
 export const requireSession: RequestHandler = async (req, res, next) => {
