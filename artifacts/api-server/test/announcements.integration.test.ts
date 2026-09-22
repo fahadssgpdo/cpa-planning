@@ -484,6 +484,12 @@ test("protects all internal content reads and user-management mutations", async 
   assert.equal(employeeRoleChangeResponse.status, 403);
 });
 
+test("health check confirms the API can query its database", async () => {
+  const response = await request("/api/healthz");
+  assert.equal(response.status, 200);
+  assert.deepEqual(await responseBody<{ status: string }>(response), { status: "ok" });
+});
+
 test("scopes private inquiries and suggestions to the authenticated employee", async () => {
   async function createSubmission(
     route: "/api/inquiries" | "/api/suggestions",

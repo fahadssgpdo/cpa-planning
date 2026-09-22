@@ -1,0 +1,78 @@
+name: Deploy Windows Server
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: windows-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to CPA Windows Server
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Windows, X64, cpa-production]
+    environment: production
+    permissions:
+      contents: read
+    env:
+      PORT: 3000
+      BASE_PATH: /
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prod=false
+
+      - name: Validate and build API
+        shell: pwsh
+        run: |
+          pnpm --filter @workspace/api-server run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm --filter @workspace/api-server run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build frontend
+        shell: pwsh
+        run: |
+          pnpm --filter @workspace/cpa-planning run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Apply additive database setup
+        shell: pwsh
+        env:
+          WINDOWS_DATABASE_URL: ${{ secrets.WINDOWS_DATABASE_URL }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_DATABASE_URL)) {
+            throw "The production environment secret WINDOWS_DATABASE_URL is required."
+          }
+          if (-not (Get-Command psql -ErrorAction SilentlyContinue)) {
+            throw "psql is not installed or is not available on PATH for the runner service account."
+          }
+          psql "$env:WINDOWS_DATABASE_URL" --set ON_ERROR_STOP=1 --file setup-database.sql
+          if ($LASTEXITCODE -ne 0) {
+            throw "Database setup failed with exit code $LASTEXITCODE."
+          }
+
+      - name: Deploy and restart service
+        shell: pwsh
+        run: |
+          ./scripts/deploy-windows.ps1 `
+            -SourcePath $env:GITHUB_WORKSPACE `
+            -DeploymentPath 'C:\Planning\CPA-Planning-Platform' `
+            -ServiceName 'CPAPlanningAP' `
+            -HealthUrl 'http://127.0.0.1:3000/api/healthz' `
+            -PublicAuthUrl 'https://planning.cpa.gov.om/api/auth/me'
