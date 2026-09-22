@@ -10,7 +10,13 @@ import {
   CreateInquiryResponse,
   UpdateInquiryResponse,
 } from "@workspace/api-zod";
-import { getSessionUser, requireManagerOrAdmin, requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
+import {
+  getSessionUser,
+  isPlanningStaff,
+  requireManagerOrAdmin,
+  requirePlanningStaff,
+  requireSession,
+} from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -62,12 +68,12 @@ router.get("/inquiries", requireSession, async (req, res): Promise<void> => {
     .$dynamic();
 
   if (userId !== undefined) {
-    if (userId !== sessionUser.id && !["officer", "manager", "admin"].includes(sessionUser.role)) {
+    if (userId !== sessionUser.id && !isPlanningStaff(sessionUser)) {
       res.status(403).json({ error: "You may only view your own inquiries." });
       return;
     }
     query = query.where(eq(inquiriesTable.userId, userId));
-  } else if (!["officer", "manager", "admin"].includes(sessionUser.role)) {
+  } else if (!isPlanningStaff(sessionUser)) {
     query = query.where(eq(inquiriesTable.userId, sessionUser.id));
   }
 

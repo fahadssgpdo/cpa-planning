@@ -207,6 +207,8 @@ paths:
       operationId: listDiscussions
       tags: [discussions]
       summary: List discussions
+      security:
+        - cookieAuth: []
       responses:
         "200":
           description: List of discussions
@@ -216,6 +218,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Discussion"
+        "401":
+          description: Authentication required
     post:
       operationId: createDiscussion
       tags: [discussions]
@@ -239,6 +243,8 @@ paths:
       operationId: getDiscussion
       tags: [discussions]
       summary: Get a discussion with its comments
+      security:
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -252,6 +258,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DiscussionDetail"
+        "401":
+          description: Authentication required
     patch:
       operationId: updateDiscussion
       tags: [discussions]
@@ -306,6 +314,9 @@ paths:
       operationId: listInquiries
       tags: [inquiries]
       summary: List inquiries
+      description: Employees can only list their own inquiries. Planning staff can list inquiries across users.
+      security:
+        - cookieAuth: []
       parameters:
         - name: userId
           in: query
@@ -320,6 +331,10 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Inquiry"
+        "401":
+          description: Authentication required
+        "403":
+          description: Employees cannot view another user's inquiries
     post:
       operationId: createInquiry
       tags: [inquiries]
@@ -498,6 +513,9 @@ paths:
       operationId: listSuggestions
       tags: [suggestions]
       summary: List suggestions
+      description: Employees can only list their own suggestions. Planning staff can list suggestions across users.
+      security:
+        - cookieAuth: []
       parameters:
         - name: userId
           in: query
@@ -512,6 +530,10 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Suggestion"
+        "401":
+          description: Authentication required
+        "403":
+          description: Employees cannot view another user's suggestions
     post:
       operationId: createSuggestion
       tags: [suggestions]
@@ -958,10 +980,8 @@ components:
 
     InquiryInput:
       type: object
-      required: [userId, subject, details]
+      required: [subject, details]
       properties:
-        userId:
-          type: integer
         subject:
           type: string
         details:
@@ -977,8 +997,6 @@ components:
           enum: [open, answered, resolved]
         response:
           type: string
-        responderId:
-          type: integer
 
     Document:
       type: object
@@ -1077,10 +1095,8 @@ components:
 
     SuggestionInput:
       type: object
-      required: [userId, category, text]
+      required: [category, text]
       properties:
-        userId:
-          type: integer
         category:
           $ref: "#/components/schemas/SuggestionCategory"
         text:

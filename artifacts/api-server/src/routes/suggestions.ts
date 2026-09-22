@@ -10,7 +10,12 @@ import {
   CreateSuggestionResponse,
   UpdateSuggestionResponse,
 } from "@workspace/api-zod";
-import { getSessionUser, requirePlanningStaff, requireSession } from "../middlewares/announcement-auth";
+import {
+  getSessionUser,
+  isPlanningStaff,
+  requirePlanningStaff,
+  requireSession,
+} from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
@@ -41,12 +46,12 @@ router.get("/suggestions", requireSession, async (req, res): Promise<void> => {
 
   let query = db.select().from(suggestionsTable).orderBy(desc(suggestionsTable.createdAt)).$dynamic();
   if (userId !== undefined) {
-    if (userId !== sessionUser.id && !["officer", "manager", "admin"].includes(sessionUser.role)) {
+    if (userId !== sessionUser.id && !isPlanningStaff(sessionUser)) {
       res.status(403).json({ error: "You may only view your own suggestions." });
       return;
     }
     query = query.where(eq(suggestionsTable.userId, userId));
-  } else if (!["officer", "manager", "admin"].includes(sessionUser.role)) {
+  } else if (!isPlanningStaff(sessionUser)) {
     query = query.where(eq(suggestionsTable.userId, sessionUser.id));
   }
 

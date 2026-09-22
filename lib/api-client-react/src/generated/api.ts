@@ -793,7 +793,7 @@ export const getListDiscussionsQueryKey = () => {
     }
 
 
-export const getListDiscussionsQueryOptions = <TData = Awaited<ReturnType<typeof listDiscussions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDiscussions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListDiscussionsQueryOptions = <TData = Awaited<ReturnType<typeof listDiscussions>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDiscussions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -812,14 +812,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListDiscussionsQueryResult = NonNullable<Awaited<ReturnType<typeof listDiscussions>>>
-export type ListDiscussionsQueryError = ErrorType<unknown>
+export type ListDiscussionsQueryError = ErrorType<void>
 
 
 /**
  * @summary List discussions
  */
 
-export function useListDiscussions<TData = Awaited<ReturnType<typeof listDiscussions>>, TError = ErrorType<unknown>>(
+export function useListDiscussions<TData = Awaited<ReturnType<typeof listDiscussions>>, TError = ErrorType<void>>(
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDiscussions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -941,7 +941,7 @@ export const getGetDiscussionQueryKey = (id: number,) => {
     }
 
 
-export const getGetDiscussionQueryOptions = <TData = Awaited<ReturnType<typeof getDiscussion>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDiscussion>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetDiscussionQueryOptions = <TData = Awaited<ReturnType<typeof getDiscussion>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDiscussion>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -960,14 +960,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetDiscussionQueryResult = NonNullable<Awaited<ReturnType<typeof getDiscussion>>>
-export type GetDiscussionQueryError = ErrorType<unknown>
+export type GetDiscussionQueryError = ErrorType<void>
 
 
 /**
  * @summary Get a discussion with its comments
  */
 
-export function useGetDiscussion<TData = Awaited<ReturnType<typeof getDiscussion>>, TError = ErrorType<unknown>>(
+export function useGetDiscussion<TData = Awaited<ReturnType<typeof getDiscussion>>, TError = ErrorType<void>>(
  id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDiscussion>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1145,6 +1145,7 @@ export const getListInquiriesUrl = (params?: ListInquiriesParams,) => {
 }
 
 /**
+ * Employees can only list their own inquiries. Planning staff can list inquiries across users.
  * @summary List inquiries
  */
 export const listInquiries = async (params?: ListInquiriesParams, options?: RequestInit): Promise<Inquiry[]> => {
@@ -1169,7 +1170,7 @@ export const getListInquiriesQueryKey = (params?: ListInquiriesParams,) => {
     }
 
 
-export const getListInquiriesQueryOptions = <TData = Awaited<ReturnType<typeof listInquiries>>, TError = ErrorType<unknown>>(params?: ListInquiriesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listInquiries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListInquiriesQueryOptions = <TData = Awaited<ReturnType<typeof listInquiries>>, TError = ErrorType<void>>(params?: ListInquiriesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listInquiries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1188,14 +1189,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListInquiriesQueryResult = NonNullable<Awaited<ReturnType<typeof listInquiries>>>
-export type ListInquiriesQueryError = ErrorType<unknown>
+export type ListInquiriesQueryError = ErrorType<void>
 
 
 /**
  * @summary List inquiries
  */
 
-export function useListInquiries<TData = Awaited<ReturnType<typeof listInquiries>>, TError = ErrorType<unknown>>(
+export function useListInquiries<TData = Awaited<ReturnType<typeof listInquiries>>, TError = ErrorType<void>>(
  params?: ListInquiriesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listInquiries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1889,6 +1890,7 @@ export const getListSuggestionsUrl = (params?: ListSuggestionsParams,) => {
 }
 
 /**
+ * Employees can only list their own suggestions. Planning staff can list suggestions across users.
  * @summary List suggestions
  */
 export const listSuggestions = async (params?: ListSuggestionsParams, options?: RequestInit): Promise<Suggestion[]> => {
@@ -1913,7 +1915,7 @@ export const getListSuggestionsQueryKey = (params?: ListSuggestionsParams,) => {
     }
 
 
-export const getListSuggestionsQueryOptions = <TData = Awaited<ReturnType<typeof listSuggestions>>, TError = ErrorType<unknown>>(params?: ListSuggestionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSuggestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListSuggestionsQueryOptions = <TData = Awaited<ReturnType<typeof listSuggestions>>, TError = ErrorType<void>>(params?: ListSuggestionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSuggestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1932,14 +1934,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListSuggestionsQueryResult = NonNullable<Awaited<ReturnType<typeof listSuggestions>>>
-export type ListSuggestionsQueryError = ErrorType<unknown>
+export type ListSuggestionsQueryError = ErrorType<void>
 
 
 /**
  * @summary List suggestions
  */
 
-export function useListSuggestions<TData = Awaited<ReturnType<typeof listSuggestions>>, TError = ErrorType<unknown>>(
+export function useListSuggestions<TData = Awaited<ReturnType<typeof listSuggestions>>, TError = ErrorType<void>>(
  params?: ListSuggestionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSuggestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
