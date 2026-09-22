@@ -20,7 +20,7 @@ const formatEntry = (row: typeof glossaryTable.$inferSelect) => ({
   date: row.createdAt.toISOString().slice(0, 10),
 });
 
-router.get("/glossary", async (_req, res): Promise<void> => {
+router.get("/glossary", requireSession, async (_req, res): Promise<void> => {
   const rows = await db.select().from(glossaryTable).orderBy(desc(glossaryTable.createdAt));
   res.json(ListGlossaryResponse.parse(rows.map(formatEntry)));
 });

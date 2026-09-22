@@ -179,7 +179,7 @@ async function announcementResponse(row: typeof announcementsTable.$inferSelect)
   };
 }
 
-router.get("/announcements", async (req, res): Promise<void> => {
+router.get("/announcements", requireSession, async (req, res): Promise<void> => {
   const rawArchived = Array.isArray(req.query.archived) ? req.query.archived[0] : req.query.archived;
   if (rawArchived !== undefined && rawArchived !== "true" && rawArchived !== "false") {
     res.status(400).json({ error: "archived must be true or false" });

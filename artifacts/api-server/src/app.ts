@@ -6,6 +6,7 @@ import path from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { requireSession } from "./middlewares/announcement-auth";
 
 const app: Express = express();
 
@@ -39,11 +40,15 @@ const flyerDirectory = path.resolve(
 mkdirSync(flyerDirectory, { recursive: true });
 app.use(
   "/uploads/announcements",
+  requireSession,
   express.static(flyerDirectory, {
     index: false,
     fallthrough: false,
-    maxAge: "1d",
+    maxAge: 0,
     immutable: false,
+    setHeaders(res) {
+      res.setHeader("Cache-Control", "private, no-store");
+    },
   }),
 );
 

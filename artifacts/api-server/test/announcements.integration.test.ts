@@ -183,9 +183,12 @@ test("authorized planning staff can upload, replace, remove, and delete a flyer"
   assert.equal(created.flyerMimeType, "image/png");
   createdFlyerPaths.add(created.flyerPath!);
 
-  const originalFileResponse = await request(created.flyerPath!);
+  const anonymousFileResponse = await request(created.flyerPath!);
+  assert.equal(anonymousFileResponse.status, 401);
+  const originalFileResponse = await request(created.flyerPath!, {}, planningCookie);
   assert.equal(originalFileResponse.status, 200);
   assert.match(originalFileResponse.headers.get("content-type") ?? "", /^image\/png/);
+  assert.equal(originalFileResponse.headers.get("cache-control"), "private, no-store");
 
   const replacementImage = await image("jpeg", { r: 230, g: 80, b: 40 });
   const replaceResponse = await request(
@@ -206,9 +209,9 @@ test("authorized planning staff can upload, replace, remove, and delete a flyer"
   assert.equal(replaced.flyerMimeType, "image/jpeg");
   createdFlyerPaths.add(replaced.flyerPath!);
 
-  const oldFileResponse = await request(created.flyerPath!);
+  const oldFileResponse = await request(created.flyerPath!, {}, planningCookie);
   assert.equal(oldFileResponse.status, 404, "Replacing a flyer should remove the old file.");
-  const replacementFileResponse = await request(replaced.flyerPath!);
+  const replacementFileResponse = await request(replaced.flyerPath!, {}, planningCookie);
   assert.equal(replacementFileResponse.status, 200);
 
   const removeResponse = await request(
@@ -221,7 +224,7 @@ test("authorized planning staff can upload, replace, remove, and delete a flyer"
   assert.equal(removed.flyerPath, null);
   assert.equal(removed.flyerName, null);
   assert.equal(removed.flyerMimeType, null);
-  assert.equal((await request(replaced.flyerPath!)).status, 404);
+  assert.equal((await request(replaced.flyerPath!, {}, planningCookie)).status, 404);
 
   const deleteResponse = await request(
     `/api/announcements/${created.id}`,
@@ -265,8 +268,18 @@ test("rejects unauthenticated, unauthorized, and fake-image flyer requests", asy
   });
 });
 
-test("protects internal reads and user-management mutations", async () => {
-  for (const route of ["/api/users", "/api/dashboard/stats", "/api/discussions", "/api/inquiries", "/api/suggestions"]) {
+test("protects all internal content reads and user-management mutations", async () => {
+  for (const route of [
+    "/api/users",
+    "/api/dashboard/stats",
+    "/api/discussions",
+    "/api/inquiries",
+    "/api/suggestions",
+    "/api/announcements",
+    "/api/documents",
+    "/api/faqs",
+    "/api/glossary",
+  ]) {
     const response = await request(route);
     assert.equal(response.status, 401, `Anonymous ${route} access should be denied.`);
   }
@@ -375,7 +388,7 @@ test("active announcement filtering includes newly created announcements", async
   const created = await responseBody<AnnouncementResponse>(createResponse);
   createdAnnouncementIds.push(created.id);
 
-  const activeResponse = await request("/api/announcements?archived=false");
+  const activeResponse = await request("/api/announcements?archived=false", {}, employeeCookie);
   assert.equal(activeResponse.status, 200);
   const activeAnnouncements = await responseBody<AnnouncementResponse[]>(activeResponse);
   assert.ok(
@@ -383,7 +396,7 @@ test("active announcement filtering includes newly created announcements", async
     "A new non-archived announcement must be returned by the active filter.",
   );
 
-  const archivedResponse = await request("/api/announcements?archived=true");
+  const archivedResponse = await request("/api/announcements?archived=true", {}, employeeCookie);
   assert.equal(archivedResponse.status, 200);
   const archivedAnnouncements = await responseBody<AnnouncementResponse[]>(archivedResponse);
   assert.ok(!archivedAnnouncements.some((announcement) => announcement.id === created.id));

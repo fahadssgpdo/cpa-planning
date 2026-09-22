@@ -12,7 +12,7 @@ import { requirePlanningStaff, requireSession } from "../middlewares/announcemen
 
 const router: IRouter = Router();
 
-router.get("/documents", async (req, res): Promise<void> => {
+router.get("/documents", requireSession, async (req, res): Promise<void> => {
   const qp = ListDocumentsQueryParams.safeParse(req.query);
   const category = qp.success ? qp.data.category : undefined;
 
