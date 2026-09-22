@@ -1,4 +1,4 @@
-# إعداد رفع فلايرات الإعلانات على Windows Server
+# إعداد تخزين الملفات على Windows Server
 
 تُحفظ صور الفلايرات خارج قاعدة البيانات في مجلد دائم، بينما يحتفظ PostgreSQL ببيانات الملف ومساره فقط.
 
@@ -40,9 +40,38 @@ ANNOUNCEMENT_UPLOAD_DIR=C:\Planning\CPA-Planning-Platform\uploads\announcements
 https://planning.cpa.gov.om/uploads/announcements/<file-name>
 ```
 
+## 4. إعداد التخزين الخاص للمستندات
+
+أنشئ مجلداً دائماً خاصاً بالمستندات:
+
+```text
+C:\Planning\CPA-Planning-Platform\uploads\documents
+```
+
+امنح حساب Windows الذي يشغّل خدمة Node.js صلاحية **Modify** على هذا المجلد. لا تمنح مستخدمي IIS أو زوار الموقع وصولاً مباشراً إليه؛ تنزيل المستندات يتم حصراً من خلال مسار API المحمي بتسجيل الدخول.
+
+عيّن متغير البيئة التالي للحساب أو الخدمة التي تشغّل المنصة:
+
+```text
+DOCUMENT_UPLOAD_DIR=C:\Planning\CPA-Planning-Platform\uploads\documents
+```
+
+ويمكن تعيينه على مستوى الجهاز من PowerShell بصلاحية مسؤول:
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+  "DOCUMENT_UPLOAD_DIR",
+  "C:\Planning\CPA-Planning-Platform\uploads\documents",
+  "Machine"
+)
+```
+
+أعد تشغيل خدمة Node.js بعد تعيين المتغير. لا تضف هذا المجلد إلى إعدادات الملفات الثابتة في IIS أو أي خادم ويب آخر.
+
 ## التشغيل والنسخ الاحتياطي
 
 - أدرج مجلد `uploads\announcements` ضمن النسخ الاحتياطية الدورية إلى جانب قاعدة بيانات PostgreSQL.
+- أدرج مجلد `uploads\documents` ضمن النسخ الاحتياطية الدورية؛ يجب استعادة قاعدة البيانات وهذا المجلد معاً للحفاظ على ارتباط السجلات بالملفات.
 - لا تحذف هذا المجلد عند تحديث ملفات التطبيق أو استبدال مجلد `dist`.
 - الملفات المدعومة: JPEG وPNG وWebP وGIF، وبحد أقصى **10 MB** لكل فلاير.
 

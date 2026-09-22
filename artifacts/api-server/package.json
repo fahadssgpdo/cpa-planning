@@ -9,7 +9,7 @@
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit && pnpm run typecheck:test",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
-    "test": "tsx --test test/announcements.integration.test.ts"
+    "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.2.0",
