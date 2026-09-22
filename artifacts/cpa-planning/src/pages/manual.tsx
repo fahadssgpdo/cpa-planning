@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   BookMarked, LayoutDashboard, Megaphone, MessagesSquare,
   HelpCircle, BookOpen, MessageCircleQuestion, Lightbulb,
-  ShieldCheck, Users, Globe, CheckCircle2, Info, BarChart2, BrainCircuit, UserCircle2
+  ShieldCheck, Users, Globe, CheckCircle2, Info, BarChart2, UserCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -144,23 +144,21 @@ export default function ManualPage() {
       <div className="space-y-4">
         <p className="text-sm text-foreground/75 leading-relaxed">
           {ar
-            ? "لوحة التحكم تعرض نظرة شاملة وسريعة لنشاط الدائرة، مع إحصائيات فورية وروابط سريعة لجميع الوحدات، إضافةً إلى لوحة التحليلات المتقدمة المدعومة بالذكاء الاصطناعي."
-            : "The dashboard provides a comprehensive overview of department activity, with real-time statistics, quick links to all modules, and an advanced AI-powered analytics panel."}
+            ? "لوحة التحكم تعرض نظرة شاملة وسريعة لنشاط الدائرة، مع إحصائيات فورية وروابط سريعة لجميع الوحدات، إضافةً إلى لوحة التحليلات والتقارير المتقدمة."
+            : "The dashboard provides a comprehensive overview of department activity, with real-time statistics, quick links to all modules, and an advanced analytics and reports panel."}
         </p>
         <FeatureList items={ar ? [
           "إحصائيات فورية: عدد الإعلانات، النقاشات، الاستفسارات، المستندات",
           "عداد الاستفسارات المفتوحة والمقترحات النشطة",
           "روابط سريعة لجميع الأقسام",
           "آخر الإعلانات النشطة",
-          "لوحة التحليلات والتقارير المتقدمة (انظر القسم التالي)",
-          "مساعد الرؤى الذكي المدعوم بـ Claude AI",
+           "لوحة التحليلات والتقارير المتقدمة (انظر القسم التالي)",
         ] : [
           "Real-time stats: announcements, discussions, inquiries, documents count",
           "Open inquiries and active suggestions counters",
           "Quick links to all sections",
           "Latest active announcements",
-          "Advanced Analytics & Reports panel (see next section)",
-          "AI Copilot insights powered by Claude AI",
+           "Advanced Analytics & Reports panel (see next section)",
         ]} />
         <Tip>{ar ? "لوحة التحليلات تظهر تلقائياً أسفل البطاقات الإحصائية للجميع — لا تحتاج إلى أذونات خاصة لعرضها." : "The analytics panel appears automatically below the stat cards for all users — no special permissions needed to view it."}</Tip>
       </div>
@@ -170,8 +168,8 @@ export default function ManualPage() {
       <div className="space-y-5">
         <p className="text-sm text-foreground/75 leading-relaxed">
           {ar
-            ? "لوحة التحليلات والتقارير توفر رؤية بصرية عميقة لنشاط المنصة، وتشمل خمسة مكونات بيانية مدعومة بمساعد ذكاء اصطناعي يُنتج رؤى ثنائية اللغة."
-            : "The Analytics & Reports panel provides deep visual insight into platform activity, including five chart components backed by an AI assistant that generates bilingual insights."}
+            ? "لوحة التحليلات والتقارير توفر رؤية بصرية عميقة لنشاط المنصة عبر خمسة مكونات بيانية تساعد على متابعة الاتجاهات وقياس الأداء."
+            : "The Analytics & Reports panel provides deep visual insight into platform activity through five chart components that help monitor trends and performance."}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -227,36 +225,6 @@ export default function ManualPage() {
           </Card>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 font-semibold text-sm">
-            <BrainCircuit className="w-4 h-4 text-violet-600" />
-            {ar ? "مساعد الرؤى الذكي (AI Copilot)" : "AI Copilot Insights"}
-          </div>
-          <p className="text-sm text-foreground/75 leading-relaxed">
-            {ar
-              ? "بالضغط على زر 'توليد رؤى جديدة'، يقرأ المساعد جميع بيانات المنصة في الوقت الفعلي ويُصدر 5 رؤى ثنائية اللغة (عربي / إنجليزي) مصنّفة بالألوان حسب نوعها."
-              : "Clicking 'Generate New Insights' (توليد رؤى جديدة) causes the assistant to read all live platform data and produce 5 bilingual (Arabic/English) insights, color-coded by type."}
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div className="flex items-start gap-2 p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg">
-              <span className="text-emerald-600 font-bold mt-0.5">✅</span>
-              <span className="text-emerald-800">{ar ? "إيجابي — مشير إلى نقطة قوة أو إنجاز" : "Positive — highlights a strength or achievement"}</span>
-            </div>
-            <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-100 rounded-lg">
-              <span className="text-amber-600 font-bold mt-0.5">⚠️</span>
-              <span className="text-amber-800">{ar ? "تنبيه — يستدعي متابعة أو انتباهاً" : "Warning — requires follow-up or attention"}</span>
-            </div>
-            <div className="flex items-start gap-2 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
-              <span className="text-blue-600 font-bold mt-0.5">ℹ️</span>
-              <span className="text-blue-800">{ar ? "معلومة — حقيقة مفيدة عن النشاط الحالي" : "Informational — useful fact about current activity"}</span>
-            </div>
-            <div className="flex items-start gap-2 p-2.5 bg-purple-50 border border-purple-100 rounded-lg">
-              <span className="text-purple-600 font-bold mt-0.5">⚡</span>
-              <span className="text-purple-800">{ar ? "إجراء موصى به — خطوة تحسينية مقترحة" : "Recommended action — suggested improvement step"}</span>
-            </div>
-          </div>
-          <Tip>{ar ? "يستخدم المساعد نموذج Claude Sonnet المتقدم — كل ضغطة على الزر تُنتج رؤى جديدة محدّثة بناءً على أحدث البيانات." : "The AI uses the advanced Claude Sonnet model — each button press produces fresh insights based on the latest data."}</Tip>
-        </div>
       </div>
     ),
 

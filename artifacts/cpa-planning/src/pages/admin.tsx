@@ -46,15 +46,6 @@ async function fetchAuditLogs() {
   return res.json() as Promise<AuditLog[]>;
 }
 
-async function postAuditLog(body: object) {
-  await fetch(`${BASE}/api/audit-logs`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    credentials: "include",
-  });
-}
-
 const PERMISSIONS_MATRIX = [
   { key: "viewDashboard",        group: "content",  employee: true,  officer: true,  manager: true,  admin: true },
   { key: "viewAnnouncements",    group: "content",  employee: true,  officer: true,  manager: true,  admin: true },
@@ -175,7 +166,6 @@ export default function AdminPage() {
     mutation: {
       onSuccess: (_, vars) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
-        postAuditLog({ action: "update_user", entityType: "user", entityId: vars.id, details: JSON.stringify(vars.data) });
         toast({ title: lang === "ar" ? "تم تحديث المستخدم" : "User updated" });
       }
     }
@@ -185,7 +175,6 @@ export default function AdminPage() {
     mutation: {
       onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
-        postAuditLog({ action: "create_user", entityType: "user", entityId: data.id, details: `${data.nameAr} — ${data.role}` });
         setCreateDialog(false);
         setCreateForm(emptyEdit());
         toast({ title: lang === "ar" ? "تم إضافة المستخدم" : "User created" });
@@ -196,7 +185,6 @@ export default function AdminPage() {
   const resetPwdMutation = useResetUserPassword({
     mutation: {
       onSuccess: (_, vars) => {
-        postAuditLog({ action: "reset_password", entityType: "user", entityId: vars.id, details: "Password reset by admin" });
         setResetPwdDialog(null);
         setNewPassword("");
         setConfirmPassword("");

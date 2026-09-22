@@ -430,10 +430,6 @@ export const translations = {
         inquiriesByCategory: "الاستفسارات حسب التصنيف",
         topContributors: "الأكثر مشاركةً",
         resolutionRate: "معدل الإنجاز",
-        aiInsights: "تحليلات الذكاء الاصطناعي",
-        aiInsightsDesc: "رؤى مُولَّدة آلياً من بيانات المنصة",
-        generateInsights: "توليد رؤى جديدة",
-        generating: "جاري التحليل...",
         contributions: "مساهمة",
         status: {
           new: "جديد",
@@ -1043,10 +1039,6 @@ export const translations = {
         inquiriesByCategory: "Inquiries by Category",
         topContributors: "Top Contributors",
         resolutionRate: "Resolution Rate",
-        aiInsights: "AI Copilot Insights",
-        aiInsightsDesc: "Auto-generated insights from live platform data",
-        generateInsights: "Generate New Insights",
-        generating: "Analyzing...",
         contributions: "contributions",
         status: {
           new: "New",

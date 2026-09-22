@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { GetDashboardAnalyticsResponse, GetDashboardAiInsightsBody } from "@workspace/api-zod";
+import { GetDashboardAnalyticsResponse } from "@workspace/api-zod";
 import { requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
@@ -96,63 +96,6 @@ router.get("/dashboard/analytics", requireSession, async (_req, res): Promise<vo
       resolutionRate,
     })
   );
-});
-
-router.post("/dashboard/ai-insights", requireSession, async (req, res): Promise<void> => {
-  if (
-    !process.env["AI_INTEGRATIONS_ANTHROPIC_BASE_URL"] ||
-    !process.env["AI_INTEGRATIONS_ANTHROPIC_API_KEY"]
-  ) {
-    res.status(503).json({ error: "AI service is not configured in this environment" });
-    return;
-  }
-
-  const data = GetDashboardAiInsightsBody.safeParse(req.body);
-  if (!data.success) {
-    res.status(400).json({ error: "Invalid analytics data" });
-    return;
-  }
-
-  const d = data.data;
-  const prompt = `You are an AI analytics copilot for HEMA (هيئة حماية المستهلك) — the Consumer Protection Authority's Planning Department internal platform. Analyze the following real-time data and generate 5 concise, bilingual insights (Arabic + English) for the planning team leadership.
-
-Platform Data:
-- Suggestions by Status: ${JSON.stringify(d.suggestionsByStatus)}
-- Suggestions by Category: ${JSON.stringify(d.suggestionsByCategory)}
-- Inquiries by Status: ${JSON.stringify(d.inquiriesByStatus)}
-- Inquiries by Category: ${JSON.stringify(d.inquiriesByCategory)}
-- Weekly Activity (last 8 weeks): ${JSON.stringify(d.weeklyActivity)}
-- Top Contributors (by total submissions): ${JSON.stringify(d.topContributors)}
-- Inquiry Resolution Rate: ${d.resolutionRate}%
-
-Generate exactly 5 insights. Each must have:
-- titleAr: short Arabic title (max 6 words)
-- titleEn: short English title (max 6 words)
-- descAr: 1-2 sentence Arabic description with a specific observation and recommendation
-- descEn: 1-2 sentence English description with a specific observation and recommendation
-- type: exactly one of "positive" | "warning" | "neutral" | "action"
-
-Rules: "positive" = strengths & good metrics, "warning" = concerns or gaps needing attention, "action" = concrete recommended next step, "neutral" = informational trend.
-
-Respond ONLY with a valid JSON array of exactly 5 objects. No markdown fences, no explanation text, nothing else — just the JSON array starting with [ and ending with ].`;
-
-  try {
-    const { anthropic } = await import("@workspace/integrations-anthropic-ai");
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 8192,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const block = message.content[0];
-    const text = block.type === "text" ? block.text : "[]";
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    const insights = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
-
-    res.json({ insights });
-  } catch {
-    res.status(500).json({ error: "AI service unavailable" });
-  }
 });
 
 export default router;
