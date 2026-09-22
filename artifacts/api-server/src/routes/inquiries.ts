@@ -50,9 +50,10 @@ const formatInquiry = async (row: typeof inquiriesTable.$inferSelect) => {
   };
 };
 
-router.get("/inquiries", async (req, res): Promise<void> => {
+router.get("/inquiries", requireSession, async (req, res): Promise<void> => {
   const qp = ListInquiriesQueryParams.safeParse(req.query);
   const userId = qp.success ? qp.data.userId : undefined;
+  const sessionUser = getSessionUser(res);
 
   let query = db
     .select()
@@ -61,7 +62,13 @@ router.get("/inquiries", async (req, res): Promise<void> => {
     .$dynamic();
 
   if (userId !== undefined) {
+    if (userId !== sessionUser.id && !["officer", "manager", "admin"].includes(sessionUser.role)) {
+      res.status(403).json({ error: "You may only view your own inquiries." });
+      return;
+    }
     query = query.where(eq(inquiriesTable.userId, userId));
+  } else if (!["officer", "manager", "admin"].includes(sessionUser.role)) {
+    query = query.where(eq(inquiriesTable.userId, sessionUser.id));
   }
 
   const rows = await query;

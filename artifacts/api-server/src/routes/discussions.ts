@@ -18,7 +18,7 @@ import { getSessionUser, isPlanningStaff, requireManagerOrAdmin, requireSession 
 
 const router: IRouter = Router();
 
-router.get("/discussions", async (_req, res): Promise<void> => {
+router.get("/discussions", requireSession, async (_req, res): Promise<void> => {
   const rows = await db
     .select({
       id: discussionsTable.id,
@@ -94,7 +94,7 @@ router.post("/discussions", requireSession, async (req, res): Promise<void> => {
   );
 });
 
-router.get("/discussions/:id", async (req, res): Promise<void> => {
+router.get("/discussions/:id", requireSession, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = GetDiscussionParams.safeParse({ id: parseInt(rawId, 10) });
   if (!params.success) {

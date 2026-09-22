@@ -34,13 +34,20 @@ const formatSuggestion = async (row: typeof suggestionsTable.$inferSelect) => {
   };
 };
 
-router.get("/suggestions", async (req, res): Promise<void> => {
+router.get("/suggestions", requireSession, async (req, res): Promise<void> => {
   const qp = ListSuggestionsQueryParams.safeParse(req.query);
   const userId = qp.success ? qp.data.userId : undefined;
+  const sessionUser = getSessionUser(res);
 
   let query = db.select().from(suggestionsTable).orderBy(desc(suggestionsTable.createdAt)).$dynamic();
   if (userId !== undefined) {
+    if (userId !== sessionUser.id && !["officer", "manager", "admin"].includes(sessionUser.role)) {
+      res.status(403).json({ error: "You may only view your own suggestions." });
+      return;
+    }
     query = query.where(eq(suggestionsTable.userId, userId));
+  } else if (!["officer", "manager", "admin"].includes(sessionUser.role)) {
+    query = query.where(eq(suggestionsTable.userId, sessionUser.id));
   }
 
   const rows = await query;

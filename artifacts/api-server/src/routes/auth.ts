@@ -1,23 +1,31 @@
 import { Router, type IRouter } from "express";
 import { sql, eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { z } from "zod/v4";
 import { db, usersTable } from "@workspace/db";
 import { clearSession, getSessionUser, issueSession, requireSession } from "../middlewares/announcement-auth";
+import { authRateLimit } from "../middlewares/rate-limit";
 
 const router: IRouter = Router();
 
-router.post("/auth/register", async (req, res): Promise<void> => {
-  const { nameAr, nameEn, username, password, designation, directorate, department, section } =
-    req.body as Record<string, unknown>;
+const registrationBody = z.object({
+  nameAr: z.string().trim().min(1),
+  nameEn: z.string().trim().optional(),
+  username: z.string().trim().min(1),
+  password: z.string().min(1),
+  designation: z.string().optional(),
+  directorate: z.string().optional(),
+  department: z.string().optional(),
+  section: z.string().optional(),
+}).strict();
 
-  if (
-    typeof nameAr !== "string" || !nameAr.trim() ||
-    typeof username !== "string" || !username.trim() ||
-    typeof password !== "string" || !password
-  ) {
-    res.status(400).json({ error: "nameAr, username, and password are required" });
+router.post("/auth/register", authRateLimit, async (req, res): Promise<void> => {
+  const parsed = registrationBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid registration fields." });
     return;
   }
+  const { nameAr, nameEn, username, password, designation, directorate, department, section } = parsed.data;
 
   if (password.length < 8) {
     res.status(400).json({ error: "password_too_short" });
@@ -87,7 +95,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
   });
 });
 
-router.post("/auth/login", async (req, res): Promise<void> => {
+router.post("/auth/login", authRateLimit, async (req, res): Promise<void> => {
   const { username, password } = req.body as Record<string, unknown>;
 
   if (typeof username !== "string" || !username.trim() || typeof password !== "string" || !password) {

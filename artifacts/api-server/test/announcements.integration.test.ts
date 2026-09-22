@@ -265,6 +265,43 @@ test("rejects unauthenticated, unauthorized, and fake-image flyer requests", asy
   });
 });
 
+test("protects internal reads and user-management mutations", async () => {
+  for (const route of ["/api/users", "/api/dashboard/stats", "/api/discussions", "/api/inquiries", "/api/suggestions"]) {
+    const response = await request(route);
+    assert.equal(response.status, 401, `Anonymous ${route} access should be denied.`);
+  }
+
+  const employeeUsersResponse = await request("/api/users", {}, employeeCookie);
+  assert.equal(employeeUsersResponse.status, 403);
+
+  const employeeRoleChangeResponse = await request(
+    "/api/users/1",
+    {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role: "admin" }),
+    },
+    employeeCookie,
+  );
+  assert.equal(employeeRoleChangeResponse.status, 403);
+});
+
+test("rejects registration privilege fields", async () => {
+  const response = await request("/api/auth/register", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      nameAr: `محاولة تصعيد ${randomUUID()}`,
+      username: `privilege-${randomUUID()}`,
+      password,
+      role: "admin",
+      active: true,
+      id: 1,
+    }),
+  });
+  assert.equal(response.status, 400);
+});
+
 test("rejects flyer uploads larger than 10 MB before saving anything", async () => {
   const oversizedFlyerTitle = `Oversized flyer ${randomUUID()}`;
   const oversizedFlyer = new Uint8Array(10 * 1024 * 1024 + 1);

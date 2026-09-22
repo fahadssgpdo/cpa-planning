@@ -49,16 +49,12 @@ export default function Slide4bAnalytics() {
 
           <div style={{ width: "28vw", display: "flex", flexDirection: "column", gap: "1.5vh" }}>
             <div style={{ backgroundColor: "#24336b", borderRadius: "1.5vw", padding: "2vh 2vw", color: "#fff", flex: 1 }}>
-              <div style={{ fontSize: "1.1vw", fontWeight: 800, color: "#c6972d", marginBottom: "1.2vh" }}>🤖 مساعد الرؤى الذكي</div>
-              <div style={{ fontSize: "0.95vw", lineHeight: 1.6, color: "#cbd5e1", marginBottom: "1.5vh" }}>يقرأ بيانات المنصة الحية ويُصدر 5 رؤى ثنائية اللغة مصنّفة بالألوان</div>
+              <div style={{ fontSize: "1.1vw", fontWeight: 800, color: "#c6972d", marginBottom: "1.2vh" }}>📊 مؤشرات الأداء</div>
+              <div style={{ fontSize: "0.95vw", lineHeight: 1.6, color: "#cbd5e1", marginBottom: "1.5vh" }}>مؤشرات بصرية تساعد على متابعة نشاط المنصة وقياس الأداء</div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.6vh", fontSize: "0.85vw" }}>
-                <div style={{ backgroundColor: "rgba(16,185,129,0.2)", borderRadius: "0.5vw", padding: "0.4vh 0.8vw", color: "#6ee7b7" }}>✅ إيجابي — نقاط قوة وإنجازات</div>
-                <div style={{ backgroundColor: "rgba(245,158,11,0.2)", borderRadius: "0.5vw", padding: "0.4vh 0.8vw", color: "#fcd34d" }}>⚠️ تنبيه — يستدعي متابعة</div>
-                <div style={{ backgroundColor: "rgba(96,165,250,0.2)", borderRadius: "0.5vw", padding: "0.4vh 0.8vw", color: "#93c5fd" }}>ℹ️ معلومة — حقيقة مفيدة</div>
-                <div style={{ backgroundColor: "rgba(167,139,250,0.2)", borderRadius: "0.5vw", padding: "0.4vh 0.8vw", color: "#c4b5fd" }}>⚡ إجراء موصى به</div>
-              </div>
-              <div style={{ marginTop: "1.5vh", backgroundColor: "rgba(198,151,45,0.15)", borderRadius: "0.8vw", padding: "0.8vh 1vw", fontSize: "0.8vw", color: "#fcd34d", textAlign: "center", fontWeight: 700 }}>
-                مُشغَّل بـ Claude Sonnet — Anthropic AI
+                <div style={{ backgroundColor: "rgba(16,185,129,0.2)", borderRadius: "0.5vw", padding: "0.4vh 0.8vw", color: "#6ee7b7" }}>📈 اتجاه النشاط الأسبوعي</div>
+                <div style={{ backgroundColor: "rgba(245,158,11,0.2)", borderRadius: "0.5vw", padding: "0.4vh 0.8vw", color: "#fcd34d" }}>📊 توزيع المقترحات</div>
+                <div style={{ backgroundColor: "rgba(96,165,250,0.2)", borderRadius: "0.5vw", padding: "0.4vh 0.8vw", color: "#93c5fd" }}>👥 أكثر المساهمين نشاطاً</div>
               </div>
             </div>
             <div style={{ backgroundColor: "rgba(255,255,255,0.75)", borderRadius: "1.2vw", padding: "1.5vh 1.5vw", border: "1.5px solid #e2e8f0", textAlign: "center" }}>

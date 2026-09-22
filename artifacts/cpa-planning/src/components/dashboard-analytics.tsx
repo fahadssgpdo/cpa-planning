@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLocale } from "@/hooks/use-locale";
 import { useGetDashboardAnalytics } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,21 +10,10 @@ import {
   XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend
 } from "recharts";
 import {
-  Sparkles, TrendingUp, AlertTriangle, Info, Zap,
-  Trophy, Target, RefreshCw, Users
+  TrendingUp, Trophy, Target, Users
 } from "lucide-react";
 import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
-
-type InsightType = "positive" | "warning" | "neutral" | "action";
-
-interface Insight {
-  titleAr: string;
-  titleEn: string;
-  descAr: string;
-  descEn: string;
-  type: InsightType;
-}
 
 const CHART_COLORS = [
   "hsl(var(--primary))",
@@ -37,13 +25,6 @@ const CHART_COLORS = [
   "#8b5cf6",
   "#ec4899",
 ];
-
-const insightConfig: Record<InsightType, { icon: typeof Sparkles; color: string; bg: string; border: string }> = {
-  positive: { icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30", border: "border-emerald-200 dark:border-emerald-800" },
-  warning: { icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30", border: "border-amber-200 dark:border-amber-800" },
-  neutral: { icon: Info, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-200 dark:border-blue-800" },
-  action: { icon: Zap, color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/30", border: "border-violet-200 dark:border-violet-800" },
-};
 
 function SectionHeading({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
@@ -60,31 +41,6 @@ export function DashboardAnalyticsPanel() {
   const ta = t.dashboard.analytics;
   const dateFnsLocale = isEn ? enUS : ar;
   const { data, isLoading } = useGetDashboardAnalytics();
-  const [insights, setInsights] = useState<Insight[]>([]);
-  const [insightsLoading, setInsightsLoading] = useState(false);
-  const [insightsGenerated, setInsightsGenerated] = useState(false);
-
-  const generateInsights = async () => {
-    if (!data) return;
-    setInsightsLoading(true);
-    try {
-      const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-      const res = await fetch(`${base}/api/dashboard/ai-insights`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-      const json = await res.json();
-      setInsights(json.insights ?? []);
-      setInsightsGenerated(true);
-    } catch {
-      setInsights([]);
-    } finally {
-      setInsightsLoading(false);
-    }
-  };
-
   const labelStatus = (key: string) =>
     (ta.status as Record<string, string>)[key] ?? key;
   const labelCat = (key: string) =>
@@ -368,90 +324,6 @@ export function DashboardAnalyticsPanel() {
         </Card>
       </div>
 
-      {/* AI Copilot Insights */}
-      <Card className="border-primary/20">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-base font-bold">{ta.aiInsights}</CardTitle>
-                <CardDescription className="text-xs mt-0.5">{ta.aiInsightsDesc}</CardDescription>
-              </div>
-            </div>
-            <Button
-              size="sm"
-              variant={insightsGenerated ? "outline" : "default"}
-              onClick={generateInsights}
-              disabled={insightsLoading}
-              className="gap-2"
-            >
-              {insightsLoading ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5" />
-              )}
-              {insightsLoading ? ta.generating : ta.generateInsights}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {insightsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-28 rounded-xl" />
-              ))}
-            </div>
-          ) : insights.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {insights.map((insight, i) => {
-                const cfg = insightConfig[insight.type] ?? insightConfig.neutral;
-                const Icon = cfg.icon;
-                const label = (ta.insightTypes as Record<string, string>)[insight.type] ?? insight.type;
-                return (
-                  <div
-                    key={i}
-                    className={`rounded-xl border p-4 space-y-2 ${cfg.bg} ${cfg.border}`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${cfg.color}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-bold leading-snug ${cfg.color}`}>
-                          {isEn ? insight.titleEn : insight.titleAr}
-                        </p>
-                        <Badge variant="outline" className={`text-[10px] h-4 px-1 mt-1 ${cfg.border} ${cfg.color}`}>
-                          {label}
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-xs text-foreground/80 leading-relaxed">
-                      {isEn ? insight.descEn : insight.descAr}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-primary/60" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  {isEn ? "AI-Powered Insights Ready" : "رؤى الذكاء الاصطناعي جاهزة"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {isEn
-                    ? "Click the button above to analyze live platform data and generate actionable insights for the planning team."
-                    : "اضغط على الزر أعلاه لتحليل بيانات المنصة وتوليد رؤى عملية لفريق التخطيط."}
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

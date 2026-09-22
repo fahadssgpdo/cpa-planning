@@ -2,10 +2,11 @@ import { Router, type IRouter } from "express";
 import { eq, sql } from "drizzle-orm";
 import { db, announcementsTable, discussionsTable, inquiriesTable, documentsTable, suggestionsTable, usersTable } from "@workspace/db";
 import { GetDashboardStatsResponse } from "@workspace/api-zod";
+import { requireSession } from "../middlewares/announcement-auth";
 
 const router: IRouter = Router();
 
-router.get("/dashboard/stats", async (_req, res): Promise<void> => {
+router.get("/dashboard/stats", requireSession, async (_req, res): Promise<void> => {
   const [{ openInquiries }] = await db
     .select({ openInquiries: sql<number>`cast(count(*) as int)` })
     .from(inquiriesTable)
