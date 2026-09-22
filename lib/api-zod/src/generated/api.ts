@@ -427,28 +427,34 @@ export const ListDocumentsResponseItem = zod.object({
   "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'annual-plans', 'reports', 'other']),
   "description": zod.string(),
   "date": zod.string(),
-  "fileUrl": zod.string().nullish()
+  "fileName": zod.string().nullish(),
+  "mimeType": zod.string().nullish(),
+  "fileSize": zod.number().nullish(),
+  "downloadUrl": zod.string().nullish(),
+  "migrationRequired": zod.boolean()
 })
 export const ListDocumentsResponse = zod.array(ListDocumentsResponseItem)
 
 
 /**
- * @summary Add a document to the knowledge base
+ * @summary Upload a document to the private knowledge base
  */
-export const CreateDocumentBody = zod.object({
-  "name": zod.string(),
-  "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'annual-plans', 'reports', 'other']),
-  "description": zod.string(),
-  "fileUrl": zod.string().nullish()
+export const UploadDocumentBody = zod.object({
+  "data": zod.string().describe('JSON encoded DocumentInput metadata.'),
+  "file": zod.string().describe('Document file sent as a multipart file field.')
 })
 
-export const CreateDocumentResponse = zod.object({
+export const UploadDocumentResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "category": zod.enum(['manuals', 'guidelines', 'kpi', 'policies', 'templates', 'annual-plans', 'reports', 'other']),
   "description": zod.string(),
   "date": zod.string(),
-  "fileUrl": zod.string().nullish()
+  "fileName": zod.string().nullish(),
+  "mimeType": zod.string().nullish(),
+  "fileSize": zod.number().nullish(),
+  "downloadUrl": zod.string().nullish(),
+  "migrationRequired": zod.boolean()
 })
 
 
@@ -460,6 +466,16 @@ export const DeleteDocumentParams = zod.object({
 })
 
 export const DeleteDocumentResponse = zod.void()
+
+
+/**
+ * @summary Download a private knowledge-base document
+ */
+export const DownloadDocumentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DownloadDocumentResponse = zod.unknown()
 
 
 /**

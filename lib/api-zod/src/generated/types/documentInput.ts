@@ -11,6 +11,4 @@ export interface DocumentInput {
   name: string;
   category: DocumentInputCategory;
   description: string;
-  /** @nullable */
-  fileUrl?: string | null;
 }

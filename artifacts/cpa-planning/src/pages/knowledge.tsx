@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
 import { useLocale } from "@/hooks/use-locale";
 import {
-  useListDocuments, useCreateDocument, useDeleteDocument,
+  useListDocuments, useDeleteDocument,
   getListDocumentsQueryKey, DocumentCategory,
   useListGlossary, useCreateGlossaryEntry, useDeleteGlossaryEntry,
   getListGlossaryQueryKey,
@@ -10,6 +10,7 @@ import {
   getListFaqsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,7 +64,7 @@ export default function KnowledgeBase() {
   const [isGlossaryDialogOpen, setIsGlossaryDialogOpen] = useState(false);
   const [isFaqDialogOpen, setIsFaqDialogOpen]       = useState(false);
   const [search, setSearch]                         = useState("");
-  const [attachmentName, setAttachmentName]         = useState("");
+  const [attachment, setAttachment]                 = useState<File | null>(null);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -76,15 +77,34 @@ export default function KnowledgeBase() {
     query: { queryKey: getListDocumentsQueryKey(docQueryParams) }
   });
 
-  const createDocMutation = useCreateDocument({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListDocumentsQueryKey() });
-        setIsDocDialogOpen(false);
-        setAttachmentName("");
-        toast({ title: k.addedSuccess });
+  const createDocMutation = useMutation({
+    mutationFn: async ({ data, file }: {
+      data: { name: string; description: string; category: DocumentCategory };
+      file: File;
+    }) => {
+      const body = new FormData();
+      body.append("data", JSON.stringify(data));
+      body.append("file", file);
+      const response = await fetch("/api/documents", {
+        method: "POST",
+        credentials: "same-origin",
+        body,
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({ error: "Unable to upload document." }));
+        throw new Error(result.error ?? "Unable to upload document.");
       }
-    }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getListDocumentsQueryKey() });
+      setIsDocDialogOpen(false);
+      setAttachment(null);
+      toast({ title: k.addedSuccess });
+    },
+    onError: (error) => {
+      toast({ title: error instanceof Error ? error.message : "Unable to upload document.", variant: "destructive" });
+    },
   });
 
   const deleteDocMutation = useDeleteDocument({
@@ -144,14 +164,17 @@ export default function KnowledgeBase() {
   const handleCreateDoc = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const externalUrl = (fd.get("fileUrl") as string)?.trim();
+    if (!attachment) {
+      toast({ title: lang === "ar" ? "يرجى اختيار ملف" : "Please select a file.", variant: "destructive" });
+      return;
+    }
     createDocMutation.mutate({
       data: {
         name: fd.get("name") as string,
         description: fd.get("description") as string,
         category: (activeCategory ?? "other") as DocumentCategory,
-        fileUrl: externalUrl || attachmentName || "https://example.com/doc.pdf",
-      }
+      },
+      file: attachment,
     });
   };
 
@@ -232,7 +255,7 @@ export default function KnowledgeBase() {
 
         {/* Add button */}
         {isDocTab && canAddDoc ? (
-          <Dialog open={isDocDialogOpen} onOpenChange={(o) => { setIsDocDialogOpen(o); if (!o) setAttachmentName(""); }}>
+          <Dialog open={isDocDialogOpen} onOpenChange={(o) => { setIsDocDialogOpen(o); if (!o) setAttachment(null); }}>
             <DialogTrigger asChild>
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Plus className="w-4 h-4 me-2" />
@@ -261,8 +284,8 @@ export default function KnowledgeBase() {
                       className="cursor-pointer flex-1 flex items-center gap-2 border border-dashed rounded-lg px-4 py-3 text-sm text-muted-foreground hover:border-primary/50 hover:bg-muted/30 transition-colors"
                     >
                       <Paperclip className="w-4 h-4 shrink-0" />
-                      {attachmentName ? (
-                        <span className="text-foreground font-medium truncate">{attachmentName}</span>
+                      {attachment ? (
+                        <span className="text-foreground font-medium truncate">{attachment.name}</span>
                       ) : (
                         <span>{k.attachmentHint}</span>
                       )}
@@ -270,20 +293,18 @@ export default function KnowledgeBase() {
                     <input
                       id="doc-file-upload"
                       type="file"
+                      name="file"
+                      required
                       className="hidden"
                       accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg"
-                      onChange={(e) => setAttachmentName(e.target.files?.[0]?.name ?? "")}
+                      onChange={(e) => setAttachment(e.target.files?.[0] ?? null)}
                     />
-                    {attachmentName && (
-                      <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive shrink-0" onClick={() => setAttachmentName("")}>
+                    {attachment && (
+                      <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive shrink-0" onClick={() => setAttachment(null)}>
                         {k.removeAttachment}
                       </Button>
                     )}
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="fileUrl">{k.externalLink}</Label>
-                  <Input id="fileUrl" name="fileUrl" type="url" placeholder="https://..." />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">{k.description}</Label>
@@ -514,11 +535,17 @@ export default function KnowledgeBase() {
                     <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-3 h-8">{doc.description}</p>
                     <div className="flex items-center justify-end mt-auto">
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 hover:text-primary" asChild>
-                          <a href={doc.fileUrl || '#'} target="_blank" rel="noreferrer" title={lang === "ar" ? "تنزيل" : "Download"}>
-                            <Download className="w-4 h-4" />
-                          </a>
-                        </Button>
+                        {doc.downloadUrl ? (
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 hover:text-primary" asChild>
+                            <a href={doc.downloadUrl} title={lang === "ar" ? "تنزيل" : "Download"}>
+                              <Download className="w-4 h-4" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="icon" className="h-8 w-8" disabled title={lang === "ar" ? "يتطلب إعادة رفع الملف" : "File must be re-uploaded"}>
+                            <Lock className="w-4 h-4" />
+                          </Button>
+                        )}
                         {canCloseInquiry && (
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => deleteDocMutation.mutate({ id: doc.id })} title={t.common.delete}>

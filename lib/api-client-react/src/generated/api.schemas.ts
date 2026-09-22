@@ -364,7 +364,14 @@ export interface Document {
   description: string;
   date: string;
   /** @nullable */
-  fileUrl?: string | null;
+  fileName?: string | null;
+  /** @nullable */
+  mimeType?: string | null;
+  /** @nullable */
+  fileSize?: number | null;
+  /** @nullable */
+  downloadUrl?: string | null;
+  migrationRequired: boolean;
 }
 
 export type DocumentInputCategory = typeof DocumentInputCategory[keyof typeof DocumentInputCategory];
@@ -385,8 +392,13 @@ export interface DocumentInput {
   name: string;
   category: DocumentInputCategory;
   description: string;
-  /** @nullable */
-  fileUrl?: string | null;
+}
+
+export interface DocumentMultipartInput {
+  /** JSON encoded DocumentInput metadata. */
+  data: string;
+  /** Document file sent as a multipart file field. */
+  file: string;
 }
 
 export interface Faq {

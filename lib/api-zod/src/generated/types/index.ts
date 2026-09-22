@@ -32,6 +32,7 @@ export * from './document';
 export * from './documentCategory';
 export * from './documentInput';
 export * from './documentInputCategory';
+export * from './documentMultipartInput';
 export * from './faq';
 export * from './faqInput';
 export * from './faqUpdate';

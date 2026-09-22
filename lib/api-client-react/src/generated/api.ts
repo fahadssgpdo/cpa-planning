@@ -32,7 +32,7 @@ import type {
   DiscussionInput,
   DiscussionUpdate,
   Document,
-  DocumentInput,
+  DocumentMultipartInput,
   Faq,
   FaqInput,
   FaqUpdate,
@@ -1441,7 +1441,7 @@ export function useListDocuments<TData = Awaited<ReturnType<typeof listDocuments
 
 
 
-export const getCreateDocumentUrl = () => {
+export const getUploadDocumentUrl = () => {
 
 
 
@@ -1450,16 +1450,19 @@ export const getCreateDocumentUrl = () => {
 }
 
 /**
- * @summary Add a document to the knowledge base
+ * @summary Upload a document to the private knowledge base
  */
-export const createDocument = async (documentInput: DocumentInput, options?: RequestInit): Promise<Document> => {
+export const uploadDocument = async (documentMultipartInput: DocumentMultipartInput, options?: RequestInit): Promise<Document> => {
+    const formData = new FormData();
+formData.append(`data`, documentMultipartInput.data);
+formData.append(`file`, documentMultipartInput.file);
 
-  return customFetch<Document>(getCreateDocumentUrl(),
+  return customFetch<Document>(getUploadDocumentUrl(),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(documentInput)
+    method: 'POST'
+    ,
+    body: formData
   }
 );}
 
@@ -1467,11 +1470,11 @@ export const createDocument = async (documentInput: DocumentInput, options?: Req
 
 
 
-export const getCreateDocumentMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDocument>>, TError,{data: BodyType<DocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createDocument>>, TError,{data: BodyType<DocumentInput>}, TContext> => {
+export const getUploadDocumentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadDocument>>, TError,{data: BodyType<DocumentMultipartInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadDocument>>, TError,{data: BodyType<DocumentMultipartInput>}, TContext> => {
 
-const mutationKey = ['createDocument'];
+const mutationKey = ['uploadDocument'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1481,10 +1484,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createDocument>>, {data: BodyType<DocumentInput>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadDocument>>, {data: BodyType<DocumentMultipartInput>}> = (props) => {
           const {data} = props ?? {};
 
-          return  createDocument(data,requestOptions)
+          return  uploadDocument(data,requestOptions)
         }
 
 
@@ -1494,22 +1497,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof createDocument>>>
-    export type CreateDocumentMutationBody = BodyType<DocumentInput>
-    export type CreateDocumentMutationError = ErrorType<unknown>
+    export type UploadDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof uploadDocument>>>
+    export type UploadDocumentMutationBody = BodyType<DocumentMultipartInput>
+    export type UploadDocumentMutationError = ErrorType<void>
 
     /**
- * @summary Add a document to the knowledge base
+ * @summary Upload a document to the private knowledge base
  */
-export const useCreateDocument = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDocument>>, TError,{data: BodyType<DocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useUploadDocument = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadDocument>>, TError,{data: BodyType<DocumentMultipartInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof createDocument>>,
+        Awaited<ReturnType<typeof uploadDocument>>,
         TError,
-        {data: BodyType<DocumentInput>},
+        {data: BodyType<DocumentMultipartInput>},
         TContext
       > => {
-      return useMutation(getCreateDocumentMutationOptions(options));
+      return useMutation(getUploadDocumentMutationOptions(options));
     }
 
 export const getDeleteDocumentUrl = (id: number,) => {
@@ -1582,6 +1585,83 @@ export const useDeleteDocument = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteDocumentMutationOptions(options));
     }
+
+export const getDownloadDocumentUrl = (id: number,) => {
+
+
+
+
+  return `/api/documents/${id}/download`
+}
+
+/**
+ * @summary Download a private knowledge-base document
+ */
+export const downloadDocument = async (id: number, options?: RequestInit): Promise<unknown> => {
+
+  return customFetch<unknown>(getDownloadDocumentUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownloadDocumentQueryKey = (id: number,) => {
+    return [
+    `/api/documents/${id}/download`
+    ] as const;
+    }
+
+
+export const getDownloadDocumentQueryOptions = <TData = Awaited<ReturnType<typeof downloadDocument>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadDocumentQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadDocument>>> = ({ signal }) => downloadDocument(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadDocument>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type DownloadDocumentQueryResult = NonNullable<Awaited<ReturnType<typeof downloadDocument>>>
+export type DownloadDocumentQueryError = ErrorType<void>
+
+
+/**
+ * @summary Download a private knowledge-base document
+ */
+
+export function useDownloadDocument<TData = Awaited<ReturnType<typeof downloadDocument>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getDownloadDocumentQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListFaqsUrl = () => {
 
