@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "section" text,
   "role" text NOT NULL DEFAULT 'employee',
   "active" boolean NOT NULL DEFAULT true,
+  "session_version" integer NOT NULL DEFAULT 1,
   "created_at" timestamp DEFAULT now() NOT NULL
 );
 
@@ -110,6 +111,9 @@ CREATE TABLE IF NOT EXISTS "glossary" (
   "examples" text,
   "created_at" timestamp DEFAULT now() NOT NULL
 );
+
+-- Session invalidation support for existing installations.
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "session_version" integer NOT NULL DEFAULT 1;
 
 -- Flyer support for existing installations.
 ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_path" text;

@@ -1,3 +1,4 @@
 - [OpenAPI multipart codegen](openapi-multipart-codegen.md) — binary file formats generate browser-only File/Blob types in shared API libraries without DOM typings.
 - [API upload test isolation](api-test-isolation.md) — file-upload integration tests must isolate storage and clean up records and generated assets.
 - [Legacy account remediation](legacy-account-remediation.md) — removing seeded credentials from source also requires invalidating their database accounts.
+- [PNPM override location](pnpm-override-location.md) — keep transitive overrides in the workspace config so Replit’s platform-pruning overrides remain active.
