@@ -23,6 +23,7 @@ const {
   pool,
   announcementsTable,
   documentsTable,
+  auditLogsTable,
   inquiriesTable,
   suggestionsTable,
   usersTable,
@@ -55,6 +56,8 @@ type DocumentResponse = {
 
 const password = "TestPassword@123";
 const planningUsername = `planning-${randomUUID()}`;
+
+const adminUsername = `admin-${randomUUID()}`;
 const employeeUsername = `employee-${randomUUID()}`;
 const secondEmployeeUsername = `employee-${randomUUID()}`;
 const createdAnnouncementIds: number[] = [];
@@ -66,9 +69,12 @@ const createdFlyerPaths = new Set<string>();
 let server: Server;
 let baseUrl: string;
 let planningCookie: string;
+
+let adminCookie: string;
 let employeeCookie: string;
 let secondEmployeeCookie: string;
 
+let employeeId: number;
 function listen(): Promise<void> {
   return new Promise((resolve, reject) => {
     server = app.listen(0, () => {
@@ -84,11 +90,11 @@ function listen(): Promise<void> {
   });
 }
 
-async function login(username: string) {
+async function login(username: string, loginPassword = password) {
   const response = await fetch(`${baseUrl}/api/auth/login`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password: loginPassword }),
   });
   assert.equal(response.status, 200);
   const cookie = response.headers.get("set-cookie");
@@ -155,13 +161,22 @@ async function responseBody<T>(response: Response) {
 
 before(async () => {
   const passwordHash = await bcrypt.hash(password, 4);
-  await db.insert(usersTable).values([
+
+  const insertedUsers = await db.insert(usersTable).values([
     {
       nameAr: `موظف تخطيط ${randomUUID()}`,
       username: planningUsername,
       passwordHash,
       directorate: "Planning Directorate",
       role: "officer",
+      active: true,
+    },
+    {
+      nameAr: `مدير نظام ${randomUUID()}`,
+      username: adminUsername,
+      passwordHash,
+      directorate: "Planning Directorate",
+      role: "admin",
       active: true,
     },
     {
@@ -180,20 +195,11 @@ before(async () => {
       role: "employee",
       active: true,
     },
-  ]);
-
-  await listen();
-  planningCookie = await login(planningUsername);
-  employeeCookie = await login(employeeUsername);
-  secondEmployeeCookie = await login(secondEmployeeUsername);
-});
-
-after(async () => {
-  if (createdAnnouncementIds.length > 0) {
+  ]).returning({ id: usersTable.id, username: usersTable.username });
     const rows = await db
-      .delete(announcementsTable)
-      .where(inArray(announcementsTable.id, createdAnnouncementIds))
-      .returning({ flyerPath: announcementsTable.flyerPath });
+      .delete(documentsTable)
+      .where(inArray(documentsTable.id, createdDocumentIds))
+      .returning({ storageKey: documentsTable.storageKey });
     for (const row of rows) {
       if (row.flyerPath) createdFlyerPaths.add(row.flyerPath);
     }
@@ -212,11 +218,15 @@ after(async () => {
   if (createdSuggestionIds.length > 0) {
     await db.delete(suggestionsTable).where(inArray(suggestionsTable.id, createdSuggestionIds));
   }
+  if (testUserIds.length > 0) {
+    await db.delete(auditLogsTable).where(inArray(auditLogsTable.userId, testUserIds));
+  }
 
   await db
     .delete(usersTable)
     .where(inArray(usersTable.username, [
       planningUsername,
+      adminUsername,
       employeeUsername,
       secondEmployeeUsername,
     ]));
@@ -239,10 +249,7 @@ test("authorized planning staff can upload, replace, remove, and delete a flyer"
     "/api/announcements",
     {
       method: "POST",
-      body: flyerForm(
-        { title: `Flyer lifecycle ${randomUUID()}`, body: "Initial flyer", category: "announcement" },
-        { name: "original.png", mimeType: "image/png", contents: originalImage },
-      ),
+      body: flyerForm({ title, body: "Visible immediately", category: "announcement" }),
     },
     planningCookie,
   );
@@ -298,7 +305,7 @@ test("authorized planning staff can upload, replace, remove, and delete a flyer"
   assert.equal((await request(replaced.flyerPath!, {}, planningCookie)).status, 404);
 
   const deleteResponse = await request(
-    `/api/announcements/${created.id}`,
+    `/api/documents/${document.id}`,
     { method: "DELETE" },
     planningCookie,
   );
@@ -465,7 +472,18 @@ test("protects all internal content reads and user-management mutations", async 
     "/api/glossary",
     "/api/discussions/1",
   ]) {
-    const response = await request(route);
+  const response = await request(
+    "/api/announcements",
+    {
+      method: "POST",
+      headers: { origin: "https://malicious.example" },
+      body: flyerForm(
+        { title: crossSiteTitle, body: "Should not save", category: "announcement" },
+        { name: "cross-site.png", mimeType: "image/png", contents: validFlyer },
+      ),
+    },
+    planningCookie,
+  );
     assert.equal(response.status, 401, `Anonymous ${route} access should be denied.`);
   }
 
@@ -481,10 +499,8 @@ test("protects all internal content reads and user-management mutations", async 
     },
     employeeCookie,
   );
-  assert.equal(employeeRoleChangeResponse.status, 403);
-});
 
-test("scopes private inquiries and suggestions to the authenticated employee", async () => {
+  const newPassword = "ChangedPassword@123";
   async function createSubmission(
     route: "/api/inquiries" | "/api/suggestions",
     cookie: string,
@@ -546,18 +562,18 @@ test("scopes private inquiries and suggestions to the authenticated employee", a
 });
 
 test("rejects registration privilege fields", async () => {
-  const response = await request("/api/auth/register", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      nameAr: `محاولة تصعيد ${randomUUID()}`,
-      username: `privilege-${randomUUID()}`,
-      password,
-      role: "admin",
-      active: true,
-      id: 1,
-    }),
-  });
+  const response = await request(
+    "/api/announcements",
+    {
+      method: "POST",
+      headers: { origin: "https://malicious.example" },
+      body: flyerForm(
+        { title: crossSiteTitle, body: "Should not save", category: "announcement" },
+        { name: "cross-site.png", mimeType: "image/png", contents: validFlyer },
+      ),
+    },
+    planningCookie,
+  );
   assert.equal(response.status, 400);
 });
 
@@ -570,17 +586,18 @@ test("rejects flyer uploads larger than 10 MB before saving anything", async () 
     "/api/announcements",
     {
       method: "POST",
+      headers: { origin: "https://malicious.example" },
       body: flyerForm(
-        { title: oversizedFlyerTitle, body: "Should not save", category: "announcement" },
-        { name: "oversized.png", mimeType: "image/png", contents: oversizedFlyer },
+        { title: crossSiteTitle, body: "Should not save", category: "announcement" },
+        { name: "cross-site.png", mimeType: "image/png", contents: validFlyer },
       ),
     },
     planningCookie,
   );
 
-  assert.equal(response.status, 400);
+  assert.equal(response.status, 403);
   assert.deepEqual(await responseBody<{ error: string }>(response), {
-    error: "Flyer image must not exceed 10 MB.",
+    error: "Cross-site requests are not allowed.",
   });
   assert.deepEqual(await readdir(uploadDirectory), filesBefore);
 
@@ -647,3 +664,47 @@ test("active announcement filtering includes newly created announcements", async
   const archivedAnnouncements = await responseBody<AnnouncementResponse[]>(archivedResponse);
   assert.ok(!archivedAnnouncements.some((announcement) => announcement.id === created.id));
 });
+
+  const restoreResponse = await request(
+    `/api/users/${secondEmployeeId}`,
+    {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role: "employee", active: true }),
+    },
+    adminCookie,
+  );
+
+let secondEmployeeId: number;
+
+  const resetResponse = await request(
+    `/api/users/${employeeId}/reset-password`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ newPassword }),
+    },
+    adminCookie,
+  );
+
+  const roleChangeResponse = await request(
+    `/api/users/${secondEmployeeId}`,
+    {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role: "officer" }),
+    },
+    adminCookie,
+  );
+
+  const deactivateResponse = await request(
+    `/api/users/${secondEmployeeId}`,
+    {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ active: false }),
+    },
+    adminCookie,
+  );
+
+let testUserIds: number[] = [];

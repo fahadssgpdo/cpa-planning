@@ -1,4 +1,4 @@
-import { pgTable, serial, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, boolean, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -14,6 +14,7 @@ export const usersTable = pgTable("users", {
   section: text("section"),
   role: text("role").notNull().default("employee"),
   active: boolean("active").notNull().default(true),
+  sessionVersion: integer("session_version").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
