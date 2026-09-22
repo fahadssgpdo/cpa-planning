@@ -17,7 +17,14 @@ const [{ default: app }, database] = await Promise.all([
   import("../src/app"),
   import("@workspace/db"),
 ]);
-const { db, pool, announcementsTable, usersTable } = database;
+const {
+  db,
+  pool,
+  announcementsTable,
+  inquiriesTable,
+  suggestionsTable,
+  usersTable,
+} = database;
 
 type AnnouncementResponse = {
   id: number;
@@ -29,16 +36,25 @@ type AnnouncementResponse = {
   flyerSize: number | null;
 };
 
+type PrivateSubmissionResponse = {
+  id: number;
+  userId: number;
+};
+
 const password = "TestPassword@123";
 const planningUsername = `planning-${randomUUID()}`;
 const employeeUsername = `employee-${randomUUID()}`;
+const secondEmployeeUsername = `employee-${randomUUID()}`;
 const createdAnnouncementIds: number[] = [];
+const createdInquiryIds: number[] = [];
+const createdSuggestionIds: number[] = [];
 const createdFlyerPaths = new Set<string>();
 
 let server: Server;
 let baseUrl: string;
 let planningCookie: string;
 let employeeCookie: string;
+let secondEmployeeCookie: string;
 
 function listen(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -128,11 +144,20 @@ before(async () => {
       role: "employee",
       active: true,
     },
+    {
+      nameAr: `موظف عادي ${randomUUID()}`,
+      username: secondEmployeeUsername,
+      passwordHash,
+      directorate: "Services Directorate",
+      role: "employee",
+      active: true,
+    },
   ]);
 
   await listen();
   planningCookie = await login(planningUsername);
   employeeCookie = await login(employeeUsername);
+  secondEmployeeCookie = await login(secondEmployeeUsername);
 });
 
 after(async () => {
@@ -146,9 +171,20 @@ after(async () => {
     }
   }
 
+  if (createdInquiryIds.length > 0) {
+    await db.delete(inquiriesTable).where(inArray(inquiriesTable.id, createdInquiryIds));
+  }
+  if (createdSuggestionIds.length > 0) {
+    await db.delete(suggestionsTable).where(inArray(suggestionsTable.id, createdSuggestionIds));
+  }
+
   await db
     .delete(usersTable)
-    .where(inArray(usersTable.username, [planningUsername, employeeUsername]));
+    .where(inArray(usersTable.username, [
+      planningUsername,
+      employeeUsername,
+      secondEmployeeUsername,
+    ]));
 
   await Promise.all(
     [...createdFlyerPaths].map(async (flyerPath) => {
@@ -279,6 +315,7 @@ test("protects all internal content reads and user-management mutations", async 
     "/api/documents",
     "/api/faqs",
     "/api/glossary",
+    "/api/discussions/1",
   ]) {
     const response = await request(route);
     assert.equal(response.status, 401, `Anonymous ${route} access should be denied.`);
@@ -297,6 +334,67 @@ test("protects all internal content reads and user-management mutations", async 
     employeeCookie,
   );
   assert.equal(employeeRoleChangeResponse.status, 403);
+});
+
+test("scopes private inquiries and suggestions to the authenticated employee", async () => {
+  async function createSubmission(
+    route: "/api/inquiries" | "/api/suggestions",
+    cookie: string,
+    body: Record<string, unknown>,
+  ) {
+    const response = await request(
+      route,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      },
+      cookie,
+    );
+    assert.equal(response.status, 201);
+    return responseBody<PrivateSubmissionResponse>(response);
+  }
+
+  const ownInquiry = await createSubmission("/api/inquiries", employeeCookie, {
+    subject: `Own inquiry ${randomUUID()}`,
+    details: "Visible only to its owner and planning staff.",
+    category: "other",
+  });
+  const otherInquiry = await createSubmission("/api/inquiries", secondEmployeeCookie, {
+    subject: `Other inquiry ${randomUUID()}`,
+    details: "Must not be visible to another employee.",
+    category: "other",
+  });
+  createdInquiryIds.push(ownInquiry.id, otherInquiry.id);
+
+  const ownSuggestion = await createSubmission("/api/suggestions", employeeCookie, {
+    category: "improvement",
+    text: `Own suggestion ${randomUUID()}`,
+  });
+  const otherSuggestion = await createSubmission("/api/suggestions", secondEmployeeCookie, {
+    category: "improvement",
+    text: `Other suggestion ${randomUUID()}`,
+  });
+  createdSuggestionIds.push(ownSuggestion.id, otherSuggestion.id);
+
+  for (const [route, ownId, otherId, otherUserId] of [
+    ["/api/inquiries", ownInquiry.id, otherInquiry.id, otherInquiry.userId],
+    ["/api/suggestions", ownSuggestion.id, otherSuggestion.id, otherSuggestion.userId],
+  ] as const) {
+    const ownListResponse = await request(route, {}, employeeCookie);
+    assert.equal(ownListResponse.status, 200);
+    const ownList = await responseBody<PrivateSubmissionResponse[]>(ownListResponse);
+    assert.ok(ownList.some((item) => item.id === ownId));
+    assert.ok(!ownList.some((item) => item.id === otherId));
+
+    const crossUserResponse = await request(`${route}?userId=${otherUserId}`, {}, employeeCookie);
+    assert.equal(crossUserResponse.status, 403);
+
+    const planningResponse = await request(`${route}?userId=${otherUserId}`, {}, planningCookie);
+    assert.equal(planningResponse.status, 200);
+    const planningList = await responseBody<PrivateSubmissionResponse[]>(planningResponse);
+    assert.ok(planningList.some((item) => item.id === otherId));
+  }
 });
 
 test("rejects registration privilege fields", async () => {

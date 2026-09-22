@@ -8,7 +8,6 @@
 import type { InquiryCategory } from './inquiryCategory';
 
 export interface InquiryInput {
-  userId: number;
   subject: string;
   details: string;
   category?: InquiryCategory;

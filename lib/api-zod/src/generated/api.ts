@@ -328,6 +328,7 @@ export const CreateCommentResponse = zod.object({
 
 
 /**
+ * Employees can only list their own inquiries. Planning staff can list inquiries across users.
  * @summary List inquiries
  */
 export const ListInquiriesQueryParams = zod.object({
@@ -358,7 +359,6 @@ export const ListInquiriesResponse = zod.array(ListInquiriesResponseItem)
  * @summary Submit an inquiry
  */
 export const CreateInquiryBody = zod.object({
-  "userId": zod.number(),
   "subject": zod.string(),
   "details": zod.string(),
   "category": zod.enum(['strategic_planning', 'annual_plan', 'projects', 'kpis', 'monitoring', 'performance_platform', 'templates', 'policies', 'other']).optional()
@@ -392,8 +392,7 @@ export const UpdateInquiryParams = zod.object({
 
 export const UpdateInquiryBody = zod.object({
   "status": zod.enum(['open', 'answered', 'resolved']).optional(),
-  "response": zod.string().optional(),
-  "responderId": zod.number().optional()
+  "response": zod.string().optional()
 })
 
 export const UpdateInquiryResponse = zod.object({
@@ -519,6 +518,7 @@ export const DeleteFaqResponse = zod.void()
 
 
 /**
+ * Employees can only list their own suggestions. Planning staff can list suggestions across users.
  * @summary List suggestions
  */
 export const ListSuggestionsQueryParams = zod.object({
@@ -545,7 +545,6 @@ export const ListSuggestionsResponse = zod.array(ListSuggestionsResponseItem)
  * @summary Submit a suggestion
  */
 export const CreateSuggestionBody = zod.object({
-  "userId": zod.number(),
   "category": zod.enum(['improvement', 'initiative', 'process', 'feedback', 'projects_initiatives', 'service_dev', 'process_improvement']),
   "text": zod.string(),
   "attachment": zod.string().optional()

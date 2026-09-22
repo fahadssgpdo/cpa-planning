@@ -10,5 +10,4 @@ import type { InquiryUpdateStatus } from './inquiryUpdateStatus';
 export interface InquiryUpdate {
   status?: InquiryUpdateStatus;
   response?: string;
-  responderId?: number;
 }

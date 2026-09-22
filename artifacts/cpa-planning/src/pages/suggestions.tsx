@@ -264,7 +264,7 @@ export default function Suggestions() {
   const confirmCreate = () => {
     if (!pendingCreate) return;
     createMutation.mutate({
-      data: { ...pendingCreate, userId: user.id }
+      data: pendingCreate,
     });
     setShowCreateConfirm(false);
   };

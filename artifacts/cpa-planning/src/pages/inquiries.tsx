@@ -183,7 +183,6 @@ export default function Inquiries() {
       data: {
         subject: fd.get("subject") as string,
         details: fd.get("details") as string,
-        userId: user.id,
         category: (fd.get("category") as InquiryCategory) || "other",
       },
     });
@@ -196,7 +195,6 @@ export default function Inquiries() {
       id,
       data: {
         response: fd.get("response") as string,
-        responderId: user.id,
         status: "answered",
       },
     });

@@ -8,7 +8,6 @@
 import type { SuggestionCategory } from './suggestionCategory';
 
 export interface SuggestionInput {
-  userId: number;
   category: SuggestionCategory;
   text: string;
   attachment?: string;

@@ -324,7 +324,6 @@ export interface Inquiry {
 }
 
 export interface InquiryInput {
-  userId: number;
   subject: string;
   details: string;
   category?: InquiryCategory;
@@ -342,7 +341,6 @@ export const InquiryUpdateStatus = {
 export interface InquiryUpdate {
   status?: InquiryUpdateStatus;
   response?: string;
-  responderId?: number;
 }
 
 export type DocumentCategory = typeof DocumentCategory[keyof typeof DocumentCategory];
@@ -453,7 +451,6 @@ export interface Suggestion {
 }
 
 export interface SuggestionInput {
-  userId: number;
   category: SuggestionCategory;
   text: string;
   attachment?: string;
