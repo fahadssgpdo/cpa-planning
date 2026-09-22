@@ -14,5 +14,12 @@ export interface Document {
   description: string;
   date: string;
   /** @nullable */
-  fileUrl?: string | null;
+  fileName?: string | null;
+  /** @nullable */
+  mimeType?: string | null;
+  /** @nullable */
+  fileSize?: number | null;
+  /** @nullable */
+  downloadUrl?: string | null;
+  migrationRequired: boolean;
 }

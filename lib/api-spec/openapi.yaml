@@ -402,15 +402,17 @@ paths:
         "401":
           description: Authentication required
     post:
-      operationId: createDocument
+      operationId: uploadDocument
       tags: [documents]
-      summary: Add a document to the knowledge base
+      summary: Upload a document to the private knowledge base
+      security:
+        - cookieAuth: []
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/DocumentInput"
+              $ref: "#/components/schemas/DocumentMultipartInput"
       responses:
         "201":
           description: Created
@@ -418,6 +420,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Document"
+        "400":
+          description: Missing, unsupported, oversized, or externally linked file
+        "401":
+          description: Authentication required
+        "403":
+          description: Planning staff authorization required
 
   /documents/{id}:
     delete:
@@ -433,6 +441,32 @@ paths:
       responses:
         "204":
           description: Deleted
+
+  /documents/{id}/download:
+    get:
+      operationId: downloadDocument
+      tags: [documents]
+      summary: Download a private knowledge-base document
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Document file
+          content:
+            "*/*":
+              schema: {}
+        "401":
+          description: Authentication required
+        "404":
+          description: Document or stored file not found
+        "409":
+          description: Legacy external document requires re-upload
 
   /faqs:
     get:
@@ -1000,7 +1034,7 @@ components:
 
     Document:
       type: object
-      required: [id, name, category, description, date]
+      required: [id, name, category, description, date, migrationRequired]
       properties:
         id:
           type: integer
@@ -1013,8 +1047,16 @@ components:
           type: string
         date:
           type: string
-        fileUrl:
+        fileName:
           type: ["string", "null"]
+        mimeType:
+          type: ["string", "null"]
+        fileSize:
+          type: ["integer", "null"]
+        downloadUrl:
+          type: ["string", "null"]
+        migrationRequired:
+          type: boolean
 
     DocumentInput:
       type: object
@@ -1027,8 +1069,17 @@ components:
           enum: [manuals, guidelines, kpi, policies, templates, annual-plans, reports, other]
         description:
           type: string
-        fileUrl:
-          type: ["string", "null"]
+
+    DocumentMultipartInput:
+      type: object
+      required: [data, file]
+      properties:
+        data:
+          type: string
+          description: JSON encoded DocumentInput metadata.
+        file:
+          type: string
+          description: Document file sent as a multipart file field.
 
     Faq:
       type: object

@@ -13,18 +13,21 @@ const uploadDirectory = await mkdtemp(path.join(tmpdir(), "cpa-announcements-tes
 process.env["ANNOUNCEMENT_UPLOAD_DIR"] = uploadDirectory;
 process.env["NODE_ENV"] = "test";
 
-const [{ default: app }, database] = await Promise.all([
+const [{ default: app }, database, documentStorage] = await Promise.all([
   import("../src/app"),
   import("@workspace/db"),
+  import("../src/lib/document-storage"),
 ]);
 const {
   db,
   pool,
   announcementsTable,
+  documentsTable,
   inquiriesTable,
   suggestionsTable,
   usersTable,
 } = database;
+const { deleteDocumentFile } = documentStorage;
 
 type AnnouncementResponse = {
   id: number;
@@ -41,11 +44,21 @@ type PrivateSubmissionResponse = {
   userId: number;
 };
 
+type DocumentResponse = {
+  id: number;
+  fileName: string | null;
+  mimeType: string | null;
+  fileSize: number | null;
+  downloadUrl: string | null;
+  migrationRequired: boolean;
+};
+
 const password = "TestPassword@123";
 const planningUsername = `planning-${randomUUID()}`;
 const employeeUsername = `employee-${randomUUID()}`;
 const secondEmployeeUsername = `employee-${randomUUID()}`;
 const createdAnnouncementIds: number[] = [];
+const createdDocumentIds: number[] = [];
 const createdInquiryIds: number[] = [];
 const createdSuggestionIds: number[] = [];
 const createdFlyerPaths = new Set<string>();
@@ -104,6 +117,21 @@ function flyerForm(data: Record<string, unknown>, file?: {
     const blobContents = new ArrayBuffer(file.contents.byteLength);
     new Uint8Array(blobContents).set(file.contents);
     form.append("flyer", new Blob([blobContents], { type: file.mimeType }), file.name);
+  }
+  return form;
+}
+
+function documentForm(data: Record<string, unknown>, file?: {
+  name: string;
+  mimeType: string;
+  contents: Uint8Array;
+}) {
+  const form = new FormData();
+  form.append("data", JSON.stringify(data));
+  if (file) {
+    const blobContents = new ArrayBuffer(file.contents.byteLength);
+    new Uint8Array(blobContents).set(file.contents);
+    form.append("file", new Blob([blobContents], { type: file.mimeType }), file.name);
   }
   return form;
 }
@@ -173,6 +201,13 @@ after(async () => {
 
   if (createdInquiryIds.length > 0) {
     await db.delete(inquiriesTable).where(inArray(inquiriesTable.id, createdInquiryIds));
+  }
+  if (createdDocumentIds.length > 0) {
+    const rows = await db
+      .delete(documentsTable)
+      .where(inArray(documentsTable.id, createdDocumentIds))
+      .returning({ storageKey: documentsTable.storageKey });
+    await Promise.all(rows.map((row) => row.storageKey ? deleteDocumentFile(row.storageKey) : undefined));
   }
   if (createdSuggestionIds.length > 0) {
     await db.delete(suggestionsTable).where(inArray(suggestionsTable.id, createdSuggestionIds));
@@ -302,6 +337,119 @@ test("rejects unauthenticated, unauthorized, and fake-image flyer requests", asy
   assert.deepEqual(await responseBody<{ error: string }>(fakeImageResponse), {
     error: "Uploaded file is not a supported image.",
   });
+});
+
+test("stores document files privately and requires authentication to download them", async () => {
+  const contents = new TextEncoder().encode("%PDF-1.4\nPrivate integration test document\n%%EOF");
+  const uploadResponse = await request(
+    "/api/documents",
+    {
+      method: "POST",
+      body: documentForm(
+        {
+          name: `Private document ${randomUUID()}`,
+          description: "Must only download through the authenticated API.",
+          category: "policies",
+        },
+        { name: "private-policy.pdf", mimeType: "application/pdf", contents },
+      ),
+    },
+    planningCookie,
+  );
+  assert.equal(uploadResponse.status, 201);
+  const document = await responseBody<DocumentResponse>(uploadResponse);
+  createdDocumentIds.push(document.id);
+  assert.equal(document.fileName, "private-policy.pdf");
+  assert.equal(document.mimeType, "application/pdf");
+  assert.equal(document.fileSize, contents.byteLength);
+  assert.equal(document.downloadUrl, `/api/documents/${document.id}/download`);
+  assert.equal(document.migrationRequired, false);
+
+  const anonymousDownload = await request(document.downloadUrl!);
+  assert.equal(anonymousDownload.status, 401);
+
+  const authenticatedDownload = await request(document.downloadUrl!, {}, employeeCookie);
+  assert.equal(authenticatedDownload.status, 200);
+  assert.equal(authenticatedDownload.headers.get("cache-control"), "private, no-store");
+  assert.match(authenticatedDownload.headers.get("content-disposition") ?? "", /attachment/);
+  assert.deepEqual(
+    new Uint8Array(await authenticatedDownload.arrayBuffer()),
+    contents,
+  );
+
+  const deleteResponse = await request(
+    `/api/documents/${document.id}`,
+    { method: "DELETE" },
+    planningCookie,
+  );
+  assert.equal(deleteResponse.status, 204);
+  createdDocumentIds.splice(createdDocumentIds.indexOf(document.id), 1);
+  assert.equal((await request(document.downloadUrl!, {}, employeeCookie)).status, 404);
+});
+
+test("rejects external document URLs and marks legacy records for re-upload", async () => {
+  const externalResponse = await request(
+    "/api/documents",
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: "External URL attempt",
+        description: "Must not be accepted.",
+        category: "policies",
+        fileUrl: "https://public.example/document.pdf",
+      }),
+    },
+    planningCookie,
+  );
+  assert.equal(externalResponse.status, 400);
+
+  const spoofedFileResponse = await request(
+    "/api/documents",
+    {
+      method: "POST",
+      body: documentForm(
+        {
+          name: "Spoofed PDF",
+          description: "The content does not match the declared type.",
+          category: "policies",
+        },
+        {
+          name: "spoofed.pdf",
+          mimeType: "application/pdf",
+          contents: new TextEncoder().encode("This is not a PDF."),
+        },
+      ),
+    },
+    planningCookie,
+  );
+  assert.equal(spoofedFileResponse.status, 400);
+  assert.deepEqual(await responseBody<{ error: string }>(spoofedFileResponse), {
+    error: "The uploaded file content does not match its declared file type.",
+  });
+
+  const [legacy] = await db
+    .insert(documentsTable)
+    .values({
+      name: `Legacy document ${randomUUID()}`,
+      description: "Requires reviewed re-upload.",
+      category: "policies",
+      fileUrl: "https://public.example/legacy.pdf",
+    })
+    .returning();
+  createdDocumentIds.push(legacy.id);
+
+  const listResponse = await request("/api/documents?category=policies", {}, employeeCookie);
+  assert.equal(listResponse.status, 200);
+  const listed = (await responseBody<Array<DocumentResponse & { id: number }>>(listResponse))
+    .find((item) => item.id === legacy.id);
+  assert.ok(listed);
+  assert.equal(listed.downloadUrl, null);
+  assert.equal(listed.migrationRequired, true);
+  assert.ok(!("fileUrl" in listed), "The legacy external URL must not be returned.");
+
+  const legacyDownload = await request(`/api/documents/${legacy.id}/download`, {}, employeeCookie);
+  assert.equal(legacyDownload.status, 409);
 });
 
 test("protects all internal content reads and user-management mutations", async () => {

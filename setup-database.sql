@@ -64,6 +64,11 @@ CREATE TABLE IF NOT EXISTS "documents" (
   "name" text NOT NULL,
   "category" text NOT NULL DEFAULT 'other',
   "description" text NOT NULL DEFAULT '',
+  "storage_key" text,
+  "file_name" text,
+  "mime_type" text,
+  "file_size" integer,
+  "deletion_pending" boolean NOT NULL DEFAULT false,
   "file_url" text,
   "created_at" timestamp DEFAULT now() NOT NULL
 );
@@ -111,3 +116,10 @@ ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_path" text;
 ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_name" text;
 ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_mime_type" text;
 ALTER TABLE "announcements" ADD COLUMN IF NOT EXISTS "flyer_size" integer;
+
+-- Private document storage support for existing installations.
+ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "storage_key" text;
+ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "file_name" text;
+ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "mime_type" text;
+ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "file_size" integer;
+ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "deletion_pending" boolean NOT NULL DEFAULT false;
