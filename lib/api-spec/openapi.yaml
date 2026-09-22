@@ -128,6 +128,8 @@ paths:
       operationId: listAnnouncements
       tags: [announcements]
       summary: List announcements
+      security:
+        - cookieAuth: []
       parameters:
         - name: archived
           in: query
@@ -142,6 +144,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Announcement"
+        "401":
+          description: Authentication required
     post:
       operationId: createAnnouncement
       tags: [announcements]
@@ -364,6 +368,8 @@ paths:
       operationId: listDocuments
       tags: [documents]
       summary: List knowledge base documents
+      security:
+        - cookieAuth: []
       parameters:
         - name: category
           in: query
@@ -378,6 +384,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Document"
+        "401":
+          description: Authentication required
     post:
       operationId: createDocument
       tags: [documents]
@@ -416,6 +424,8 @@ paths:
       operationId: listFaqs
       tags: [faqs]
       summary: List FAQ entries
+      security:
+        - cookieAuth: []
       responses:
         "200":
           description: List of FAQs
@@ -425,6 +435,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Faq"
+        "401":
+          description: Authentication required
     post:
       operationId: createFaq
       tags: [faqs]
@@ -548,6 +560,8 @@ paths:
       operationId: listGlossary
       tags: [glossary]
       summary: List glossary entries
+      security:
+        - cookieAuth: []
       responses:
         "200":
           description: List of glossary entries
@@ -557,6 +571,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/GlossaryEntry"
+        "401":
+          description: Authentication required
     post:
       operationId: createGlossaryEntry
       tags: [glossary]
@@ -617,6 +633,11 @@ paths:
                 $ref: "#/components/schemas/DashboardAnalytics"
 
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: cpa_session
   schemas:
     HealthStatus:
       type: object

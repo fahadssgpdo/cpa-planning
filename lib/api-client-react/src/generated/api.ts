@@ -481,7 +481,7 @@ export const getListAnnouncementsQueryKey = (params?: ListAnnouncementsParams,) 
     }
 
 
-export const getListAnnouncementsQueryOptions = <TData = Awaited<ReturnType<typeof listAnnouncements>>, TError = ErrorType<unknown>>(params?: ListAnnouncementsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAnnouncements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListAnnouncementsQueryOptions = <TData = Awaited<ReturnType<typeof listAnnouncements>>, TError = ErrorType<void>>(params?: ListAnnouncementsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAnnouncements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -500,14 +500,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListAnnouncementsQueryResult = NonNullable<Awaited<ReturnType<typeof listAnnouncements>>>
-export type ListAnnouncementsQueryError = ErrorType<unknown>
+export type ListAnnouncementsQueryError = ErrorType<void>
 
 
 /**
  * @summary List announcements
  */
 
-export function useListAnnouncements<TData = Awaited<ReturnType<typeof listAnnouncements>>, TError = ErrorType<unknown>>(
+export function useListAnnouncements<TData = Awaited<ReturnType<typeof listAnnouncements>>, TError = ErrorType<void>>(
  params?: ListAnnouncementsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAnnouncements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1377,7 +1377,7 @@ export const getListDocumentsQueryKey = (params?: ListDocumentsParams,) => {
     }
 
 
-export const getListDocumentsQueryOptions = <TData = Awaited<ReturnType<typeof listDocuments>>, TError = ErrorType<unknown>>(params?: ListDocumentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDocuments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListDocumentsQueryOptions = <TData = Awaited<ReturnType<typeof listDocuments>>, TError = ErrorType<void>>(params?: ListDocumentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDocuments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1396,14 +1396,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListDocumentsQueryResult = NonNullable<Awaited<ReturnType<typeof listDocuments>>>
-export type ListDocumentsQueryError = ErrorType<unknown>
+export type ListDocumentsQueryError = ErrorType<void>
 
 
 /**
  * @summary List knowledge base documents
  */
 
-export function useListDocuments<TData = Awaited<ReturnType<typeof listDocuments>>, TError = ErrorType<unknown>>(
+export function useListDocuments<TData = Awaited<ReturnType<typeof listDocuments>>, TError = ErrorType<void>>(
  params?: ListDocumentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDocuments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1594,7 +1594,7 @@ export const getListFaqsQueryKey = () => {
     }
 
 
-export const getListFaqsQueryOptions = <TData = Awaited<ReturnType<typeof listFaqs>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFaqs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListFaqsQueryOptions = <TData = Awaited<ReturnType<typeof listFaqs>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFaqs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1613,14 +1613,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListFaqsQueryResult = NonNullable<Awaited<ReturnType<typeof listFaqs>>>
-export type ListFaqsQueryError = ErrorType<unknown>
+export type ListFaqsQueryError = ErrorType<void>
 
 
 /**
  * @summary List FAQ entries
  */
 
-export function useListFaqs<TData = Awaited<ReturnType<typeof listFaqs>>, TError = ErrorType<unknown>>(
+export function useListFaqs<TData = Awaited<ReturnType<typeof listFaqs>>, TError = ErrorType<void>>(
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFaqs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -2107,7 +2107,7 @@ export const getListGlossaryQueryKey = () => {
     }
 
 
-export const getListGlossaryQueryOptions = <TData = Awaited<ReturnType<typeof listGlossary>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGlossary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListGlossaryQueryOptions = <TData = Awaited<ReturnType<typeof listGlossary>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGlossary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -2126,14 +2126,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListGlossaryQueryResult = NonNullable<Awaited<ReturnType<typeof listGlossary>>>
-export type ListGlossaryQueryError = ErrorType<unknown>
+export type ListGlossaryQueryError = ErrorType<void>
 
 
 /**
  * @summary List glossary entries
  */
 
-export function useListGlossary<TData = Awaited<ReturnType<typeof listGlossary>>, TError = ErrorType<unknown>>(
+export function useListGlossary<TData = Awaited<ReturnType<typeof listGlossary>>, TError = ErrorType<void>>(
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGlossary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {

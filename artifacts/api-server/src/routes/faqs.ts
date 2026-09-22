@@ -14,7 +14,7 @@ import { requirePlanningStaff, requireSession } from "../middlewares/announcemen
 
 const router: IRouter = Router();
 
-router.get("/faqs", async (_req, res): Promise<void> => {
+router.get("/faqs", requireSession, async (_req, res): Promise<void> => {
   const rows = await db.select().from(faqsTable).orderBy(faqsTable.id);
   res.json(
     ListFaqsResponse.parse(
