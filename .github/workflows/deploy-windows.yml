@@ -40,6 +40,8 @@ jobs:
       - name: Validate and build API
         shell: powershell
         run: |
+          pnpm run typecheck:libs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pnpm --filter @workspace/api-server run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pnpm --filter @workspace/api-server run build
