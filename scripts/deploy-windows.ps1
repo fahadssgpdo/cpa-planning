@@ -82,18 +82,26 @@ function Wait-ForHealth {
 
   $lastResult = 'no response'
   for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+    $statusCode = $null
     try {
       $response = Invoke-WebRequest `
         -Uri $Uri `
         -Method Get `
-        -SkipHttpErrorCheck `
+        -UseBasicParsing `
         -TimeoutSec 15
-      $lastResult = "HTTP $($response.StatusCode)"
-      if ($response.StatusCode -eq $ExpectedStatus) {
+      $statusCode = [int]$response.StatusCode
+    } catch {
+      if ($null -ne $_.Exception.Response) {
+        $statusCode = [int]$_.Exception.Response.StatusCode
+      } else {
+        $lastResult = $_.Exception.Message
+      }
+    }
+    if ($null -ne $statusCode) {
+      $lastResult = "HTTP $statusCode"
+      if ($statusCode -eq $ExpectedStatus) {
         return
       }
-    } catch {
-      $lastResult = $_.Exception.Message
     }
     if ($attempt -lt $Attempts) {
       Start-Sleep -Seconds $DelaySeconds

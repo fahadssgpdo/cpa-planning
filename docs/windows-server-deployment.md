@@ -38,7 +38,7 @@ The account running the GitHub Actions runner service must be able to:
 - run `node`, `pnpm`, and `psql` from `PATH`;
 - connect to the production PostgreSQL database.
 
-Install Node.js 24, pnpm 10.26.1, Git, PowerShell 7, and the PostgreSQL command-line tools for that account. The account does not need to be a local administrator if it has explicit Modify permission on the deployment parent folder and permission to control only `CPAPlanningAP`. Restart the runner service after changing machine-level environment variables or `PATH`.
+Install Node.js 24, pnpm 10.26.1, Git, and the PostgreSQL command-line tools for that account. The deployment supports the built-in Windows PowerShell 5.1, so PowerShell 7 is optional. The account does not need to be a local administrator if it has explicit Modify permission on the deployment parent folder and permission to control only `CPAPlanningAP`. Restart the runner service after changing machine-level environment variables or `PATH`.
 
 ## 3. Configure persistent application storage
 
