@@ -90,8 +90,7 @@ function Install-ReleaseDependencies {
       'install',
       '--frozen-lockfile',
       '--prod=false',
-      '--offline',
-      '--force'
+      '--offline'
     )
   } finally {
     Pop-Location
