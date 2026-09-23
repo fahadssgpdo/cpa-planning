@@ -1,31 +1,9 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { useContext, useEffect, useState, ReactNode } from "react";
+import { UserContext, AppUser, UserRole, AuthenticatedContext } from "./user-context";
 
-export type UserRole = 'employee' | 'officer' | 'manager' | 'admin';
-
-export interface AppUser {
-  id: number;
-  name: string;
-  username?: string;
-  role: UserRole;
-  designation: string;
-}
+export type { AppUser, UserRole, AuthenticatedContext };
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-interface UserContextType {
-  user: AppUser | null;
-  setUser: (user: AppUser) => void;
-  login: (user: AppUser) => void;
-  logout: () => void;
-  canManage: boolean;
-  isAdmin: boolean;
-  canCloseInquiry: boolean;
-  isLoading: boolean;
-}
-
-type AuthenticatedContext = Omit<UserContextType, "user"> & { user: AppUser };
-
-export const UserContext = createContext<UserContextType | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<AppUser | null>(null);

@@ -1,8 +1,8 @@
 import { useState, useContext } from "react";
 import { Link, useLocation } from "wouter";
 import { useLocale } from "@/hooks/use-locale";
-import { UserContext } from "@/hooks/use-user";
-import type { AppUser } from "@/hooks/use-user";
+import { UserContext } from "@/hooks/user-context";
+import type { AppUser } from "@/hooks/user-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
