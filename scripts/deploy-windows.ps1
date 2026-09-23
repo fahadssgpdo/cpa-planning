@@ -164,7 +164,7 @@ function Restore-PreviousRelease {
       Invoke-Robocopy `
         -From $previousRelease `
         -To $deployment `
-        -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
+        -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
       Install-ReleaseDependencies -ReleasePath $deployment
     }
   } finally {
@@ -239,7 +239,7 @@ try {
   Invoke-Robocopy `
     -From $stagedRelease `
     -To $deployment `
-    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
   $newReleaseActivated = $true
 
   if (-not (Test-Path -LiteralPath (Join-Path $deployment 'uploads'))) {
