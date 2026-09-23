@@ -98,9 +98,9 @@ Store the production PostgreSQL connection URL there. Do not add it as a reposit
    - installs dependencies and builds the API and frontend;
    - applies the idempotent `setup-database.sql` before starting the new code;
    - builds a complete staged release before stopping production;
-   - copies the existing application into a complete rollback directory, then mirrors the staged release into `C:\Planning\CPA-Planning-Platform` without replacing the locked root directory;
+   - copies the existing application into a rollback directory, then mirrors the staged release into `C:\Planning\CPA-Planning-Platform` without replacing the locked root directory;
+   - excludes `node_modules` and Windows directory junctions from release copies, then recreates dependency links from the local pnpm cache at the final path;
    - preserves the persistent `uploads` and `logs` directories during activation and rollback;
-   - recreates pnpm dependency links at the final production path from the local package cache;
    - restarts `CPAPlanningAP`;
    - retries a local database-backed readiness endpoint until it returns `200`;
    - confirms the public protected authentication endpoint returns `401` anonymously;
