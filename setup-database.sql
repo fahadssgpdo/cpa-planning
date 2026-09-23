@@ -123,3 +123,33 @@ ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "file_name" text;
 ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "mime_type" text;
 ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "file_size" integer;
 ALTER TABLE "documents" ADD COLUMN IF NOT EXISTS "deletion_pending" boolean NOT NULL DEFAULT false;
+
+-- One-time maintenance operations tracker, so destructive one-off scripts below
+-- run exactly once and are safe to leave in this rerunnable setup script.
+CREATE TABLE IF NOT EXISTS "maintenance_log" (
+  "operation" text PRIMARY KEY,
+  "executed_at" timestamp DEFAULT now() NOT NULL
+);
+
+-- One-time: archive then clear out test data from announcements/updates,
+-- participatory discussions, inquiries, and suggestions so those sections
+-- start fresh. Users and all other data are untouched. Archived copies are
+-- kept in *_backup_2026_09_23 tables.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM "maintenance_log" WHERE "operation" = 'wipe_test_data_2026_09_23') THEN
+    CREATE TABLE IF NOT EXISTS "announcements_backup_2026_09_23" AS SELECT * FROM "announcements";
+    CREATE TABLE IF NOT EXISTS "comments_backup_2026_09_23" AS SELECT * FROM "comments";
+    CREATE TABLE IF NOT EXISTS "discussions_backup_2026_09_23" AS SELECT * FROM "discussions";
+    CREATE TABLE IF NOT EXISTS "inquiries_backup_2026_09_23" AS SELECT * FROM "inquiries";
+    CREATE TABLE IF NOT EXISTS "suggestions_backup_2026_09_23" AS SELECT * FROM "suggestions";
+
+    DELETE FROM "comments";
+    DELETE FROM "discussions";
+    DELETE FROM "announcements";
+    DELETE FROM "inquiries";
+    DELETE FROM "suggestions";
+
+    INSERT INTO "maintenance_log"("operation") VALUES ('wipe_test_data_2026_09_23');
+  END IF;
+END $$;

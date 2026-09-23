@@ -9,4 +9,5 @@ export const DESIGNATION_KEYS = [
   "expert",
   "consultant",
   "authorityChair",
+  "deputyChair",
 ] as const;
