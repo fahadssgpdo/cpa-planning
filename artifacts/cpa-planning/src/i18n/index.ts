@@ -141,6 +141,7 @@ export const translations = {
         expert: "خبير",
         consultant: "مستشار",
         authorityChair: "رئيس الهيئة",
+        deputyChair: "نائب الرئيس",
       },
       directorates: {
         planning: "الإدارة العامة للتخطيط الاستراتيجي",
@@ -750,6 +751,7 @@ export const translations = {
         expert: "Expert",
         consultant: "Consultant",
         authorityChair: "Chairperson of the Authority",
+        deputyChair: "Deputy Chairperson",
       },
       directorates: {
         planning: "General Directorate of Strategic Planning",
