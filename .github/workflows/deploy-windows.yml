@@ -38,7 +38,7 @@ jobs:
         run: pnpm install --frozen-lockfile --prod=false
 
       - name: Validate and build API
-        shell: pwsh
+        shell: powershell
         run: |
           pnpm --filter @workspace/api-server run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -46,13 +46,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build frontend
-        shell: pwsh
+        shell: powershell
         run: |
           pnpm --filter @workspace/cpa-planning run build
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Apply additive database setup
-        shell: pwsh
+        shell: powershell
         env:
           WINDOWS_DATABASE_URL: ${{ secrets.WINDOWS_DATABASE_URL }}
         run: |
@@ -71,7 +71,7 @@ jobs:
           }
 
       - name: Deploy and restart service
-        shell: pwsh
+        shell: powershell
         run: |
           ./scripts/deploy-windows.ps1 `
             -SourcePath $env:GITHUB_WORKSPACE `
