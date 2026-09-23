@@ -48,6 +48,15 @@ function Invoke-Pnpm {
   }
 }
 
+function Remove-NodeModules {
+  param([Parameter(Mandatory = $true)][string]$ReleasePath)
+
+  $nodeModulesPath = Join-Path $ReleasePath 'node_modules'
+  if (Test-Path -LiteralPath $nodeModulesPath) {
+    Remove-Item -LiteralPath $nodeModulesPath -Recurse -Force
+  }
+}
+
 function Install-ReleaseDependencies {
   param([Parameter(Mandatory = $true)][string]$ReleasePath)
 
@@ -151,10 +160,11 @@ function Restore-PreviousRelease {
       $previousReleasePrepared -and
       (Test-Path -LiteralPath $previousRelease)
     ) {
+      Remove-NodeModules -ReleasePath $deployment
       Invoke-Robocopy `
         -From $previousRelease `
         -To $deployment `
-        -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
+        -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
       Install-ReleaseDependencies -ReleasePath $deployment
     }
   } finally {
@@ -215,13 +225,21 @@ try {
   Invoke-Robocopy `
     -From $deployment `
     -To $previousRelease `
-    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
   $previousReleasePrepared = $true
+
+  # Delete the live deployment's node_modules before mirroring the new release
+  # into it. robocopy /MIR's extra-file purge pass does not reliably respect
+  # /XD when the excluded directory already exists on the destination side —
+  # it can end up trying (and failing) to delete every file inside it one by
+  # one. Deleting it outright first avoids that entirely; the offline
+  # dependency install below rebuilds it from the local package cache.
+  Remove-NodeModules -ReleasePath $deployment
 
   Invoke-Robocopy `
     -From $stagedRelease `
     -To $deployment `
-    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
   $newReleaseActivated = $true
 
   if (-not (Test-Path -LiteralPath (Join-Path $deployment 'uploads'))) {
