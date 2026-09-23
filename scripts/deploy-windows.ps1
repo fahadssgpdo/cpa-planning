@@ -48,13 +48,37 @@ function Invoke-Pnpm {
   }
 }
 
+function Remove-DirectoryRobustly {
+  param([Parameter(Mandatory = $true)][string]$Path)
+
+  if (-not (Test-Path -LiteralPath $Path)) {
+    return
+  }
+
+  # PowerShell's Remove-Item can fail with "Access to the path is denied" on
+  # pnpm's node_modules trees: pnpm hardlinks package files from a shared,
+  # read-only content store, and Remove-Item's own recursive delete does not
+  # reliably clear those attributes even with -Force. Robocopy's file-removal
+  # engine handles read-only/hardlinked files correctly, so empty the
+  # directory by mirroring an empty folder onto it, then drop the empty
+  # shell.
+  $emptyDir = Join-Path $env:TEMP ("empty-" + [guid]::NewGuid().ToString('N'))
+  New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
+  try {
+    & robocopy $emptyDir $Path /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+    if ($LASTEXITCODE -ge 8) {
+      throw "robocopy failed with exit code $LASTEXITCODE while clearing '$Path'."
+    }
+    Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction SilentlyContinue
+  } finally {
+    Remove-Item -LiteralPath $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
+  }
+}
+
 function Remove-NodeModules {
   param([Parameter(Mandatory = $true)][string]$ReleasePath)
 
-  $nodeModulesPath = Join-Path $ReleasePath 'node_modules'
-  if (Test-Path -LiteralPath $nodeModulesPath) {
-    Remove-Item -LiteralPath $nodeModulesPath -Recurse -Force
-  }
+  Remove-DirectoryRobustly -Path (Join-Path $ReleasePath 'node_modules')
 }
 
 function Install-ReleaseDependencies {
@@ -186,9 +210,7 @@ if (-not (Test-Path -LiteralPath $deployment -PathType Container)) {
   throw "The existing deployment directory '$deployment' was not found; refusing a first-time deployment without a rollback source."
 }
 
-if (Test-Path -LiteralPath $stagedRelease) {
-  Remove-Item -LiteralPath $stagedRelease -Recurse -Force
-}
+Remove-DirectoryRobustly -Path $stagedRelease
 
 Invoke-Robocopy `
   -From $source `
@@ -215,9 +237,7 @@ try {
   Pop-Location
 }
 
-if (Test-Path -LiteralPath $previousRelease) {
-  Remove-Item -LiteralPath $previousRelease -Recurse -Force
-}
+Remove-DirectoryRobustly -Path $previousRelease
 
 try {
   Stop-ApplicationService
@@ -263,9 +283,7 @@ try {
   }
   throw $deploymentError
 } finally {
-  if (Test-Path -LiteralPath $stagedRelease) {
-    Remove-Item -LiteralPath $stagedRelease -Recurse -Force -ErrorAction SilentlyContinue
-  }
+  Remove-DirectoryRobustly -Path $stagedRelease
 }
 
 Write-Host "Deployment completed, health verification passed, and service '$ServiceName' is running."
