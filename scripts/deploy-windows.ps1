@@ -22,8 +22,7 @@ $deploymentName = Split-Path -Leaf $deployment
 $releaseId = [guid]::NewGuid().ToString('N')
 $stagedRelease = Join-Path $deploymentParent "$deploymentName.next-$releaseId"
 $previousRelease = Join-Path $deploymentParent "$deploymentName.previous"
-$failedRelease = Join-Path $deploymentParent "$deploymentName.failed-$releaseId"
-$oldReleaseMoved = $false
+$previousReleasePrepared = $false
 $newReleaseActivated = $false
 
 function Invoke-Robocopy {
@@ -130,18 +129,15 @@ function Restore-PreviousRelease {
   try {
     Stop-ApplicationService
 
-    if ($newReleaseActivated -and (Test-Path -LiteralPath $deployment)) {
-      $activeUploads = Join-Path $deployment 'uploads'
-      $previousUploads = Join-Path $previousRelease 'uploads'
-      if ((Test-Path -LiteralPath $activeUploads) -and (Test-Path -LiteralPath $previousRelease)) {
-        Remove-Item -LiteralPath $previousUploads -Recurse -Force -ErrorAction SilentlyContinue
-        Move-Item -LiteralPath $activeUploads -Destination $previousUploads
-      }
-      Move-Item -LiteralPath $deployment -Destination $failedRelease
-    }
-
-    if ($oldReleaseMoved -and (Test-Path -LiteralPath $previousRelease)) {
-      Move-Item -LiteralPath $previousRelease -Destination $deployment
+    if (
+      $newReleaseActivated -and
+      $previousReleasePrepared -and
+      (Test-Path -LiteralPath $previousRelease)
+    ) {
+      Invoke-Robocopy `
+        -From $previousRelease `
+        -To $deployment `
+        -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
     }
   } finally {
     Start-ApplicationService
@@ -197,18 +193,19 @@ try {
   if (Test-Path -LiteralPath $previousRelease) {
     Remove-Item -LiteralPath $previousRelease -Recurse -Force
   }
-  if (Test-Path -LiteralPath $deployment) {
-    Move-Item -LiteralPath $deployment -Destination $previousRelease
-    $oldReleaseMoved = $true
-  }
+  Invoke-Robocopy `
+    -From $deployment `
+    -To $previousRelease `
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
+  $previousReleasePrepared = $true
 
-  Move-Item -LiteralPath $stagedRelease -Destination $deployment
+  Invoke-Robocopy `
+    -From $stagedRelease `
+    -To $deployment `
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
   $newReleaseActivated = $true
 
-  $oldUploads = Join-Path $previousRelease 'uploads'
-  if (Test-Path -LiteralPath $oldUploads) {
-    Move-Item -LiteralPath $oldUploads -Destination (Join-Path $deployment 'uploads')
-  } else {
+  if (-not (Test-Path -LiteralPath (Join-Path $deployment 'uploads'))) {
     New-Item -ItemType Directory -Path (Join-Path $deployment 'uploads\announcements') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $deployment 'uploads\documents') -Force | Out-Null
   }
@@ -243,10 +240,6 @@ try {
   if (Test-Path -LiteralPath $stagedRelease) {
     Remove-Item -LiteralPath $stagedRelease -Recurse -Force -ErrorAction SilentlyContinue
   }
-}
-
-if (Test-Path -LiteralPath $failedRelease) {
-  Remove-Item -LiteralPath $failedRelease -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host "Deployment completed, health verification passed, and service '$ServiceName' is running."

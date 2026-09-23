@@ -98,7 +98,8 @@ Store the production PostgreSQL connection URL there. Do not add it as a reposit
    - installs dependencies and builds the API and frontend;
    - applies the idempotent `setup-database.sql` before starting the new code;
    - builds a complete staged release before stopping production;
-   - swaps the staged release into `C:\Planning\CPA-Planning-Platform` while moving the persistent `uploads` directory with it;
+   - copies the existing application into a complete rollback directory, then mirrors the staged release into `C:\Planning\CPA-Planning-Platform` without replacing the locked root directory;
+   - preserves the persistent `uploads` and `logs` directories during activation and rollback;
    - recreates pnpm dependency links at the final production path from the local package cache;
    - restarts `CPAPlanningAP`;
    - retries a local database-backed readiness endpoint until it returns `200`;
@@ -109,4 +110,4 @@ After the workflow succeeds, sign in as a planning officer and verify one docume
 
 ## Rollback
 
-The deployment script keeps the previous complete release at `C:\Planning\CPA-Planning-Platform.previous` and restores it automatically if deployment or health verification fails. For a rollback after a successful deployment, redeploy the previous known-good commit. Keep the additive database columns and retain both upload folders; they are backward-compatible and may contain files referenced by the database.
+The deployment script keeps the previous application release at `C:\Planning\CPA-Planning-Platform.previous` and mirrors it back automatically if deployment or health verification fails. Persistent `uploads` and `logs` remain in the active directory and are not overwritten during activation or rollback. For a rollback after a successful deployment, redeploy the previous known-good commit. Keep the additive database columns and retain both upload folders; they are backward-compatible and may contain files referenced by the database.
