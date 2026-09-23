@@ -130,7 +130,7 @@ router.post("/auth/login", authRateLimit, async (req, res): Promise<void> => {
     return;
   }
 
-  issueSession(res, user.id);
+  issueSession(res, user.id, user.sessionVersion);
   res.json({
     id: user.id,
     nameAr: user.nameAr,

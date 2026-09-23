@@ -14,7 +14,7 @@ function useSecureCookies() {
   return process.env["NODE_ENV"] === "production";
 }
 
-type SessionPayload = { userId: number; expiresAt: number };
+type SessionPayload = { userId: number; sessionVersion: number; expiresAt: number };
 export type PlatformRole = "employee" | "officer" | "manager" | "admin";
 export type SessionUser = {
   id: number;
@@ -45,7 +45,12 @@ function decodeSession(token: string | undefined): SessionPayload | null {
 
   try {
     const payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8")) as SessionPayload;
-    return Number.isInteger(payload.userId) && payload.expiresAt > Date.now() ? payload : null;
+    return Number.isInteger(payload.userId)
+      && Number.isInteger(payload.sessionVersion)
+      && payload.sessionVersion > 0
+      && payload.expiresAt > Date.now()
+      ? payload
+      : null;
   } catch {
     return null;
   }
@@ -66,8 +71,10 @@ function hasTrustedOrigin(req: Request) {
   }
 }
 
-export function issueSession(response: Response, userId: number) {
-  const payload = Buffer.from(JSON.stringify({ userId, expiresAt: Date.now() + SESSION_TTL_MS })).toString("base64url");
+export function issueSession(response: Response, userId: number, sessionVersion: number) {
+  const payload = Buffer.from(
+    JSON.stringify({ userId, sessionVersion, expiresAt: Date.now() + SESSION_TTL_MS }),
+  ).toString("base64url");
   response.cookie(COOKIE_NAME, `${payload}.${sign(payload)}`, {
     httpOnly: true,
     secure: useSecureCookies(),
@@ -101,11 +108,16 @@ export const requireSession: RequestHandler = async (req, res, next) => {
       designation: usersTable.designation,
       role: usersTable.role,
       active: usersTable.active,
+      sessionVersion: usersTable.sessionVersion,
     })
     .from(usersTable)
     .where(eq(usersTable.id, session.userId))
     .limit(1);
-  if (!user?.active || !isPlatformRole(user.role)) {
+  if (
+    !user?.active
+    || !isPlatformRole(user.role)
+    || user.sessionVersion !== session.sessionVersion
+  ) {
     res.status(401).json({ error: "Authentication is required." });
     return;
   }

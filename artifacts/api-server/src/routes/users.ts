@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Response } from "express";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { z } from "zod/v4";
 import { auditLogsTable, db, usersTable } from "@workspace/db";
@@ -133,6 +133,13 @@ router.patch("/users/:id", requireSession, requireRoles("admin"), userMutationRa
     return;
   }
 
+  const securityStateChanged =
+    (parsed.data.role !== undefined && parsed.data.role !== existing.role)
+    || (parsed.data.active !== undefined && parsed.data.active !== existing.active);
+  if (securityStateChanged) {
+    updateData.sessionVersion = sql`${usersTable.sessionVersion} + 1`;
+  }
+
   const [user] = await db
     .update(usersTable)
     .set(updateData)
@@ -165,7 +172,10 @@ router.post("/users/:id/reset-password", requireSession, requireRoles("admin"), 
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
   const [user] = await db
     .update(usersTable)
-    .set({ passwordHash })
+    .set({
+      passwordHash,
+      sessionVersion: sql`${usersTable.sessionVersion} + 1`,
+    })
     .where(eq(usersTable.id, id))
     .returning();
   if (!user) {

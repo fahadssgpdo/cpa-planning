@@ -212,7 +212,6 @@ after(async () => {
   if (createdSuggestionIds.length > 0) {
     await db.delete(suggestionsTable).where(inArray(suggestionsTable.id, createdSuggestionIds));
   }
-
   await db
     .delete(usersTable)
     .where(inArray(usersTable.username, [
