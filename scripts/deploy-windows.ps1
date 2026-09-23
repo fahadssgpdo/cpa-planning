@@ -33,7 +33,7 @@ function Invoke-Robocopy {
   )
 
   New-Item -ItemType Directory -Path $To -Force | Out-Null
-  & robocopy $From $To /E /R:2 /W:2 /NFL /NDL /NJH /NJS /NP @ExtraArguments
+  & robocopy $From $To /E /XJ /R:2 /W:2 /NFL /NDL /NJH /NJS /NP @ExtraArguments
   if ($LASTEXITCODE -ge 8) {
     throw "robocopy failed with exit code $LASTEXITCODE while copying '$From' to '$To'."
   }
@@ -45,6 +45,23 @@ function Invoke-Pnpm {
   & pnpm @Arguments
   if ($LASTEXITCODE -ne 0) {
     throw "pnpm $($Arguments -join ' ') failed with exit code $LASTEXITCODE."
+  }
+}
+
+function Install-ReleaseDependencies {
+  param([Parameter(Mandatory = $true)][string]$ReleasePath)
+
+  Push-Location $ReleasePath
+  try {
+    Invoke-Pnpm -Arguments @(
+      'install',
+      '--frozen-lockfile',
+      '--prod=false',
+      '--offline',
+      '--force'
+    )
+  } finally {
+    Pop-Location
   }
 }
 
@@ -137,7 +154,8 @@ function Restore-PreviousRelease {
       Invoke-Robocopy `
         -From $previousRelease `
         -To $deployment `
-        -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
+        -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
+      Install-ReleaseDependencies -ReleasePath $deployment
     }
   } finally {
     Start-ApplicationService
@@ -187,22 +205,23 @@ try {
   Pop-Location
 }
 
+if (Test-Path -LiteralPath $previousRelease) {
+  Remove-Item -LiteralPath $previousRelease -Recurse -Force
+}
+
 try {
   Stop-ApplicationService
 
-  if (Test-Path -LiteralPath $previousRelease) {
-    Remove-Item -LiteralPath $previousRelease -Recurse -Force
-  }
   Invoke-Robocopy `
     -From $deployment `
     -To $previousRelease `
-    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
   $previousReleasePrepared = $true
 
   Invoke-Robocopy `
     -From $stagedRelease `
     -To $deployment `
-    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
   $newReleaseActivated = $true
 
   if (-not (Test-Path -LiteralPath (Join-Path $deployment 'uploads'))) {
@@ -210,18 +229,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $deployment 'uploads\documents') -Force | Out-Null
   }
 
-  Push-Location $deployment
-  try {
-    Invoke-Pnpm -Arguments @(
-      'install',
-      '--frozen-lockfile',
-      '--prod=false',
-      '--offline',
-      '--force'
-    )
-  } finally {
-    Pop-Location
-  }
+  Install-ReleaseDependencies -ReleasePath $deployment
 
   Start-ApplicationService
   Wait-ForHealth -Uri $HealthUrl -ExpectedStatus 200
