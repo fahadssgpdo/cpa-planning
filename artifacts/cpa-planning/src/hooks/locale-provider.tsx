@@ -1,15 +1,6 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { translations, Lang, Translations } from "@/i18n";
-
-export interface LocaleContextType {
-  lang: Lang;
-  locale: Lang;
-  setLang: (lang: Lang) => void;
-  t: Translations;
-  dir: "rtl" | "ltr";
-}
-
-export const LocaleContext = createContext<LocaleContextType | null>(null);
+import { LocaleContext } from "@/hooks/locale-context";
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {

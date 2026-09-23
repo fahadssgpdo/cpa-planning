@@ -1,0 +1,89 @@
+Run ./scripts/deploy-windows.ps1 `
+  
+Scope: all 10 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +555
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 555, reused 23, downloaded 0, added 0
+Progress: resolved 555, reused 257, downloaded 0, added 0
+Progress: resolved 555, reused 367, downloaded 0, added 0
+Progress: resolved 555, reused 380, downloaded 0, added 0
+Progress: resolved 555, reused 514, downloaded 0, added 0
+Progress: resolved 555, reused 555, downloaded 0, added 0
+Progress: resolved 555, reused 555, downloaded 0, added 1
+Progress: resolved 555, reused 555, downloaded 0, added 53
+Progress: resolved 555, reused 555, downloaded 0, added 71
+Progress: resolved 555, reused 555, downloaded 0, added 72
+Progress: resolved 555, reused 555, downloaded 0, added 126
+Progress: resolved 555, reused 555, downloaded 0, added 180
+Progress: resolved 555, reused 555, downloaded 0, added 209
+Progress: resolved 555, reused 555, downloaded 0, added 211
+Progress: resolved 555, reused 555, downloaded 0, added 267
+Progress: resolved 555, reused 555, downloaded 0, added 307
+Progress: resolved 555, reused 555, downloaded 0, added 331
+Progress: resolved 555, reused 555, downloaded 0, added 338
+Progress: resolved 555, reused 555, downloaded 0, added 351
+Progress: resolved 555, reused 555, downloaded 0, added 367
+Progress: resolved 555, reused 555, downloaded 0, added 368
+Progress: resolved 555, reused 555, downloaded 0, added 375
+Progress: resolved 555, reused 555, downloaded 0, added 376
+Progress: resolved 555, reused 555, downloaded 0, added 377
+Progress: resolved 555, reused 555, downloaded 0, added 380
+Progress: resolved 555, reused 555, downloaded 0, added 381
+Progress: resolved 555, reused 555, downloaded 0, added 382
+Progress: resolved 555, reused 555, downloaded 0, added 386
+Progress: resolved 555, reused 555, downloaded 0, added 395
+Progress: resolved 555, reused 555, downloaded 0, added 399
+Progress: resolved 555, reused 555, downloaded 0, added 429
+Progress: resolved 555, reused 555, downloaded 0, added 462
+Progress: resolved 555, reused 555, downloaded 0, added 470
+Progress: resolved 555, reused 555, downloaded 0, added 483
+Progress: resolved 555, reused 555, downloaded 0, added 498
+Progress: resolved 555, reused 555, downloaded 0, added 502
+Progress: resolved 555, reused 555, downloaded 0, added 546
+Progress: resolved 555, reused 555, downloaded 0, added 555, done
+optionalDependencies:
++ @esbuild/win32-x64 0.28.1
++ @rollup/rollup-win32-x64-msvc 4.62.2
++ @tailwindcss/oxide-win32-x64-msvc 4.3.1
++ lightningcss-win32-x64-msvc 1.32.0
+devDependencies:
++ prettier 3.8.4
++ typescript 5.9.3
+. preinstall$ node scripts/preinstall.mjs
+. preinstall: Done
+Done in 56.5s using pnpm v10.26.1
+> @workspace/api-server@0.0.0 build C:\Planning\CPA-Planning-Platform.next-8e515e3bf54f4795ab0356bcabd2a72e\artifacts\api-server
+> node ./build.mjs
+  dist\index.mjs                   2.6mb
+  dist\pino-worker.mjs           153.5kb
+  dist\pino-file.mjs             142.2kb
+  dist\pino-pretty.mjs           114.7kb
+  dist\thread-stream-worker.mjs    7.4kb
+  ...and 5 more output files...
+Done in 3829ms
+> @workspace/cpa-planning@0.0.0 build C:\Planning\CPA-Planning-Platform.next-8e515e3bf54f4795ab0356bcabd2a72e\artifacts\cpa-planning
+> vite build --config vite.config.ts && pnpm run verify:build
+vite v7.3.5 building client environment for production...
+transforming...
+src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/label.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/avatar.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/dropdown-menu.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/select.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+✓ 3310 modules transformed.
+rendering chunks...
+
+computing gzip size...
+(!) Some chunks are larger than 500 kB after minification. Consider:
+dist/public/index.html                     0.80 kB │ gzip:   0.46 kB
+- Using dynamic import() to code-split the application
+dist/public/assets/index-B48I5S8F.css    155.17 kB │ gzip:  24.16 kB
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+dist/public/assets/index-BI8mcrR1.js   1,175.28 kB │ gzip: 328.39 kB
+✓ built in 29.46s
+> @workspace/cpa-planning@0.0.0 verify:build C:\Planning\CPA-Planning-Platform.next-8e515e3bf54f4795ab0356bcabd2a72e\artifacts\cpa-planning
+> node ../../scripts/verify-frontend-build.mjs --dir dist/public
+Verified 1 JavaScript file(s) in artifacts\cpa-planning\dist\public.
