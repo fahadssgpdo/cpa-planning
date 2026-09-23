@@ -225,7 +225,7 @@ try {
   Invoke-Robocopy `
     -From $deployment `
     -To $previousRelease `
-    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs')
+    -ExtraArguments @('/MIR', '/XD', 'uploads', 'logs', 'node_modules')
   $previousReleasePrepared = $true
 
   # Delete the live deployment's node_modules before mirroring the new release
