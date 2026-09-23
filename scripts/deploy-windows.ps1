@@ -199,8 +199,8 @@ Invoke-Robocopy `
     (Join-Path $source '.github'),
     (Join-Path $source '.agents'),
     (Join-Path $source '.local'),
-    (Join-Path $source 'node_modules'),
-    (Join-Path $source 'uploads')
+    (Join-Path $source 'uploads'),
+    'node_modules'
   )
 
 Push-Location $stagedRelease
