@@ -1,15 +1,8 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { UserContext } from "./use-user";
+import { useContext, useState, useEffect, ReactNode } from "react";
+import { UserContext } from "./user-context";
+import { PreferencesContext, Preferences, Theme, FontSize } from "./preferences-context";
 
-export type Theme = "light" | "dark" | "system";
-export type FontSize = "sm" | "md" | "lg";
-
-export interface Preferences {
-  theme: Theme;
-  fontSize: FontSize;
-  highContrast: boolean;
-  reducedMotion: boolean;
-}
+export type { Preferences, Theme, FontSize };
 
 const DEFAULT: Preferences = {
   theme: "light",
@@ -17,13 +10,6 @@ const DEFAULT: Preferences = {
   highContrast: false,
   reducedMotion: false,
 };
-
-interface PreferencesContextType {
-  prefs: Preferences;
-  setPrefs: (p: Partial<Preferences>) => void;
-}
-
-export const PreferencesContext = createContext<PreferencesContextType | null>(null);
 
 function storageKey(userId: number | null) {
   return userId ? `hema_prefs_${userId}` : "hema_prefs_guest";

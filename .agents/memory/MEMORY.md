@@ -1,3 +1,4 @@
 - [OpenAPI multipart codegen](openapi-multipart-codegen.md) — binary file formats generate browser-only File/Blob types in shared API libraries without DOM typings.
 - [API upload test isolation](api-test-isolation.md) — file-upload integration tests must isolate storage and clean up records and generated assets.
 - [Legacy account remediation](legacy-account-remediation.md) — removing seeded credentials from source also requires invalidating their database accounts.
+- [Windows deploy pnpm hangs](windows-deploy-pnpm-hangs.md) — GH Actions cancellation doesn't kill spawned cmd.exe/pnpm process trees on Windows; use Start-Process+taskkill /T /F with timeouts.
