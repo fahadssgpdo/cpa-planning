@@ -49,14 +49,21 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: powershell
         run: |
-          $tokens = $null
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
-            (Resolve-Path 'scripts/deploy-windows.ps1'),
-            [ref]$tokens,
-            [ref]$errors
-          ) | Out-Null
-          if ($errors.Count -gt 0) {
-            $errors | ForEach-Object { Write-Error $_.Message }
+          $hasErrors = $false
+          Get-ChildItem -Path 'scripts' -Filter '*.ps1' | ForEach-Object {
+            $scriptPath = $_.FullName
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $scriptPath,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $hasErrors = $true
+              $errors | ForEach-Object { Write-Error "$scriptPath : $($_.Message)" }
+            }
+          }
+          if ($hasErrors) {
             exit 1
           }
