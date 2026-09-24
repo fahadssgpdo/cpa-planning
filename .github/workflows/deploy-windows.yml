@@ -79,6 +79,7 @@ jobs:
           }
 
       - name: Deploy and restart service
+        id: deploy
         shell: powershell
         # A stuck native install used to hang here for hours with no
         # progress before GitHub Actions' ~6 hour default job timeout ever
@@ -93,3 +94,30 @@ jobs:
             -ServiceName 'CPAPlanningAP' `
             -HealthUrl 'http://127.0.0.1:3000/api/healthz' `
             -PublicAuthUrl 'https://planning.cpa.gov.om/api/auth/me'
+
+      - name: Notify Microsoft Teams on deploy failure
+        # Fast failure only helps if someone finds out fast: without this,
+        # a failed deploy (rolled back or not) is only ever noticed by
+        # someone manually checking the Actions run. Scoped to this one
+        # step's outcome (not job-wide failure()) so an earlier build/test
+        # failure -- which never touches production -- doesn't also page.
+        if: always() && steps.deploy.outcome == 'failure'
+        shell: powershell
+        timeout-minutes: 2
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_DEPLOY_WEBHOOK_URL }}
+          DEPLOY_ERROR: ${{ steps.deploy.outputs.deploy_error }}
+          ROLLBACK_SUCCEEDED: ${{ steps.deploy.outputs.rollback_succeeded }}
+          ROLLBACK_ERROR: ${{ steps.deploy.outputs.rollback_error }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:TEAMS_WEBHOOK_URL)) {
+            Write-Warning "TEAMS_DEPLOY_WEBHOOK_URL secret is not set; skipping Teams notification for this failed deploy."
+            exit 0
+          }
+          ./scripts/notify-deploy-failure.ps1 `
+            -WebhookUrl $env:TEAMS_WEBHOOK_URL `
+            -DeployError $env:DEPLOY_ERROR `
+            -RollbackSucceeded $env:ROLLBACK_SUCCEEDED `
+            -RollbackError $env:ROLLBACK_ERROR `
+            -RunUrl $env:RUN_URL

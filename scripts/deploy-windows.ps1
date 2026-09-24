@@ -246,6 +246,22 @@ function Start-ApplicationService {
   }
 }
 
+function Write-GitHubOutput {
+  param(
+    [Parameter(Mandatory = $true)][string]$Name,
+    [string]$Value = ''
+  )
+
+  # Lets a later workflow step (e.g. a Teams failure notification) read what
+  # happened here without scraping log text. Silently no-ops outside GitHub
+  # Actions (no $env:GITHUB_OUTPUT) so this script stays runnable standalone.
+  if (-not $env:GITHUB_OUTPUT) {
+    return
+  }
+  $safeValue = $Value -replace '\r?\n', ' '
+  Add-Content -Path $env:GITHUB_OUTPUT -Value "$Name=$safeValue"
+}
+
 function Restore-PreviousRelease {
   try {
     Stop-ApplicationService
@@ -352,12 +368,22 @@ try {
 } catch {
   $deploymentError = $_
   Write-Warning "Deployment failed: $($deploymentError.Exception.Message)"
+  $rollbackSucceeded = $false
+  $rollbackErrorMessage = ''
   try {
     Restore-PreviousRelease
     Wait-ForHealth -Uri $HealthUrl -ExpectedStatus 200
+    $rollbackSucceeded = $true
   } catch {
-    Write-Error "Rollback failed: $($_.Exception.Message)"
+    $rollbackErrorMessage = $_.Exception.Message
+    Write-Error "Rollback failed: $rollbackErrorMessage"
   }
+  # Recorded so the workflow's failure-notification step can report whether
+  # production is on the previous release or in an unknown/down state,
+  # instead of just "something failed" -- see .github/workflows/deploy-windows.yml.
+  Write-GitHubOutput -Name 'deploy_error' -Value $deploymentError.Exception.Message
+  Write-GitHubOutput -Name 'rollback_succeeded' -Value ([string]$rollbackSucceeded)
+  Write-GitHubOutput -Name 'rollback_error' -Value $rollbackErrorMessage
   throw $deploymentError
 } finally {
   Remove-DirectoryRobustly -Path $stagedRelease
