@@ -13,6 +13,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, Windows, X64, cpa-production]
     environment: production
+    # Backstop for the whole job: without this, a step that hangs (e.g. a
+    # stuck native process GitHub Actions can't cancel cleanly) is only ever
+    # caught by the platform's ~6 hour default job timeout, during which
+    # production sits half-deployed. Each step should fail well within this
+    # window on its own; this is only the last resort.
+    timeout-minutes: 40
     permissions:
       contents: read
     env:
@@ -74,6 +80,12 @@ jobs:
 
       - name: Deploy and restart service
         shell: powershell
+        # A stuck native install used to hang here for hours with no
+        # progress before GitHub Actions' ~6 hour default job timeout ever
+        # stepped in. Fail fast instead: deploy-windows.ps1 time-bounds its
+        # own pnpm calls well under this limit, so this is a backstop, not
+        # the primary defense.
+        timeout-minutes: 20
         run: |
           ./scripts/deploy-windows.ps1 `
             -SourcePath $env:GITHUB_WORKSPACE `

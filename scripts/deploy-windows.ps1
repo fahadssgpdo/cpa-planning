@@ -39,12 +39,53 @@ function Invoke-Robocopy {
   }
 }
 
-function Invoke-Pnpm {
-  param([Parameter(Mandatory = $true)][string[]]$Arguments)
+function Stop-ProcessTree {
+  param([Parameter(Mandatory = $true)][int]$ProcessId)
 
-  & pnpm @Arguments
-  if ($LASTEXITCODE -ne 0) {
-    throw "pnpm $($Arguments -join ' ') failed with exit code $LASTEXITCODE."
+  # taskkill's /T kills the full descendant tree (cmd.exe -> pnpm.cmd ->
+  # node.exe), unlike Stop-Process, which only kills the single process we
+  # have a handle to and leaves its children running.
+  & taskkill.exe /PID $ProcessId /T /F 2>&1 | Out-Null
+}
+
+function Invoke-Pnpm {
+  param(
+    [Parameter(Mandatory = $true)][string[]]$Arguments,
+    # A stuck pnpm install (e.g. blocked on a store lock) used to hang here
+    # indefinitely: PowerShell's `&` call operator blocks with no timeout,
+    # so a hang was only ever noticed hours later by GitHub Actions' job
+    # timeout, and by then the underlying process couldn't even be killed
+    # cleanly (see Stop-ProcessTree). Running pnpm as a real child process we
+    # hold a handle to lets us bound the wait and forcibly kill the whole
+    # process tree on timeout, turning a silent multi-hour hang into a
+    # normal, catchable error within minutes.
+    [int]$TimeoutSeconds = 600
+  )
+
+  $pnpmCommand = Get-Command pnpm -ErrorAction Stop
+  $quotedArguments = $Arguments | ForEach-Object { '"' + $_ + '"' }
+  # pnpm on Windows resolves to a .cmd shim, which Start-Process -NoNewWindow
+  # (CreateProcess) cannot launch directly the way the shell can. Route it
+  # through cmd.exe /c, the same way PowerShell's own `&` operator does under
+  # the hood, so console output still streams live to the job log while we
+  # keep a real Process handle to wait on and, if needed, kill.
+  $commandLine = 'call "' + $pnpmCommand.Source + '" ' + ($quotedArguments -join ' ')
+
+  $process = Start-Process `
+    -FilePath 'cmd.exe' `
+    -ArgumentList @('/d', '/c', $commandLine) `
+    -WorkingDirectory (Get-Location).Path `
+    -NoNewWindow `
+    -PassThru
+
+  $exited = $process.WaitForExit($TimeoutSeconds * 1000)
+  if (-not $exited) {
+    Stop-ProcessTree -ProcessId $process.Id
+    throw "pnpm $($Arguments -join ' ') timed out after $TimeoutSeconds seconds and its process tree was terminated. This usually means a stale pnpm store lock left behind by a previous deploy attempt that wasn't fully terminated."
+  }
+
+  if ($process.ExitCode -ne 0) {
+    throw "pnpm $($Arguments -join ' ') failed with exit code $($process.ExitCode)."
   }
 }
 
@@ -82,7 +123,15 @@ function Remove-NodeModules {
 }
 
 function Install-ReleaseDependencies {
-  param([Parameter(Mandatory = $true)][string]$ReleasePath)
+  param(
+    [Parameter(Mandatory = $true)][string]$ReleasePath,
+    # This install is offline and resolves entirely from the local package
+    # store, so it should finish in well under a minute even on a slow disk.
+    # A much shorter timeout than Invoke-Pnpm's network-install default is
+    # intentional: it's exactly what turns a stuck-on-a-stale-lock hang into
+    # a fast, catchable failure instead of a multi-hour one.
+    [int]$TimeoutSeconds = 180
+  )
 
   Push-Location $ReleasePath
   try {
@@ -91,9 +140,32 @@ function Install-ReleaseDependencies {
       '--frozen-lockfile',
       '--prod=false',
       '--offline'
-    )
+    ) -TimeoutSeconds $TimeoutSeconds
   } finally {
     Pop-Location
+  }
+}
+
+function Stop-StalePnpmProcesses {
+  # Root cause of the original multi-hour hangs: when GitHub Actions cancels
+  # or times out a step, it can only signal the top-level shell process. The
+  # underlying cmd.exe/pnpm.cmd/node.exe tree it spawned doesn't die with
+  # it -- cmd.exe drops into an interactive "Terminate batch job (Y/N)?"
+  # prompt that nothing ever answers, so the pnpm process (and the lock it
+  # holds on the shared local package store) is left running indefinitely.
+  # The next deploy's `pnpm install --offline` then blocks forever waiting
+  # for a lock that a live-but-orphaned process keeps renewing, so it never
+  # goes stale on its own. Sweep and kill any leftover pnpm-related
+  # processes before starting a new deploy so this run can't inherit a
+  # previous run's stuck state. This only ever targets processes whose
+  # command line mentions pnpm, so it cannot touch the running application
+  # service (which runs plain `node`, not `pnpm`).
+  $staleProcesses = Get-CimInstance Win32_Process -Filter "Name = 'node.exe' OR Name = 'cmd.exe'" |
+    Where-Object { $_.CommandLine -and $_.CommandLine -match 'pnpm' -and $_.ProcessId -ne $PID }
+
+  foreach ($proc in $staleProcesses) {
+    Write-Warning "Killing stale pnpm-related process left over from a previous deploy attempt: PID $($proc.ProcessId) - $($proc.CommandLine)"
+    Stop-ProcessTree -ProcessId $proc.ProcessId
   }
 }
 
@@ -200,6 +272,12 @@ if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
 }
 if (-not (Get-Command robocopy -ErrorAction SilentlyContinue)) {
   throw 'robocopy is not available on PATH for the runner service account.'
+}
+
+try {
+  Stop-StalePnpmProcesses
+} catch {
+  Write-Warning "Failed to sweep stale pnpm processes from a previous deploy attempt: $($_.Exception.Message)"
 }
 
 Get-Service -Name $ServiceName -ErrorAction Stop | Out-Null
