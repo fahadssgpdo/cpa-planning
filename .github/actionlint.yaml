@@ -1,0 +1,6 @@
+self-hosted-runner:
+  # Custom label used by the self-hosted Windows runner that deploys to the
+  # production CPA Planning server. Without this, actionlint flags
+  # "cpa-production" as an unknown runner label.
+  labels:
+    - cpa-production
